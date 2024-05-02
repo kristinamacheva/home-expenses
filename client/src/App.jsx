@@ -1,7 +1,7 @@
 function App() {
   return (
     <>
-      
+      <h1>Home Expenses</h1>
     </>
   )
 }
