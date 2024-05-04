@@ -8,7 +8,6 @@ import {
     Button,
     Heading,
     Text,
-    HStack,
     InputGroup,
     InputRightElement,
     Link,
