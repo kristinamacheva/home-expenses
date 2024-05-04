@@ -34,10 +34,10 @@ const SidebarContent = ({ onClose, ...rest }) => {
     return (
         <Box
             transition="3s ease"
-            bg={useColorModeValue("white", "gray.900")}
+            bg={useColorModeValue("white")}
             borderRight="1px"
-            borderRightColor={useColorModeValue("gray.200", "gray.700")}
-            w={{ base: "full", md: 60 }}
+            borderRightColor={useColorModeValue("gray.200")}
+            w={{ base: "full", md: 64 }}
             pos="fixed"
             h="full"
             {...rest}
@@ -76,7 +76,7 @@ const NavItem = ({ icon, children, to, ...rest }) => {
                 role="group"
                 cursor="pointer"
                 _hover={{
-                    bg: "green.900",
+                    bg: "themeBlue.900",
                     color: "white",
                 }}
                 {...rest}
@@ -103,7 +103,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
             px={{ base: 4, md: 4 }}
             height="20"
             alignItems="center"
-            bg={useColorModeValue("green.900")}
+            bg={useColorModeValue("themeBlue.800")}
             borderBottomWidth="1px"
             borderBottomColor={useColorModeValue("gray.200")}
             justifyContent={{ base: "space-between", md: "flex-end" }}
@@ -116,8 +116,9 @@ const MobileNav = ({ onOpen, ...rest }) => {
                 aria-label="open menu"
                 icon={<FiMenu />}
                 color={useColorModeValue("white")}
+                bg="transparent"
                 _hover={{
-                    color: useColorModeValue("green.900"),
+                    color: useColorModeValue("themeBlue.900"),
                     bg: useColorModeValue("white"),
                 }}
             />
@@ -139,8 +140,9 @@ const MobileNav = ({ onOpen, ...rest }) => {
                     aria-label="open menu"
                     icon={<FiBell />}
                     color={useColorModeValue("white")}
+                    bg="transparent"
                     _hover={{
-                        color: useColorModeValue("green.800"),
+                        color: useColorModeValue("themeBlue.900"),
                         bg: useColorModeValue("white"),
                     }}
                 />
@@ -202,11 +204,11 @@ const MobileNav = ({ onOpen, ...rest }) => {
     );
 };
 
-const Sidebar = () => {
+export default function Sidebar({children}) {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     return (
-        <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
+        <Box minH="100vh" bg={useColorModeValue("gray.100")}>
             <SidebarContent
                 onClose={onClose}
                 display={{ base: "none", md: "block" }}
@@ -225,10 +227,9 @@ const Sidebar = () => {
             </Drawer>
             <MobileNav onOpen={onOpen} />
             <Box ml={{ base: 0, md: 60 }} p="4">
-                {/* Content */}
+                {children}
             </Box>
         </Box>
     );
 };
 
-export default Sidebar;
