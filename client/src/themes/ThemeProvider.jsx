@@ -12,7 +12,7 @@ const theme = extendTheme({
         },
     },
     fonts: {
-        body: "Raleway, sans-serif",
+        body: "Roboto, sans-serif",
         heading: "Merriweather, serif",
     },
     components: {
