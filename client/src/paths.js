@@ -1,7 +1,8 @@
 const Path = {
     Home: '/',
+    Logout: 'logout',
+    HouseholdList: 'households',
     Login: '/login',
-    Logout: '/logout',
     Register: '/register',
 
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import {
     IconButton,
     Avatar,
@@ -23,10 +23,11 @@ import {
 import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
 
 import { FaHouse, FaPeopleRoof, FaList } from "react-icons/fa6";
+import Path from "../../paths";
 
 const LinkItems = [
-    { name: "Начало", icon: FaHouse, to: "/" },
-    { name: "Домакинства", icon: FaPeopleRoof, to: "/households" },
+    { name: "Начало", icon: FaHouse, to: Path.Home },
+    { name: "Домакинства", icon: FaPeopleRoof, to: Path.HouseholdList },
     { name: "Категории разходи", icon: FaList, to: "/expense-categories" },
 ];
 
@@ -227,7 +228,7 @@ export default function Sidebar({children}) {
             </Drawer>
             <MobileNav onOpen={onOpen} />
             <Box ml={{ base: 0, md: 60 }} p="4">
-                {children}
+                <Outlet />
             </Box>
         </Box>
     );
