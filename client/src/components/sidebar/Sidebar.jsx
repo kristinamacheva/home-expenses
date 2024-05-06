@@ -38,7 +38,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
             bg={useColorModeValue("white")}
             borderRight="1px"
             borderRightColor={useColorModeValue("gray.200")}
-            w={{ base: "full", md: 64 }}
+            w={{ base: "full", md: 60 }}
             pos="fixed"
             h="full"
             {...rest}
