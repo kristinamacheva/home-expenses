@@ -1,7 +1,7 @@
 import { useState } from "react";
 import HouseholdListItem from "./household-list-item/HouseholdListItem";
-import { Button, HStack, Heading, Spacer, VStack, Stack } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Button, HStack, Heading, Spacer, VStack, Stack, useDisclosure } from "@chakra-ui/react";
+import HouseholdCreate from "./household-create/HouseholdCreate";
 
 export default function HouseholdList() {
     const [households, setHouseholds] = useState([
@@ -20,25 +20,26 @@ export default function HouseholdList() {
             "admin": "3"
         }
     ]);
-    
+
+    const { isOpen: isCreateModalOpen, onOpen: onOpenCreateModal, onClose: onCloseCreateModal } = useDisclosure();
+
     return (
-        <Stack>
-            <HStack mx={4} my={2} alignItems="center">
-                <Heading as="h1" size='lg' color="themeBlue.800">Домакинства</Heading>
-                <Spacer />
-                <Button as={Link} to={`/domakinstva/suzdavane`} variant="primary">
-                    + Създаване
-            </Button>
-            </HStack>
+        <>
             <Stack>
-            {households.map(household => (
-                <HouseholdListItem key={household._id} {...household}/>
-            ))}
+                <HStack mx={4} my={2} alignItems="center">
+                    <Heading as="h1" size='lg' color="themeBlue.800">Домакинства</Heading>
+                    <Spacer />
+                    <Button variant="primary" onClick={onOpenCreateModal}>
+                        + Създаване
+                    </Button>
+                </HStack>
+                <Stack>
+                    {households.map(household => (
+                        <HouseholdListItem key={household._id} {...household}/>
+                    ))}
+                </Stack>
             </Stack>
-            
-
-        </Stack>
-
-        
+            <HouseholdCreate isOpen={isCreateModalOpen} onClose={onCloseCreateModal}/>
+        </>
     );
 }
