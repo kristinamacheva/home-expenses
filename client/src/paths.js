@@ -1,9 +1,9 @@
 const Path = {
     Home: '/',
-    Logout: 'logout',
-    HouseholdList: 'households',
-    Login: '/login',
-    Register: '/register',
+    Logout: 'izhod',
+    HouseholdList: 'domakinstva',
+    Login: '/vhod',
+    Register: '/registraciq',
 
 };
 

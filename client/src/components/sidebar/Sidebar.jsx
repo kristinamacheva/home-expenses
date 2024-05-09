@@ -28,7 +28,7 @@ import Path from "../../paths";
 const LinkItems = [
     { name: "Начало", icon: FaHouse, to: Path.Home },
     { name: "Домакинства", icon: FaPeopleRoof, to: Path.HouseholdList },
-    { name: "Категории разходи", icon: FaList, to: "/expense-categories" },
+    { name: "Категории", icon: FaList, to: "/expense-categories" },
 ];
 
 const SidebarContent = ({ onClose, ...rest }) => {
