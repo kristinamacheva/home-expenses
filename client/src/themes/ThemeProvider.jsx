@@ -6,6 +6,8 @@ const theme = extendTheme({
             900: "#2D3250",
             800: "#42466B",
             700: "#676F9D",
+            400: "#c4cbf5",
+            200: "#ebecf5",
         },
         themeYellow: {
             900: "#F8B179",
@@ -23,6 +25,13 @@ const theme = extendTheme({
                     color: "white",
                     _hover: {
                         bg: "themeBlue.900",
+                    },
+                },
+                outline: {
+                    color: "themeBlue.700",
+                    borderColor: "themeBlue.700",
+                    _hover: {
+                        bg: "themeBlue.200",
                     },
                 },
             },
