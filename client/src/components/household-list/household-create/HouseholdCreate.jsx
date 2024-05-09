@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+    Box,
     Button,
     FormControl,
     FormLabel,
@@ -11,11 +12,13 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    Select,
     Text,
 } from "@chakra-ui/react";
 
 export default function HouseholdCreate({ isOpen, onClose }) {
     const [values, setValues] = useState({ name: '', members: [{ email: '', role: '' }] });
+    const roles = ["Член", "Дете"];
 
     const onMemberAddInput = () => {
         setValues({
@@ -62,7 +65,7 @@ export default function HouseholdCreate({ isOpen, onClose }) {
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Създай домакинство</ModalHeader>
+                <ModalHeader>Създайте домакинство</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <form onSubmit={onSubmit}>
@@ -80,7 +83,7 @@ export default function HouseholdCreate({ isOpen, onClose }) {
                         <Text fontWeight="bold" fontSize="lg">Членове</Text>
                     
                         {values.members.map((member, index) => (
-                            <div key={index}>
+                            <Box key={index}>
 
                                 <FormControl mt={3}>
                                     <FormLabel>Имейл</FormLabel>
@@ -95,13 +98,16 @@ export default function HouseholdCreate({ isOpen, onClose }) {
 
                                 <FormControl mt={2}>
                                     <FormLabel>Роля</FormLabel>
-                                    <Input
-                                        type="text"
+                                    <Select
                                         name="role"
                                         value={member.role}
                                         onChange={(e) => onMemberChange(e, index)}
-                                        placeholder="Роля"
-                                    />
+                                        placeholder="Изберете роля"
+                                    >
+                                        {roles.map((role) => (
+                                            <option key={role} value={role}>{role}</option>
+                                        ))}
+                                    </Select>
                                 </FormControl>
 
                                 <Button
@@ -109,22 +115,22 @@ export default function HouseholdCreate({ isOpen, onClose }) {
                                     colorScheme="red"
                                     onClick={() => onMemberDeleteInput(index)}
                                 >
-                                    Премахни
+                                    Премахнете
                                 </Button>
                                 
-                            </div>
+                            </Box>
                         ))}
 
                         <Button variant="primary" mt={3} onClick={onMemberAddInput}>
-                            Добави член
+                            Добавете член
                         </Button>
                     </form>
                 </ModalBody>
                 <ModalFooter>
                     <Button variant="primary" mr={3} onClick={onSubmit}>
-                        Създай
+                        Създайте
                     </Button>
-                    <Button onClick={onCloseForm}>Отмени</Button>
+                    <Button onClick={onCloseForm}>Отменете</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>
