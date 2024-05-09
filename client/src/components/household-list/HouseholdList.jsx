@@ -1,73 +1,67 @@
-import React, { useState } from 'react';
-import { Stack, Text, Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
-import { FcLock } from 'react-icons/fc';
-import DatePicker from '../custom/datepicker/DatePicker';
+import {
+    Stack,
+    Button,
+    Heading,
+    AvatarGroup,
+    Avatar,
+    Badge,
+    Box,
+} from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 
 export default function HouseholdList() {
-  const { isOpen: isCreateModalOpen, onOpen: onOpenCreateModal, onClose: onCloseCreateModal } = useDisclosure();
-  const { isOpen: isEditModalOpen, onOpen: onOpenEditModal, onClose: onCloseEditModal } = useDisclosure();
-  const [date, setDate] = useState(new Date())
-  return (
-    <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
-      <Stack direction="row" alignItems="center">
-        <Text fontWeight="semibold">Your Privacy</Text>
-        <FcLock />
-      </Stack>
 
-      <Stack direction={{ base: 'column', md: 'row' }} justifyContent="space-between">
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          We use cookies and similar technologies to help personalise content, tailor and
-          measure ads, and provide a better experience. By clicking OK or turning an
-          option on in Cookie Preferences, you agree to this, as outlined in our Cookie
-          Policy. To change preferences or withdraw consent, please update your Cookie
-          Preferences.
-        </Text>
-        <Stack direction={{ base: 'column', md: 'row' }}>
-          <Button onClick={onOpenCreateModal} variant="outline" colorScheme="green">
-            Create
-          </Button>
-          <Button onClick={onOpenEditModal} colorScheme="green">
-            Edit
-          </Button>
+    return (
+        <Stack
+            px="5"
+            py="5"
+            m="4"
+            boxShadow="lg"
+            borderRadius="lg"
+            background="white"
+            spacing="4"
+            direction={{ base: "column", md: "row" }}
+            justifyContent="space-between"
+            alignItems={{ md: "center" }}
+        >
+            <Stack
+                direction={{ base: "column", md: "row" }}
+                alignItems={{ md: "center" }}
+                spacing={{ base: "2", md: "3" }}
+            >
+                <Stack direction="column" spacing={{ base: "1", md: "0" }}>
+                    <Heading as="h4" size="md">
+                        Съквартиранти Пловдив
+                    </Heading>
+                    <Box display="inline-block">
+                        <Badge variant="subtle" colorScheme="green">
+                            Дължат Ви 1824.57 лв.
+                        </Badge>
+                    </Box>
+                </Stack>
+                <AvatarGroup size="md" max={2}>
+                    <Avatar
+                        name="Ryan Florence"
+                        background={"themeYellow.900"}
+                    />
+                    <Avatar
+                        name="Segun Adebayo"
+                        src="https://bit.ly/sage-adebayo"
+                    />
+                    <Avatar
+                        name="Kent Dodds"
+                        src="https://bit.ly/kent-c-dodds"
+                    />
+                </AvatarGroup>          
+            </Stack>
+            <Button
+                    as={Link}
+                    to={`/domakinstva/1`}
+                    // to={`/domakinstva/${_id}`}
+                    variant="primary"
+                >
+                    Детайли
+                </Button>
         </Stack>
-      </Stack>
-
-      {/* Create Modal */}
-      <Modal isOpen={isCreateModalOpen} onClose={onCloseCreateModal}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Create Household</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <DatePicker selectedDate={date} onChange={setDate} />
-            <div>{date.toISOString()}</div>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onCloseCreateModal}>
-              Close
-            </Button>
-            <Button variant="ghost">Save</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* Edit Modal */}
-      <Modal isOpen={isEditModalOpen} onClose={onCloseEditModal}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Edit Household</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {/* Your form for editing household */}
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onCloseEditModal}>
-              Close
-            </Button>
-            <Button variant="ghost">Save Changes</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Stack>
-  );
+    );
 }
