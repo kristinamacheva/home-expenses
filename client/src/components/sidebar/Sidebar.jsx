@@ -20,7 +20,7 @@ import {
     MenuItem,
     MenuList,
 } from "@chakra-ui/react";
-import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
+import { FiMenu, FiChevronDown } from "react-icons/fi";
 
 import { FaHouse, FaPeopleRoof, FaList } from "react-icons/fa6";
 import Path from "../../paths";
@@ -34,6 +34,7 @@ const LinkItems = [
 const SidebarContent = ({ onClose, ...rest }) => {
     return (
         <Box
+            as="nav"
             transition="3s ease"
             bg={useColorModeValue("white")}
             borderRight="1px"
@@ -134,20 +135,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                 Домоводител
             </Text>
 
-            <HStack spacing={{ base: "0", md: "6" }}>
-                <IconButton
-                    size="lg"
-                    variant="ghost"
-                    aria-label="open menu"
-                    icon={<FiBell />}
-                    color={useColorModeValue("white")}
-                    bg="transparent"
-                    _hover={{
-                        color: useColorModeValue("themeBlue.900"),
-                        bg: useColorModeValue("white"),
-                    }}
-                />
-                <Flex alignItems={"center"}>
+            <HStack spacing={{ base: "0", md: "6" }} alignItems={"center"}>
                     <Menu>
                         <MenuButton
                             py={2}
@@ -198,7 +186,6 @@ const MobileNav = ({ onOpen, ...rest }) => {
                             </Link>
                         </MenuList>
                     </Menu>
-                </Flex>
             </HStack>
         </Flex>
     );
