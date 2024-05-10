@@ -6,6 +6,7 @@ import {
     Avatar,
     Badge,
     Box,
+    Card,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
@@ -26,13 +27,14 @@ export default function HouseholdListItem({ _id, name, members, balance }) {
     }
 
     return (
-        <Stack
+        <Card
             px="5"
             py="5"
             mx="4"
             my="1"
-            boxShadow="lg"
-            borderRadius="lg"
+            boxShadow="md"
+            // borderRadius="lg"
+            borderTop="4px solid #676F9D"
             background="white"
             spacing="4"
             direction={{ base: "column", md: "row" }}
@@ -69,9 +71,9 @@ export default function HouseholdListItem({ _id, name, members, balance }) {
                     />
                 </AvatarGroup>
             </Stack>
-            <Button as={Link} to={`/domakinstva/${_id}`} variant="outline">
+            <Button as={Link} to={`/domakinstva/${_id}`} variant="outline" mt={{ base: "3" }}>
                 Детайли
             </Button>
-        </Stack>
+        </Card>
     );
 }
