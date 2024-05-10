@@ -30,12 +30,6 @@ export default function ExpenseListItem({
 
     let balanceText = "";
     let badgeColor = "";
-    // const balanceSum = balance.reduce((total, currentBalance) => {
-    //     if (currentBalance.type === "+") {
-    //         return total + currentBalance.sum;
-    //     }
-    //     return total;
-    // }, 0);
 
     if (filteredBalance.length === 1) {
         if (filteredBalance[0].type === "+") {
@@ -59,20 +53,30 @@ export default function ExpenseListItem({
             boxShadow="lg"
             borderRadius="lg"
             background="white"
-            spacing="4"
+            spacing={{ base: "1", md: "4" }}
             direction={{ base: "column", md: "row" }}
             justifyContent="space-between"
             alignItems={{ md: "center" }}
         >
             <Stack direction="column" spacing={{ base: "1", md: "0" }}>
-                <Heading as="h3" size="md">
-                    {title}
-                </Heading>
-                <Box display="inline-block">
-                    <Badge variant="subtle" background={"themePurple.400"}>
-                        {category}
-                    </Badge>
-                </Box>
+                <Stack direction="row" spacing="2">
+                    <Heading as="h3" size="md">
+                        {title}
+                    </Heading>
+                    <Box display="inline-block">
+                        <Badge
+                            variant="subtle"
+                            background={"themePurple.400"}
+                            rounded="full"
+                            px="1.5"
+                            py="0.2"
+                            textTransform="none"
+                        >
+                            {category}
+                        </Badge>
+                    </Box>
+                </Stack>
+
                 <Text color={"gray.500"} fontSize="sm">
                     {expenseDate}
                 </Text>
@@ -82,8 +86,8 @@ export default function ExpenseListItem({
                 alignItems={{ md: "center" }}
                 spacing={{ base: "2", md: "6" }}
             >
-                <Flex direction="column" align="flex-end">
-                    <Text fontSize="xl" fontWeight="bold">
+                <Flex direction="column" align={{ md: "flex-end" }}>
+                    <Text fontSize="xl" fontWeight="bold" >
                         {amount} лв.
                     </Text>
                     <Box display="inline-block">
@@ -92,7 +96,7 @@ export default function ExpenseListItem({
                         </Badge>
                     </Box>
                 </Flex>
-                <Button as={Link} variant="outline">
+                <Button as={Link} variant="outline" mt={{ base: "1" }}>
                     Детайли
                 </Button>
             </Stack>

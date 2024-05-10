@@ -8,7 +8,7 @@ export default function ExpenseList() {
     const [expenses, setExpenses] = useState([
         {
             "_id": "1",
-            "title": "Лекси",
+            "title": "Пазаруване в Лекси",
             "amount": 120,
             "split": "even",
             "paid": [{ "userId": "1", "sum": 120 }],
@@ -34,7 +34,7 @@ export default function ExpenseList() {
         },
         {
             "_id": "3",
-            "title": "Хладилник",
+            "title": "Климатик за общата стая",
             "amount": 300,
             "split": "percent",
             "paid": [{ "userId": "1", "sum": 300 }],
