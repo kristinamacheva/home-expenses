@@ -17,13 +17,16 @@ import {
 } from "@chakra-ui/react";
 
 export default function HouseholdCreate({ isOpen, onClose }) {
-    const [values, setValues] = useState({ name: '', members: [{ email: '', role: '' }] });
+    const [values, setValues] = useState({
+        name: "",
+        members: [{ email: "", role: "" }],
+    });
     const roles = ["Член", "Дете"];
 
     const onMemberAddInput = () => {
         setValues({
             ...values,
-            members: [...values.members, { email: '', role: '' }],
+            members: [...values.members, { email: "", role: "" }],
         });
     };
 
@@ -53,16 +56,16 @@ export default function HouseholdCreate({ isOpen, onClose }) {
     };
 
     const clearFormHandler = () => {
-        setValues({ name: '', members: [{ email: '', role: '' }] });
-    }
+        setValues({ name: "", members: [{ email: "", role: "" }] });
+    };
 
     const onCloseForm = () => {
-        onClose();
         clearFormHandler();
-    }
+        onClose();
+    };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onCloseForm}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Създайте домакинство</ModalHeader>
@@ -80,18 +83,21 @@ export default function HouseholdCreate({ isOpen, onClose }) {
                             />
                         </FormControl>
 
-                        <Text fontWeight="bold" fontSize="lg">Членове</Text>
-                    
+                        <Text fontWeight="bold" fontSize="lg">
+                            Членове
+                        </Text>
+
                         {values.members.map((member, index) => (
                             <Box key={index}>
-
                                 <FormControl mt={3}>
                                     <FormLabel>Имейл</FormLabel>
                                     <Input
                                         type="email"
                                         name="email"
                                         value={member.email}
-                                        onChange={(e) => onMemberChange(e, index)}
+                                        onChange={(e) =>
+                                            onMemberChange(e, index)
+                                        }
                                         placeholder="Имейл"
                                     />
                                 </FormControl>
@@ -101,11 +107,15 @@ export default function HouseholdCreate({ isOpen, onClose }) {
                                     <Select
                                         name="role"
                                         value={member.role}
-                                        onChange={(e) => onMemberChange(e, index)}
+                                        onChange={(e) =>
+                                            onMemberChange(e, index)
+                                        }
                                         placeholder="Изберете роля"
                                     >
                                         {roles.map((role) => (
-                                            <option key={role} value={role}>{role}</option>
+                                            <option key={role} value={role}>
+                                                {role}
+                                            </option>
                                         ))}
                                     </Select>
                                 </FormControl>
@@ -117,11 +127,14 @@ export default function HouseholdCreate({ isOpen, onClose }) {
                                 >
                                     Премахнете
                                 </Button>
-                                
                             </Box>
                         ))}
 
-                        <Button variant="primary" mt={3} onClick={onMemberAddInput}>
+                        <Button
+                            variant="primary"
+                            mt={3}
+                            onClick={onMemberAddInput}
+                        >
                             Добавете член
                         </Button>
                     </form>
