@@ -48,7 +48,7 @@ export default function Login() {
                                 justify={"space-between"}
                             >
                                 <Checkbox>Запомни ме</Checkbox>
-                                <Text color={"themeBlue.700"}>
+                                <Text color={"themePurple.700"}>
                                     Забравена парола?
                                 </Text>
                             </Stack>

@@ -78,7 +78,7 @@ const NavItem = ({ icon, children, to, ...rest }) => {
                 role="group"
                 cursor="pointer"
                 _hover={{
-                    bg: "themeBlue.900",
+                    bg: "themePurple.900",
                     color: "white",
                 }}
                 {...rest}
@@ -105,7 +105,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
             px={{ base: 4, md: 4 }}
             height="20"
             alignItems="center"
-            bg={useColorModeValue("themeBlue.800")}
+            bg={useColorModeValue("themePurple.800")}
             borderBottomWidth="1px"
             borderBottomColor={useColorModeValue("gray.200")}
             justifyContent={{ base: "space-between", md: "flex-end" }}
@@ -120,7 +120,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                 color={useColorModeValue("white")}
                 bg="transparent"
                 _hover={{
-                    color: useColorModeValue("themeBlue.900"),
+                    color: useColorModeValue("themePurple.900"),
                     bg: useColorModeValue("white"),
                 }}
             />

@@ -2,7 +2,7 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 
 const theme = extendTheme({
     colors: {
-        themeBlue: {
+        themePurple: {
             900: "#2D3250",
             800: "#42466B",
             700: "#676F9D",
@@ -11,6 +11,11 @@ const theme = extendTheme({
         },
         themeYellow: {
             900: "#F8B179",
+        },
+        tabsPurple: {
+            900: "#2D3250",
+            800: "#42466B",
+            100: "#c4cbf5",
         },
     },
     fonts: {
@@ -21,17 +26,17 @@ const theme = extendTheme({
         Button: {
             variants: {
                 primary: {
-                    bg: "themeBlue.700",
+                    bg: "themePurple.700",
                     color: "white",
                     _hover: {
-                        bg: "themeBlue.900",
+                        bg: "themePurple.900",
                     },
                 },
                 outline: {
-                    color: "themeBlue.700",
-                    borderColor: "themeBlue.700",
+                    color: "themePurple.700",
+                    borderColor: "themePurple.700",
                     _hover: {
-                        bg: "themeBlue.200",
+                        bg: "themePurple.200",
                     },
                 },
             },
@@ -40,8 +45,8 @@ const theme = extendTheme({
             baseStyle: {
                 control: {
                     _checked: {
-                        bg: "themeBlue.700",
-                        borderColor: "themeBlue.700",
+                        bg: "themePurple.700",
+                        borderColor: "themePurple.700",
                     },
                 },
             },

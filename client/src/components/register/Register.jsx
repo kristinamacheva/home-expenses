@@ -90,7 +90,7 @@ export default function Register() {
                         <Stack pt={4}>
                             <Text align={"center"}>
                                 Вече имате профил?{" "}
-                                <Link color={"themeBlue.700"}>Вход</Link>
+                                <Link color={"themePurple.700"}>Вход</Link>
                             </Text>
                         </Stack>
                     </Stack>
