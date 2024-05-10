@@ -6,8 +6,9 @@ import {
     Box,
     Text,
     Flex,
+    Card,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 export default function ExpenseListItem({
     _id,
@@ -22,6 +23,8 @@ export default function ExpenseListItem({
     household,
     expenseDate,
 }) {
+    const { householdId } = useParams();
+
     const currentUserId = "1";
 
     const filteredBalance = balance.filter(
@@ -45,13 +48,14 @@ export default function ExpenseListItem({
     }
 
     return (
-        <Stack
+        <Card
             px="4"
             py="3"
             mx="4"
             my="1"
-            boxShadow="lg"
-            borderRadius="lg"
+            boxShadow="md"
+            // borderRadius="lg"
+            // borderTop="4px solid #676F9D"
             background="white"
             spacing={{ base: "1", md: "4" }}
             direction={{ base: "column", md: "row" }}
@@ -87,7 +91,7 @@ export default function ExpenseListItem({
                 spacing={{ base: "2", md: "6" }}
             >
                 <Flex direction="column" align={{ md: "flex-end" }}>
-                    <Text fontSize="xl" fontWeight="bold" >
+                    <Text fontSize="xl" fontWeight="bold" color="themePurple.800" mb="-1">
                         {amount} лв.
                     </Text>
                     <Box display="inline-block">
@@ -96,10 +100,10 @@ export default function ExpenseListItem({
                         </Badge>
                     </Box>
                 </Flex>
-                <Button as={Link} variant="outline" mt={{ base: "1" }}>
+                <Button as={Link} to={`razhodi/${_id}`} variant="outline" mt={{ base: "1" }}>
                     Детайли
                 </Button>
             </Stack>
-        </Stack>
+        </Card>
     );
 }
