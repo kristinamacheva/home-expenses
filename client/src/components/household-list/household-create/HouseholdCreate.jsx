@@ -120,13 +120,17 @@ export default function HouseholdCreate({ isOpen, onClose }) {
                                     </Select>
                                 </FormControl>
 
-                                <Button
-                                    mt={3}
-                                    colorScheme="red"
-                                    onClick={() => onMemberDeleteInput(index)}
-                                >
-                                    Премахнете
-                                </Button>
+                                {values.members.length > 1 && (
+                                    <Button
+                                        mt={3}
+                                        colorScheme="red"
+                                        onClick={() =>
+                                            onMemberDeleteInput(index)
+                                        }
+                                    >
+                                        Премахнете
+                                    </Button>
+                                )}
                             </Box>
                         ))}
 
