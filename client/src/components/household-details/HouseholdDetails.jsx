@@ -11,7 +11,7 @@ import {
     Tabs,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import ExpenseList from "../expense-list/ExpenseList";
 // import ExpenseList from "../expense-list/ExpenseList";
 
@@ -111,7 +111,7 @@ export default function HouseholdDetails() {
                             </TabList>
                             <TabPanels>
                                 <TabPanel>
-                                    <ExpenseList />
+                                    <Outlet />
                                 </TabPanel>
                                 <TabPanel>
                                     <p>Неплатени</p>
