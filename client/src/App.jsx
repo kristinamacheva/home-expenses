@@ -18,10 +18,7 @@ function App() {
             <Route path={Path.Home} element={<Sidebar />}>
                 <Route index element={<Home />} />
                 <Route path={Path.HouseholdList} element={<HouseholdList />} />
-                <Route path={Path.HouseholdDetails} element={<HouseholdDetails /> } >
-                    <Route index element={<ExpenseList />} />
-                    <Route path={Path.ExpenseDetails} element={<ExpenseDetails /> } />
-                </Route>
+                <Route path={Path.HouseholdDetails} element={<HouseholdDetails /> } />
                 <Route path={Path.Logout} element={<Logout />} />
             </Route>
             <Route path={Path.Login} element={<Login />} />

@@ -111,7 +111,7 @@ export default function HouseholdDetails() {
                             </TabList>
                             <TabPanels>
                                 <TabPanel>
-                                    <Outlet />
+                                    <ExpenseList />
                                 </TabPanel>
                                 <TabPanel>
                                     <p>Неплатени</p>

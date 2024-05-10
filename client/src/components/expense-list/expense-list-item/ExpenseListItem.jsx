@@ -100,7 +100,7 @@ export default function ExpenseListItem({
                         </Badge>
                     </Box>
                 </Flex>
-                <Button as={Link} to={`razhodi/${_id}`} variant="outline" mt={{ base: "1" }}>
+                <Button variant="outline" mt={{ base: "1" }}>
                     Детайли
                 </Button>
             </Stack>

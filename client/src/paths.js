@@ -4,7 +4,6 @@ const Path = {
     HouseholdList: 'domakinstva',
     HouseholdCreate: 'domakinstva/suzdavane',
     HouseholdDetails: 'domakinstva/:householdId',
-    ExpenseDetails: 'razhodi/:expenseId',
     Login: '/vhod',
     Register: '/registraciq',
 };
