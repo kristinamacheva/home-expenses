@@ -4,20 +4,28 @@ import { Button, HStack, Heading, Spacer, VStack, Stack, useDisclosure } from "@
 import HouseholdCreate from "./household-create/HouseholdCreate";
 
 export default function HouseholdList() {
+    const userId = '1';
     const [households, setHouseholds] = useState([
         {
             "_id": "1",
             "name": "Съквартиранти",
             "members": [{ "userId": "1", "role": "admin" }, { "userId": "2", "role": "member" }],
-            "balance": [{ "userId": "1", "sum": "100", "type": "+" }, { "userId": "2", "sum": "100", "type": "-" }],
+            "balance": [{ "userId": "1", "sum": 100, "type": "+" }, { "userId": "2", "sum": 100, "type": "-" }],
             "admin": "1"
         },
         {
             "_id": "2",
             "name": "Вкъщи",
             "members": [{ "userId": "1", "role": "member" }, { "userId": "2", "role": "member" }, { "userId": "3", "role": "admin" }],
-            "balance": [{ "userId": "1", "sum": "30", "type": "+" }, { "userId": "2", "sum": "30", "type": "-" }, { "userId": "3", "sum": "60", "type": "+" }],
+            "balance": [{ "userId": "1", "sum": 30, "type": "-" }, { "userId": "2", "sum": 30, "type": "-" }, { "userId": "3", "sum": 60, "type": "+" }],
             "admin": "3"
+        },
+        {
+            "_id": "3",
+            "name": "Обмен",
+            "members": [{ "userId": "1", "role": "member" }, { "userId": "2", "role": "admin" }],
+            "balance": [{ "userId": "1", "sum": 0, "type": "+" }, { "userId": "2", "sum": 0, "type": "+" }],
+            "admin": "2"
         }
     ]);
 

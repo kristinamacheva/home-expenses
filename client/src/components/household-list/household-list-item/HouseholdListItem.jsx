@@ -10,6 +10,21 @@ import {
 import { Link } from "react-router-dom";
 
 export default function HouseholdListItem({ _id, name, members, balance }) {
+    const userId = '1';
+
+    const userBalance = balance.find(user => user.userId === userId);
+    //TODO: fix the number type if necessary
+    const userBalanceSum = userBalance ? userBalance.sum : 0;
+    const badgeColorScheme = userBalance.type === '-' ? 'red' : 'green';
+
+    let badgeText;
+
+    if (userBalance.type === '-') {
+        badgeText =`Дължите ${userBalanceSum} лв.`;
+    } else {
+        badgeText = userBalanceSum === 0 ? 'Нямате дългове' : `Дължат Ви ${userBalanceSum} лв.`;;
+    }
+
     return (
         <Stack
             px="5"
@@ -34,8 +49,8 @@ export default function HouseholdListItem({ _id, name, members, balance }) {
                         {name}
                     </Heading>
                     <Box display="inline-block">
-                        <Badge variant="subtle" colorScheme="green">
-                            Дължат Ви 1824.57 лв.
+                        <Badge variant="subtle" colorScheme={badgeColorScheme}>
+                            {badgeText}
                         </Badge>
                     </Box>
                 </Stack>
