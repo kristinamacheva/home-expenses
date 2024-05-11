@@ -7,23 +7,35 @@ import {
     Badge,
     Box,
     Card,
+    IconButton,
+    HStack,
 } from "@chakra-ui/react";
+import { FaEye, FaPen } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 
-export default function HouseholdListItem({ _id, name, members, balance }) {
-    const userId = '1';
+export default function HouseholdListItem({
+    _id,
+    name,
+    members,
+    balance,
+    admin,
+}) {
+    const currentUserId = "1";
 
-    const userBalance = balance.find(user => user.userId === userId);
+    const userBalance = balance.find((user) => user.userId === currentUserId);
     //TODO: fix the number type if necessary
     const userBalanceSum = userBalance ? userBalance.sum : 0;
-    const badgeColorScheme = userBalance.type === '-' ? 'red' : 'green';
+    const badgeColorScheme = userBalance.type === "-" ? "red" : "green";
 
     let badgeText;
 
-    if (userBalance.type === '-') {
-        badgeText =`Дължите ${userBalanceSum} лв.`;
+    if (userBalance.type === "-") {
+        badgeText = `Дължите ${userBalanceSum} лв.`;
     } else {
-        badgeText = userBalanceSum === 0 ? 'Нямате дългове' : `Дължат Ви ${userBalanceSum} лв.`;;
+        badgeText =
+            userBalanceSum === 0
+                ? "Нямате дългове"
+                : `Дължат Ви ${userBalanceSum} лв.`;
     }
 
     return (
@@ -71,9 +83,44 @@ export default function HouseholdListItem({ _id, name, members, balance }) {
                     />
                 </AvatarGroup>
             </Stack>
-            <Button as={Link} to={`/domakinstva/${_id}`} variant="outline" mt={{ base: "3" }}>
-                Детайли
-            </Button>
+            <HStack
+                spacing="0"
+                w={["auto", "auto", "90px"]}
+                justifyContent="flex-end"
+            >
+                <IconButton
+                    as={Link}
+                    to={`/domakinstva/${_id}`}
+                    aria-label="Детайли"
+                    title="Детайли"
+                    icon={<FaEye fontSize="20px" />}
+                    variant="ghost"
+                    color="themePurple.800"
+                />
+                {/* TODO: implement isAdmin logic */}
+                {/* {(currentUserId === creator.userId || isAdmin(currentUserId)) && (
+                        <>
+                        </>
+                    )} */}
+                {currentUserId === admin.userId && (
+                    <>
+                        <IconButton
+                            aria-label="Редактирайте"
+                            title="Редактирайте"
+                            icon={<FaPen fontSize="20px" />}
+                            variant="ghost"
+                            color="themePurple.800"
+                        />
+                        {/* <IconButton
+                            aria-label="Изтрийте"
+                            title="Изтрийте"
+                            icon={<FaRegTrashCan fontSize="20px" />}
+                            variant="ghost"
+                            color="themePurple.800"
+                        /> */}
+                    </>
+                )}
+            </HStack>
         </Card>
     );
 }

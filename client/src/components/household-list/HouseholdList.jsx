@@ -26,7 +26,7 @@ export default function HouseholdList() {
                 { userId: "1", sum: 60, type: "+" },
                 { userId: "2", sum: 60, type: "-" },
             ],
-            admin: "1",
+            admin: { userId: "1" },
         },
         {
             _id: "2",
@@ -41,7 +41,7 @@ export default function HouseholdList() {
                 { userId: "2", sum: 30, type: "-" },
                 { userId: "3", sum: 60, type: "+" },
             ],
-            admin: "3",
+            admin: { userId: "3" },
         },
         {
             _id: "3",
@@ -54,7 +54,7 @@ export default function HouseholdList() {
                 { userId: "1", sum: 0, type: "+" },
                 { userId: "2", sum: 0, type: "+" },
             ],
-            admin: "2",
+            admin: { userId: "2" },
         },
     ]);
 

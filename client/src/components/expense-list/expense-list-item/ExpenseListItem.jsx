@@ -7,7 +7,10 @@ import {
     Text,
     Flex,
     Card,
+    HStack,
+    IconButton,
 } from "@chakra-ui/react";
+import { FaEye, FaPen, FaRegTrashCan } from "react-icons/fa6";
 import { Link, useParams } from "react-router-dom";
 
 export default function ExpenseListItem({
@@ -51,7 +54,7 @@ export default function ExpenseListItem({
         <Card
             px="4"
             py="3"
-            mx="4"
+            // mx="4"
             my="1"
             boxShadow="md"
             // borderRadius="lg"
@@ -63,7 +66,7 @@ export default function ExpenseListItem({
             alignItems={{ md: "center" }}
         >
             <Stack direction="column" spacing={{ base: "1", md: "0" }}>
-                <Stack direction="row" spacing="2">
+                <Stack direction="row" spacing="2" justifyContent={{ base: "space-between", lg: "initial"}}>    
                     <Heading as="h3" size="md">
                         {title}
                     </Heading>
@@ -86,12 +89,17 @@ export default function ExpenseListItem({
                 </Text>
             </Stack>
             <Stack
-                direction={{ base: "column", md: "row" }}
-                alignItems={{ md: "center" }}
-                spacing={{ base: "2", md: "6" }}
+                direction={{ base: "column", lg: "row" }}
+                alignItems={{ lg: "center" }}
+                spacing={{ base: "2", lg: "6" }}
             >
                 <Flex direction="column" align={{ md: "flex-end" }}>
-                    <Text fontSize="xl" fontWeight="bold" color="themePurple.800" mb="-1">
+                    <Text
+                        fontSize="xl"
+                        fontWeight="bold"
+                        color="themePurple.800"
+                        mb="-1"
+                    >
                         {amount} лв.
                     </Text>
                     <Box display="inline-block">
@@ -100,9 +108,38 @@ export default function ExpenseListItem({
                         </Badge>
                     </Box>
                 </Flex>
-                <Button variant="outline" mt={{ base: "1" }}>
-                    Детайли
-                </Button>
+                <HStack spacing="0" w={["auto", "auto", "120px"]} justifyContent="flex-end">
+                    <IconButton
+                        aria-label="Детайли"
+                        title="Детайли"
+                        icon={<FaEye fontSize="20px" />}
+                        variant="ghost"
+                        color="themePurple.800"
+                    />
+                    {/* TODO: implement isAdmin logic */}
+                    {/* {(currentUserId === creator.userId || isAdmin(currentUserId)) && (
+                        <>
+                        </>
+                    )} */}
+                    {currentUserId === creator.userId && (
+                        <>
+                            <IconButton
+                                aria-label="Редактирайте"
+                                title="Редактирайте"
+                                icon={<FaPen fontSize="20px" />}
+                                variant="ghost"
+                                color="themePurple.800"
+                            />
+                            <IconButton
+                                aria-label="Изтрийте"
+                                title="Изтрийте"
+                                icon={<FaRegTrashCan fontSize="20px" />}
+                                variant="ghost"
+                                color="themePurple.800"
+                            />
+                        </>
+                    )}
+                </HStack>
             </Stack>
         </Card>
     );

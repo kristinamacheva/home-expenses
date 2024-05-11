@@ -30,7 +30,7 @@ export default function HouseholdDetails() {
                 { userId: "1", sum: 60, type: "+" },
                 { userId: "2", sum: 60, type: "-" },
             ],
-            admin: "1",
+            admin: { userId: "1"},
         },
         {
             _id: "2",
@@ -45,7 +45,7 @@ export default function HouseholdDetails() {
                 { userId: "2", sum: 30, type: "-" },
                 { userId: "3", sum: 60, type: "+" },
             ],
-            admin: "3",
+            admin: { userId: "3"},
         },
         {
             _id: "3",
@@ -58,7 +58,7 @@ export default function HouseholdDetails() {
                 { userId: "1", sum: 0, type: "+" },
                 { userId: "2", sum: 0, type: "+" },
             ],
-            admin: "2",
+            admin: { userId: "3"},
         },
     ]);
 
@@ -71,11 +71,11 @@ export default function HouseholdDetails() {
     return (
         <>   
             <Card background="white" p="2" boxShadow="xs">
-                <HStack mx={4} my={2} alignItems="center">
-                    <Heading as="h1" size="lg" color="themePurple.800">
+                <HStack mx={4} my={2} alignItems="center" flexWrap="wrap">
+                    <Heading as="h1" size="lg" color="themePurple.800"  mr="2">
                         {currentHousehold.name}
                     </Heading>
-                    <AvatarGroup size="md" max={2} ml="2">
+                    <AvatarGroup size="md" max={2}>
                         <Avatar
                             name="Ryan Florence"
                             background={"themeYellow.900"}
@@ -96,18 +96,21 @@ export default function HouseholdDetails() {
 
             <Tabs isLazy colorScheme="themePurple" mx="1" mt="4">
                 <TabList>
-                    <Tab>Разходи</Tab>
                     <Tab>Баланс</Tab>
+                    <Tab>Разходи</Tab>
                     <Tab>Членове</Tab>
                 </TabList>
 
                 <TabPanels>
                     <TabPanel>
+                        <p>Баланс</p>
+                    </TabPanel>
+                    <TabPanel>
                         <Tabs isLazy variant="soft-rounded" colorScheme="tabsPurple">
-                            <TabList>
-                                <Tab>Платени</Tab>
-                                <Tab>Неплатени</Tab>
-                                <Tab>Периодични</Tab>
+                            <TabList >
+                                <Tab sx={{ padding: "0.4rem 0.6rem", marginRight: "0.2rem", fontSize: "1rem" }}>Платени</Tab>
+                                <Tab sx={{ padding: "0.4rem 0.6rem", marginRight: "0.2rem", fontSize: "1rem" }}>Неплатени</Tab>
+                                <Tab sx={{ padding: "0.4rem 0.6rem", marginRight: "0.2rem", fontSize: "1rem" }}>Периодични</Tab>
                             </TabList>
                             <TabPanels>
                                 <TabPanel>
@@ -121,9 +124,6 @@ export default function HouseholdDetails() {
                                 </TabPanel>
                             </TabPanels>
                         </Tabs>
-                    </TabPanel>
-                    <TabPanel>
-                        <p>Баланс</p>
                     </TabPanel>
                     <TabPanel>
                         <p>Членове</p>

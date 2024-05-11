@@ -15,8 +15,8 @@ export default function ExpenseList() {
             "owed": [{ "userId": "1", "sum": 60 }, { "userId": "2", "sum": 60 }],
             "balance": [{ "userId": "1", "sum": 60, "type": "+" }, { "userId": "2", "sum": 60, "type": "-" }],
             "category": "Храна",
-            "creator": [{ "userId": "1" }],
-            "household": [{ "householdId": "1" }],
+            "creator": { "userId": "1" },
+            "household": { "householdId": "1" },
             "expenseDate": "01.05.2024",
         },
         {
@@ -28,8 +28,8 @@ export default function ExpenseList() {
             "owed": [{ "userId": "1", "sum": 150 }, { "userId": "2", "sum": 50 }],
             "balance": [{ "userId": "1", "sum": 150, "type": "-" }, { "userId": "2", "sum": 150, "type": "+" }],
             "category": "Уреди",
-            "creator": [{ "userId": "2" }],
-            "household": [{ "householdId": "1" }],
+            "creator": { "userId": "2" },
+            "household": { "householdId": "1" },
             "expenseDate": "06.05.2024",
         },
         {
@@ -41,8 +41,8 @@ export default function ExpenseList() {
             "owed": [{ "userId": "1", "sum": 150 }, { "userId": "2", "sum": 150 }],
             "balance": [{ "userId": "1", "sum": 150, "type": "+" }, { "userId": "2", "sum": 150, "type": "-" }],
             "category": "Уреди",
-            "creator": [{ "userId": "1" }],
-            "household": [{ "householdId": "1" }],
+            "creator": { "userId": "1" },
+            "household": { "householdId": "1" },
             "expenseDate": "08.05.2024",
         },
 
