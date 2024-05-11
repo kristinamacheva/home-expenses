@@ -113,12 +113,11 @@ export default function HouseholdDetails() {
                                 <Tab sx={{ padding: "0.4rem 0.6rem", marginRight: "0.2rem", fontSize: "1rem" }}>Периодични</Tab>
                             </TabList>
                             <TabPanels>
-                                <TabPanel px="2">
+                                <TabPanel px="2" pt="2">
                                     <ExpenseList />
                                 </TabPanel>
                                 <TabPanel px="2">
-                                    {/* <p>Неплатени</p> */}
-                                    <ExpenseList />
+                                    <p>Неплатени</p>
                                 </TabPanel>
                                 <TabPanel px="2">
                                     <p>Периодични</p>

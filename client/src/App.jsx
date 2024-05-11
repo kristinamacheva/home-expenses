@@ -9,8 +9,6 @@ import Sidebar from "./components/sidebar/Sidebar";
 import HouseholdList from './components/household-list/HouseholdList';
 import Home from './components/home/Home';
 import HouseholdDetails from './components/household-details/HouseholdDetails';
-import ExpenseDetails from './components/expense-details/ExpenseDetails';
-import ExpenseList from './components/expense-list/ExpenseList';
 
 function App() {
     return (
