@@ -16,6 +16,9 @@ import {
     Text,
 } from "@chakra-ui/react";
 
+import * as householdService from '../../../services/householdService';
+import Path from "../../../paths";
+
 export default function HouseholdCreate({ isOpen, onClose }) {
     const [values, setValues] = useState({
         name: "",
@@ -49,10 +52,18 @@ export default function HouseholdCreate({ isOpen, onClose }) {
         }));
     };
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
 
-        console.log(values);
+        try {
+            const result = await householdService.create(values);
+            console.log(result);
+
+            onCloseForm();
+        } catch (err) {
+            //TODO Error notification - toast
+            console.log(err);
+        }
     };
 
     const clearFormHandler = () => {
