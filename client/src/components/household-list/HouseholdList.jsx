@@ -14,7 +14,6 @@ import {
 import * as householdService from '../../services/householdService';
 import HouseholdCreate from "./household-create/HouseholdCreate";
 
-
 export default function HouseholdList() {
     const userId = "1";
     const [households, setHouseholds] = useState([]);
@@ -32,6 +31,13 @@ export default function HouseholdList() {
         onOpen: onOpenCreateModal,
         onClose: onCloseCreateModal,
     } = useDisclosure();
+
+    const addHouseholdToState = (newHousehold) => {
+        setHouseholds(state => ([
+            ...state,
+            newHousehold,
+        ]));
+    };
 
     return (
         <>
@@ -56,6 +62,7 @@ export default function HouseholdList() {
             <HouseholdCreate
                 isOpen={isCreateModalOpen}
                 onClose={onCloseCreateModal}
+                addHouseholdToState={addHouseholdToState}
             />
         </>
     );

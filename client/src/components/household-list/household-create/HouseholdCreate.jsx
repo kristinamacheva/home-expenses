@@ -19,7 +19,7 @@ import {
 import * as householdService from '../../../services/householdService';
 import Path from "../../../paths";
 
-export default function HouseholdCreate({ isOpen, onClose }) {
+export default function HouseholdCreate({ isOpen, onClose, addHouseholdToState }) {
     const [values, setValues] = useState({
         name: "",
         members: [{ email: "", role: "" }],
@@ -55,11 +55,21 @@ export default function HouseholdCreate({ isOpen, onClose }) {
     const onSubmit = async (e) => {
         e.preventDefault();
 
+        const newHousehold = {
+            name: values.name,
+            members: [
+                { userId: "1", role: "Член" },
+                { userId: "3", role: "Член" }
+            ],
+            admin: { userId: "2" }
+        };
+
         try {
-            const result = await householdService.create(values);
+            const result = await householdService.create(newHousehold);
             console.log(result);
 
-            onCloseForm();
+            addHouseholdToState(result);
+            onCloseForm(); 
         } catch (err) {
             //TODO Error notification - toast
             console.log(err);
@@ -70,9 +80,13 @@ export default function HouseholdCreate({ isOpen, onClose }) {
         setValues({ name: "", members: [{ email: "", role: "" }] });
     };
 
+    //TODO: find a better solution
+    // const reload = () => window.location.reload();
+
     const onCloseForm = () => {
         clearFormHandler();
         onClose();
+        // reload();
     };
 
     return (

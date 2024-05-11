@@ -10,63 +10,40 @@ import {
     TabPanels,
     Tabs,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { Outlet, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
+import * as householdService from '../../services/householdService';
 import ExpenseList from "../expense-list/ExpenseList";
 // import ExpenseList from "../expense-list/ExpenseList";
 
 export default function HouseholdDetails() {
     const { householdId } = useParams();
+    const [households, setHouseholds] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const [households, setHouseholds] = useState([
-        {
-            _id: "1",
-            name: "Съквартиранти",
-            members: [
-                { userId: "1", role: "admin" },
-                { userId: "2", role: "member" },
-            ],
-            balance: [
-                { userId: "1", sum: 60, type: "+" },
-                { userId: "2", sum: 60, type: "-" },
-            ],
-            admin: { userId: "1"},
-        },
-        {
-            _id: "2",
-            name: "Вкъщи",
-            members: [
-                { userId: "1", role: "member" },
-                { userId: "2", role: "member" },
-                { userId: "3", role: "admin" },
-            ],
-            balance: [
-                { userId: "1", sum: 30, type: "-" },
-                { userId: "2", sum: 30, type: "-" },
-                { userId: "3", sum: 60, type: "+" },
-            ],
-            admin: { userId: "3"},
-        },
-        {
-            _id: "3",
-            name: "Обмен",
-            members: [
-                { userId: "1", role: "member" },
-                { userId: "2", role: "admin" },
-            ],
-            balance: [
-                { userId: "1", sum: 0, type: "+" },
-                { userId: "2", sum: 0, type: "+" },
-            ],
-            admin: { userId: "3"},
-        },
-    ]);
+    useEffect(() => {
+        setLoading(true);
+        householdService.getAll()
+            .then(result => {
+                setHouseholds(result);
+                setLoading(false); 
+            })
+            .catch(err => {
+                console.log(err);
+                setLoading(false); 
+            });
+    }, []);
 
-    const currentHousehold = households.filter(
-        (household) => household._id === householdId
-    )[0];
+    if (loading) {
+        return <p>Loading...</p>;
+    }
 
-    console.log(currentHousehold);
+    const currentHousehold = households.find(household => household._id === householdId);
+
+    if (!currentHousehold) {
+        return <p>Household not found!</p>;
+    }
 
     return (
         <>   
