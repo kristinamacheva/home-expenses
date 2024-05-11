@@ -54,7 +54,7 @@ export default function ExpenseListItem({
         <Card
             px="4"
             py="3"
-            // mx="4"
+            mx="0.2em"
             my="1"
             boxShadow="md"
             // borderRadius="lg"

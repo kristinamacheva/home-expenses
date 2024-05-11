@@ -107,19 +107,20 @@ export default function HouseholdDetails() {
                     </TabPanel>
                     <TabPanel>
                         <Tabs isLazy variant="soft-rounded" colorScheme="tabsPurple">
-                            <TabList >
+                            <TabList>
                                 <Tab sx={{ padding: "0.4rem 0.6rem", marginRight: "0.2rem", fontSize: "1rem" }}>Платени</Tab>
                                 <Tab sx={{ padding: "0.4rem 0.6rem", marginRight: "0.2rem", fontSize: "1rem" }}>Неплатени</Tab>
                                 <Tab sx={{ padding: "0.4rem 0.6rem", marginRight: "0.2rem", fontSize: "1rem" }}>Периодични</Tab>
                             </TabList>
                             <TabPanels>
-                                <TabPanel>
+                                <TabPanel px="2">
                                     <ExpenseList />
                                 </TabPanel>
-                                <TabPanel>
-                                    <p>Неплатени</p>
+                                <TabPanel px="2">
+                                    {/* <p>Неплатени</p> */}
+                                    <ExpenseList />
                                 </TabPanel>
-                                <TabPanel>
+                                <TabPanel px="2">
                                     <p>Периодични</p>
                                 </TabPanel>
                             </TabPanels>

@@ -67,7 +67,7 @@ export default function HouseholdCreate({ isOpen, onClose }) {
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>
             <ModalOverlay />
-            <ModalContent>
+            <ModalContent mx={{ base: "4", md: "0" }}>
                 <ModalHeader>Създайте домакинство</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>

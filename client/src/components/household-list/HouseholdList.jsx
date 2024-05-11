@@ -68,7 +68,7 @@ export default function HouseholdList() {
         <>
             <Stack>
                 <Card background="white" p="2" boxShadow="xs">
-                    <HStack mx={4} my={2} alignItems="center">
+                    <HStack mx={4} my={2} alignItems="center" flexWrap="wrap">
                         <Heading as="h1" size="lg" color="themePurple.800">
                             Домакинства
                         </Heading>
