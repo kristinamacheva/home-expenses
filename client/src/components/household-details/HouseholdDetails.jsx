@@ -20,7 +20,7 @@ import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 
 export default function HouseholdDetails() {
     const { householdId } = useParams();
-    const [isLoading, setisLoading] = useState(false);
+    const [isLoading, setisLoading] = useState(true);
     const [households, setHouseholds] = useState([]);
 
     useEffect(() => {
