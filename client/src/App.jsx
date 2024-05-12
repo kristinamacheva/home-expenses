@@ -9,6 +9,7 @@ import Sidebar from "./components/sidebar/Sidebar";
 import HouseholdList from './components/household-list/HouseholdList';
 import Home from './components/home/Home';
 import HouseholdDetails from './components/household-details/HouseholdDetails';
+import NotFound from './components/not-found/NotFound';
 
 function App() {
     return (
@@ -21,6 +22,7 @@ function App() {
             </Route>
             <Route path={Path.Login} element={<Login />} />
             <Route path={Path.Register} element={<Register />} />
+            <Route path="*" element={<NotFound/>}/>
         </Routes>
     );
 }

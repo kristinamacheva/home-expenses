@@ -4,6 +4,7 @@ import {
     Card,
     HStack,
     Heading,
+    Spinner,
     Tab,
     TabList,
     TabPanel,
@@ -15,7 +16,7 @@ import { useParams } from "react-router-dom";
 
 import * as householdService from '../../services/householdService';
 import ExpenseList from "../expense-list/ExpenseList";
-// import ExpenseList from "../expense-list/ExpenseList";
+import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 
 export default function HouseholdDetails() {
     const { householdId } = useParams();
@@ -36,13 +37,13 @@ export default function HouseholdDetails() {
     }, []);
 
     if (loading) {
-        return <p>Loading...</p>;
+        return <Spinner size='lg' />;
     }
 
     const currentHousehold = households.find(household => household._id === householdId);
 
     if (!currentHousehold) {
-        return <p>Household not found!</p>;
+        return <HouseholdNotFound/>;
     }
 
     return (
