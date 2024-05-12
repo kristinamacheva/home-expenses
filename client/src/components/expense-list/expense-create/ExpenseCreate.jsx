@@ -2,9 +2,14 @@ import { useState } from "react";
 import {
     Box,
     Button,
+    ButtonGroup,
+    Divider,
     FormControl,
     FormLabel,
+    HStack,
     Input,
+    InputGroup,
+    InputRightAddon,
     Modal,
     ModalBody,
     ModalCloseButton,
@@ -12,34 +17,33 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    NumberDecrementStepper,
+    NumberIncrementStepper,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
     Select,
+    Stack,
     Text,
 } from "@chakra-ui/react";
+import categoriesOptions from "../../../data/categoriesOptions ";
 
 export default function ExpenseCreate({ isOpen, onClose }) {
-    const [values, setValues] = useState({
-        name: "",
-        members: [{ email: "", role: "" }],
-    });
-    const roles = ["Член", "Дете"];
+    const today = new Date();
+    const dateOnly = today.toISOString().split("T")[0];
 
-    const onMemberAddInput = () => {
-        setValues({
-            ...values,
-            members: [...values.members, { email: "", role: "" }],
-        });
+    const initialValues = {
+        title: "",
+        amount: "0",
+        category: "",
+        date: `${dateOnly}`,
     };
 
-    const onMemberChange = (event, index) => {
-        const updatedMembers = [...values.members];
-        updatedMembers[index][event.target.name] = event.target.value;
-        setValues({ ...values, members: updatedMembers });
-    };
+    const [values, setValues] = useState(initialValues);
+    const [payersButton, setPayersButton] = useState("currentUser");
 
-    const onMemberDeleteInput = (index) => {
-        const updatedMembers = [...values.members];
-        updatedMembers.splice(index, 1);
-        setValues({ ...values, members: updatedMembers });
+    const handlePayerButtonClick = (payerType) => {
+        setPayersButton(payerType);
     };
 
     const onChange = (e) => {
@@ -56,7 +60,7 @@ export default function ExpenseCreate({ isOpen, onClose }) {
     };
 
     const clearFormHandler = () => {
-        setValues({ name: "", members: [{ email: "", role: "" }] });
+        setValues(initialValues);
     };
 
     const onCloseForm = () => {
@@ -67,80 +71,110 @@ export default function ExpenseCreate({ isOpen, onClose }) {
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>
             <ModalOverlay />
-            <ModalContent mx={{ base: "4", md: "0" }}>
+            <ModalContent
+                mx={{ base: "4", md: "0" }}
+                maxW={{ base: "90vw", md: "80vw", lg: "65vw" }}
+            >
                 <ModalHeader>Създайте разход</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <form onSubmit={onSubmit}>
-                        <FormControl mb={4}>
-                            <FormLabel>Име</FormLabel>
-                            <Input
-                                type="text"
-                                name="name"
-                                value={values.name}
-                                onChange={onChange}
-                                placeholder="Име"
-                            />
-                        </FormControl>
-
-                        <Text fontWeight="bold" fontSize="lg">
-                            Членове
-                        </Text>
-
-                        {values.members.map((member, index) => (
-                            <Box key={index}>
-                                <FormControl mt={3}>
-                                    <FormLabel>Имейл</FormLabel>
-                                    <Input
-                                        type="email"
-                                        name="email"
-                                        value={member.email}
-                                        onChange={(e) =>
-                                            onMemberChange(e, index)
-                                        }
-                                        placeholder="Имейл"
-                                    />
-                                </FormControl>
-
-                                <FormControl mt={2}>
-                                    <FormLabel>Роля</FormLabel>
-                                    <Select
-                                        name="role"
-                                        value={member.role}
-                                        onChange={(e) =>
-                                            onMemberChange(e, index)
-                                        }
-                                        placeholder="Изберете роля"
-                                    >
-                                        {roles.map((role) => (
-                                            <option key={role} value={role}>
-                                                {role}
-                                            </option>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-
-                                {values.members.length > 1 && (
-                                    <Button
-                                        mt={3}
-                                        colorScheme="red"
-                                        onClick={() =>
-                                            onMemberDeleteInput(index)
-                                        }
-                                    >
-                                        Премахнете
-                                    </Button>
-                                )}
-                            </Box>
-                        ))}
-
-                        <Button
-                            variant="primary"
-                            mt={3}
-                            onClick={onMemberAddInput}
+                        <Stack
+                            direction={{ base: "column", lg: "row" }}
+                            spacing={{ lg: "4" }}
                         >
-                            Добавете член
-                        </Button>
+                            <FormControl mb={4}>
+                                <FormLabel>Заглавие*</FormLabel>
+                                <Input
+                                    type="number"
+                                    name="title"
+                                    value={values.title}
+                                    onChange={onChange}
+                                    placeholder="Въведете заглавие"
+                                />
+                            </FormControl>
+
+                            <FormControl mb={4}>
+                                <FormLabel>Обща сума*</FormLabel>
+                                <InputGroup>
+                                    <Input
+                                        type="number"
+                                        name="amount"
+                                        value={values.amount}
+                                        onChange={onChange}
+                                        placeholder="Въведете обща сума"
+                                    />
+                                    <InputRightAddon>лв.</InputRightAddon>
+                                </InputGroup>
+                            </FormControl>
+                        </Stack>
+                        <Stack
+                            direction={{ base: "column", lg: "row" }}
+                            spacing={{ lg: "4" }}
+                        >
+                            <FormControl mb={4}>
+                                <FormLabel>Дата*</FormLabel>
+                                <Input
+                                    type="date"
+                                    name="date"
+                                    value={values.date}
+                                    onChange={onChange}
+                                    placeholder="Изберете дата"
+                                />
+                            </FormControl>
+
+                            <FormControl mb={4}>
+                                <FormLabel>Категория</FormLabel>
+                                <Select
+                                    name="category"
+                                    value={values.category}
+                                    onChange={onChange}
+                                    placeholder="Изберете категория"
+                                >
+                                    {categoriesOptions.map(
+                                        (categoryGroup, index) => (
+                                            <optgroup
+                                                label={categoryGroup.category}
+                                                key={index}
+                                            >
+                                                {categoryGroup.items.map(
+                                                    (item, i) => (
+                                                        <option
+                                                            value={item}
+                                                            key={`${index}-${i}`}
+                                                        >
+                                                            {item}
+                                                        </option>
+                                                    )
+                                                )}
+                                            </optgroup>
+                                        )
+                                    )}
+                                </Select>
+                            </FormControl>
+                        </Stack>
+                        <Divider />
+                        <Stack direction={{ base: "column", md: "row" }} spacing="4">
+                            <Text>Платец</Text>
+                            <ButtonGroup isAttached variant="outline" size="sm">
+                                <Button
+                                    onClick={() => handlePayerButtonClick("currentUser")}
+                                    colorScheme={
+                                        payersButton === "currentUser" ? "themePurple" : "gray"
+                                    }
+                                >
+                                    Текущ потребител
+                                </Button>
+                                <Button
+                                    onClick={() => handlePayerButtonClick("changedUser")}
+                                    colorScheme={
+                                        payersButton === "changedUser" ? "themePurple" : "gray"
+                                    }
+                                >
+                                    Изберете потребители
+                                </Button>
+                            </ButtonGroup>
+                        </Stack>
                     </form>
                 </ModalBody>
                 <ModalFooter>
