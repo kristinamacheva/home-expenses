@@ -17,34 +17,24 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
-    NumberDecrementStepper,
-    NumberIncrementStepper,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
     Select,
     Stack,
     Text,
 } from "@chakra-ui/react";
 import categoriesOptions from "../../../data/categoriesOptions ";
+import moment from 'moment';
 
 export default function ExpenseCreate({ isOpen, onClose }) {
-    const today = new Date();
-    const dateOnly = today.toISOString().split("T")[0];
-
     const initialValues = {
         title: "",
         amount: "0",
         category: "",
-        date: `${dateOnly}`,
+        date: moment().format('YYYY-MM-DD'),
+        payersOption: "",
+        splittingOption: "",
     };
 
     const [values, setValues] = useState(initialValues);
-    const [payersButton, setPayersButton] = useState("currentUser");
-
-    const handlePayerButtonClick = (payerType) => {
-        setPayersButton(payerType);
-    };
 
     const onChange = (e) => {
         setValues((state) => ({
@@ -154,26 +144,56 @@ export default function ExpenseCreate({ isOpen, onClose }) {
                             </FormControl>
                         </Stack>
                         <Divider />
-                        <Stack direction={{ base: "column", md: "row" }} spacing="4">
-                            <Text>Платец</Text>
-                            <ButtonGroup isAttached variant="outline" size="sm">
-                                <Button
-                                    onClick={() => handlePayerButtonClick("currentUser")}
-                                    colorScheme={
-                                        payersButton === "currentUser" ? "themePurple" : "gray"
-                                    }
+                        <Stack mt="3" spacing="4">
+                            <FormControl mb={4}>
+                                <FormLabel>Платец*</FormLabel>
+                                <Select
+                                    name="payersOption"
+                                    value={values.payersOption}
+                                    onChange={onChange}
+                                    placeholder="Изберете платец"
                                 >
-                                    Текущ потребител
-                                </Button>
-                                <Button
-                                    onClick={() => handlePayerButtonClick("changedUser")}
-                                    colorScheme={
-                                        payersButton === "changedUser" ? "themePurple" : "gray"
-                                    }
+                                    <option value="currentUser">
+                                        Текущ потребител
+                                    </option>
+                                    <option value="changedUser">
+                                        Други потребители
+                                    </option>
+                                </Select>
+                            </FormControl>
+                            {values.payersOption === "currentUser" && (
+                                <Text>текущ потребител</Text>
+                            )}
+
+                            {values.payersOption === "changedUser" && (
+                                <Text>други потребители</Text>
+                            )}
+                        </Stack>
+                        <Stack mt="3" spacing="4">
+                            <FormControl mb={4}>
+                                <FormLabel>Метод на разпределяне*</FormLabel>
+                                <Select
+                                    name="splittingOption"
+                                    value={values.splittingOption}
+                                    onChange={onChange}
+                                    placeholder="Изберете метод"
                                 >
-                                    Изберете потребители
-                                </Button>
-                            </ButtonGroup>
+                                    <option value="equally">Поравно</option>
+                                    <option value="percent">Процент</option>
+                                    <option value="manual">Ръчно</option>
+                                </Select>
+                            </FormControl>
+                            {values.splittingOption === "equally" && (
+                                <Text>Поравно</Text>
+                            )}
+
+                            {values.splittingOption === "percent" && (
+                                <Text>Процент</Text>
+                            )}
+
+                            {values.splittingOption === "manual" && (
+                                <Text>Ръчно</Text>
+                            )}
                         </Stack>
                     </form>
                 </ModalBody>
