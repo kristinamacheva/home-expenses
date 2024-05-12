@@ -20,23 +20,23 @@ import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 
 export default function HouseholdDetails() {
     const { householdId } = useParams();
+    const [isLoading, setisLoading] = useState(false);
     const [households, setHouseholds] = useState([]);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setLoading(true);
+        setisLoading(true);
         householdService.getAll()
             .then(result => {
                 setHouseholds(result);
-                setLoading(false); 
+                setisLoading(false); 
             })
             .catch(err => {
                 console.log(err);
-                setLoading(false); 
+                setisLoading(false); 
             });
     }, []);
 
-    if (loading) {
+    if (isLoading) {
         return <Spinner size='lg' />;
     }
 
