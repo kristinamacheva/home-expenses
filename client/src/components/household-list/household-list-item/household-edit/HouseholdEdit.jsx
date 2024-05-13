@@ -31,7 +31,7 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
     const [values, setValues] = useState({
         name: "",
         members: [{ userId: "", role: "" }],
-        newMembers: [{ email: "", role: "" }],
+        newMembers: [],
     });
 
     useEffect(() => {
@@ -105,13 +105,17 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>
             <ModalOverlay />
-            <ModalContent mx={{ base: "4", md: "0" }}>
+            <ModalContent mx={{ base: "4", md: "0" }} 
+                maxW={{ base: "90vw", md: "80vw", lg: "65vw" }}>
                 <ModalHeader>Редактирайте домакинство</ModalHeader>
                 <ModalCloseButton />
-                <ModalBody pb={6}>
+                <ModalBody pb={6} >
                     <form onSubmit={onSubmit}>
-                        <Stack>
-                            <FormControl mb={4}>
+                        <Stack direction={{ base: "column", lg: "row" }} gap="10">
+                            <Stack flex="1">
+                        <Text fontWeight="bold" fontSize="lg">Текущо домакинство</Text>
+
+                            <FormControl mt={2}>
                                 <FormLabel>Име</FormLabel>
                                 <Input
                                     type="text"
@@ -121,10 +125,12 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                     placeholder="Име"
                                 />
                             </FormControl>
-
+                            <Text fontWeight="bold" fontSize="lg">
+                            Членове
+                        </Text>
                             {values.members.map((member, index) => (
                                 <Box key={index}>
-                                    <Text>{member.userId}</Text>
+                                    <Text mt={2}>userId: {member.userId}</Text>
 
                                     <FormControl mt={2}>
                                         <FormLabel>Роля</FormLabel>
@@ -147,14 +153,11 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                             ))}
                         </Stack>
 
-                        <Stack>
-                            <Text fontWeight="bold" fontSize="lg">
-                                Добавете член
-                            </Text>
-
-                            {values.newMembers.map((member, index) => (
+                        <Stack flex="1"> 
+                        <Text fontWeight="bold" fontSize="lg">Добавяне на членове</Text>
+                            {values.newMembers.length > 0 && values.newMembers.map((member, index) => (
                                 <Box key={index}>
-                                    <FormControl mt={3}>
+                                    <FormControl mt={2}>
                                         <FormLabel>Имейл</FormLabel>
                                         <Input
                                             type="email"
@@ -185,8 +188,7 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                         </Select>
                                     </FormControl>
 
-                                    {values.newMembers.length > 1 && (
-                                        <Button
+                                    <Button
                                             mt={3}
                                             colorScheme="red"
                                             onClick={() =>
@@ -195,17 +197,17 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                         >
                                             Премахнете
                                         </Button>
-                                    )}
                                 </Box>
                             ))}
-
+<Box display="inline-block">
                             <Button
                                 variant="primary"
-                                mt={3}
                                 onClick={onMemberAddInput}
                             >
                                 Добавете член
                             </Button>
+                            </Box>
+                        </Stack>
                         </Stack>
                     </form>
                 </ModalBody>
