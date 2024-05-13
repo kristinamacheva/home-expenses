@@ -135,11 +135,13 @@ export default function HouseholdListItem({
                     )}
                 </HStack>
             </Card>
-            <HouseholdEdit
-                isOpen={isEditModalOpen}
-                onClose={onCloseEditModal}
-                _id
-            />
+            {isEditModalOpen && (
+                <HouseholdEdit
+                    isOpen={isEditModalOpen}
+                    onClose={onCloseEditModal}
+                    householdId={_id}
+                />
+            )}
         </>
     );
 }
