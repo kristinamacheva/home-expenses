@@ -16,42 +16,30 @@ import { useParams } from "react-router-dom";
 
 import * as householdService from '../../services/householdService';
 import ExpenseList from "../expense-list/ExpenseList";
-import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
+// import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 
 export default function HouseholdDetails() {
+    const [household, setHousehold] = useState({});
+    
     const { householdId } = useParams();
-    const [isLoading, setisLoading] = useState(true);
-    const [households, setHouseholds] = useState([]);
 
     useEffect(() => {
-        setisLoading(true);
-        householdService.getAll()
+        // TODO household not found case
+        householdService.getOne(householdId)
             .then(result => {
-                setHouseholds(result);
-                setisLoading(false); 
+                setHousehold(result);
             })
-            .catch(err => {
-                console.log(err);
-                setisLoading(false); 
-            });
-    }, []);
-
-    if (isLoading) {
-        return <Spinner size='lg' />;
-    }
-
-    const currentHousehold = households.find(household => household._id === householdId);
-
-    if (!currentHousehold) {
-        return <HouseholdNotFound/>;
-    }
+            // .catch(err => {
+            //     console.log(err);
+            // });
+    }, [householdId]);
 
     return (
         <>   
             <Card background="white" p="2" boxShadow="xs">
                 <HStack mx={4} my={2} alignItems="center" flexWrap="wrap">
                     <Heading as="h1" size="lg" color="themePurple.800"  mr="2">
-                        {currentHousehold.name}
+                        {household.name}
                     </Heading>
                     <AvatarGroup size="md" max={2}>
                         <Avatar

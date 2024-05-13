@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -13,37 +13,71 @@ import {
     ModalHeader,
     ModalOverlay,
     Select,
+    Spinner,
+    Stack,
     Text,
 } from "@chakra-ui/react";
 
-export default function HouseholdEdit({ isOpen, onClose }) {
+import * as householdService from "../../../../services/householdService";
+
+export default function HouseholdEdit({ isOpen, onClose, householdId }) {
     //request for email?
-    const [values, setValues] = useState({
-        name: "Съквартиранти",
-        members: [
-            { userId: "1", role: "Админ" },
-            { userId: "2", role: "Член" },
-        ]
+    // TODO: return only the id or email directly, manage newMembers in a seperate state
+    // const [isLoading, setisLoading] = useState(true);
+    const [household, setHousehold] = useState({
+        name: "",
+        members: [{ userId: "", role: "" }],
     });
+    const [values, setValues] = useState({
+        name: "",
+        members: [{ userId: "", role: "" }],
+        newMembers: [{ email: "", role: "" }],
+    });
+
+    useEffect(() => {
+        // setisLoading(true);
+        householdService
+            .getOneReducedData(householdId)
+            .then((result) => {
+                // setisLoading(false);
+                setHousehold(result);
+                setValues((state) => ({
+                    ...state,
+                    name: result.name,
+                    members: result.members,
+                }));
+            })
+            .catch((err) => {
+                console.log(err);
+                // setisLoading(false);
+            });
+    }, [householdId]);
+
+    // if (isLoading) {
+    //     return <Spinner size='lg' />;
+    // }
+    console.log(values);
+    console.log(household);
+
     const roles = ["Админ", "Член", "Дете"];
 
     const onMemberAddInput = () => {
         setValues({
             ...values,
-            members: [...values.members, { email: "", role: "" }],
+            newMembers: [...values.newMembers, { email: "", role: "" }],
         });
     };
 
     const onMemberChange = (event, index) => {
-        const updatedMembers = [...values.members];
+        const updatedMembers = [...values.newMembers];
         updatedMembers[index][event.target.name] = event.target.value;
-        setValues({ ...values, members: updatedMembers });
+        setValues({ ...values, newMembers: updatedMembers });
     };
 
     const onMemberDeleteInput = (index) => {
-        const updatedMembers = [...values.members];
+        const updatedMembers = [...values.newMembers];
         updatedMembers.splice(index, 1);
-        setValues({ ...values, members: updatedMembers });
+        setValues({ ...values, newMembers: updatedMembers });
     };
 
     const onChange = (e) => {
@@ -60,7 +94,7 @@ export default function HouseholdEdit({ isOpen, onClose }) {
     };
 
     const clearFormHandler = () => {
-        setValues({ name: "", members: [{ email: "", role: "" }] });
+        setValues({ name: "", newMembers: [{ email: "", role: "" }] });
     };
 
     const onCloseForm = () => {
@@ -76,75 +110,103 @@ export default function HouseholdEdit({ isOpen, onClose }) {
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <form onSubmit={onSubmit}>
-                        <FormControl mb={4}>
-                            <FormLabel>Име</FormLabel>
-                            <Input
-                                type="text"
-                                name="name"
-                                value={values.name}
-                                onChange={onChange}
-                                placeholder="Име"
-                            />
-                        </FormControl>
+                        <Stack>
+                            <FormControl mb={4}>
+                                <FormLabel>Име</FormLabel>
+                                <Input
+                                    type="text"
+                                    name="name"
+                                    value={values.name}
+                                    onChange={onChange}
+                                    placeholder="Име"
+                                />
+                            </FormControl>
 
-                        <Text fontWeight="bold" fontSize="lg">
-                            Членове
-                        </Text>
+                            {values.members.map((member, index) => (
+                                <Box key={index}>
+                                    <Text>{member.userId}</Text>
 
-                        {values.members.map((member, index) => (
-                            <Box key={index}>
-                                <FormControl mt={3}>
-                                    <FormLabel>Имейл</FormLabel>
-                                    <Input
-                                        type="email"
-                                        name="email"
-                                        value={member.email}
-                                        onChange={(e) =>
-                                            onMemberChange(e, index)
-                                        }
-                                        placeholder="Имейл"
-                                    />
-                                </FormControl>
+                                    <FormControl mt={2}>
+                                        <FormLabel>Роля</FormLabel>
+                                        <Select
+                                            name="role"
+                                            value={member.role}
+                                            onChange={(e) =>
+                                                onMemberChange(e, index)
+                                            }
+                                            placeholder="Изберете роля"
+                                        >
+                                            {roles.map((role) => (
+                                                <option key={role} value={role}>
+                                                    {role}
+                                                </option>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                            ))}
+                        </Stack>
 
-                                <FormControl mt={2}>
-                                    <FormLabel>Роля</FormLabel>
-                                    <Select
-                                        name="role"
-                                        value={member.role}
-                                        onChange={(e) =>
-                                            onMemberChange(e, index)
-                                        }
-                                        placeholder="Изберете роля"
-                                    >
-                                        {roles.map((role) => (
-                                            <option key={role} value={role}>
-                                                {role}
-                                            </option>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                        <Stack>
+                            <Text fontWeight="bold" fontSize="lg">
+                                Добавете член
+                            </Text>
 
-                                {values.members.length > 1 && (
-                                    <Button
-                                        mt={3}
-                                        colorScheme="red"
-                                        onClick={() =>
-                                            onMemberDeleteInput(index)
-                                        }
-                                    >
-                                        Премахнете
-                                    </Button>
-                                )}
-                            </Box>
-                        ))}
+                            {values.newMembers.map((member, index) => (
+                                <Box key={index}>
+                                    <FormControl mt={3}>
+                                        <FormLabel>Имейл</FormLabel>
+                                        <Input
+                                            type="email"
+                                            name="email"
+                                            value={member.email}
+                                            onChange={(e) =>
+                                                onMemberChange(e, index)
+                                            }
+                                            placeholder="Имейл"
+                                        />
+                                    </FormControl>
 
-                        <Button
-                            variant="primary"
-                            mt={3}
-                            onClick={onMemberAddInput}
-                        >
-                            Добавете член
-                        </Button>
+                                    <FormControl mt={2}>
+                                        <FormLabel>Роля</FormLabel>
+                                        <Select
+                                            name="role"
+                                            value={member.role}
+                                            onChange={(e) =>
+                                                onMemberChange(e, index)
+                                            }
+                                            placeholder="Изберете роля"
+                                        >
+                                            {roles.map((role) => (
+                                                <option key={role} value={role}>
+                                                    {role}
+                                                </option>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+
+                                    {values.newMembers.length > 1 && (
+                                        <Button
+                                            mt={3}
+                                            colorScheme="red"
+                                            onClick={() =>
+                                                onMemberDeleteInput(index)
+                                            }
+                                        >
+                                            Премахнете
+                                        </Button>
+                                    )}
+                                </Box>
+                            ))}
+
+                            <Button
+                                variant="primary"
+                                mt={3}
+                                onClick={onMemberAddInput}
+                            >
+                                Добавете член
+                            </Button>
+                        </Stack>
                     </form>
                 </ModalBody>
                 <ModalFooter>
