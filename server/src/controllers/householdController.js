@@ -23,4 +23,14 @@ router.post('/', (req, res) => {
     res.status(201).json(newHousehold);
 });
 
+router.get('/:householdId', (req, res) => {
+    const household = householdManager.getOne(req.params.householdId);
+    res.json(household);
+});
+
+router.get('/:householdId/reduced', (req, res) => {
+    const household = householdManager.getOneReducedData(req.params.householdId);
+    res.json(household);
+});
+
 module.exports = router;

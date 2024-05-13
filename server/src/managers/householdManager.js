@@ -44,6 +44,18 @@ const households = [
 
 exports.getAll = () => households.slice();
 
+exports.getOne = (householdId) => households.find(x => x._id == householdId);
+
+// TODO: Send email instead of id?
+exports.getOneReducedData = (householdId) => {
+    const household = households.find(x => x._id == householdId);
+    // if (!household) return null;
+
+    const { name, members } = household;
+    
+    return { name, members };
+};
+
 exports.create = (householdData) => {
     const balance = [householdData.admin, ...householdData.members].map(user => ({
         userId: user.userId,
@@ -52,6 +64,7 @@ exports.create = (householdData) => {
     }));
 
     const newHousehold = {
+        // TODO generate new id
         _id: `${households.length + 1}`,
         //createdAt...
         ...householdData,
