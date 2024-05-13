@@ -22,17 +22,24 @@ export default function Login() {
         >
             <Stack spacing={6} mx={"auto"} maxW={"lg"} py={12} px={6}>
                 <Stack align={"center"}>
-                    <Heading fontSize={"4xl"} color={useColorModeValue("white")}>Домоводител</Heading>
+                    <Heading
+                        fontSize={"4xl"}
+                        color={useColorModeValue("white")}
+                    >
+                        Домоводител
+                    </Heading>
                 </Stack>
                 <Box
                     rounded={"lg"}
                     bg={useColorModeValue("white")}
                     boxShadow={"lg"}
-                    py={12} 
-                    px={{ base: 10, md: 20 }} 
+                    py={12}
+                    px={{ base: 10, md: 20 }}
                 >
                     <Stack spacing={4}>
-                        <Heading fontSize={'2xl'} mb={3} align={"center"}>Влезте в профила си</Heading>
+                        <Heading fontSize={"2xl"} mb={3} align={"center"}>
+                            Влезте в профила си
+                        </Heading>
                         <FormControl id="email">
                             <FormLabel>Имейл</FormLabel>
                             <Input type="email" />
@@ -41,7 +48,10 @@ export default function Login() {
                             <FormLabel>Парола</FormLabel>
                             <Input type="password" />
                         </FormControl>
-                        <Stack spacing={10}>
+                        <Button variant="primary" spacing={10}>
+                            Вход
+                        </Button>
+                        {/* <Stack spacing={10}>
                             <Stack
                                 direction={{ base: "column", sm: "row" }}
                                 align={"start"}
@@ -55,7 +65,7 @@ export default function Login() {
                             <Button variant="primary">
                                 Вход
                             </Button>
-                        </Stack>
+                        </Stack> */}
                     </Stack>
                 </Box>
             </Stack>
