@@ -11,7 +11,7 @@ import {
     Card,
 } from "@chakra-ui/react";
 
-import * as householdService from '../../services/householdService';
+import * as householdService from "../../services/householdService";
 import HouseholdCreate from "./household-create/HouseholdCreate";
 
 export default function HouseholdList() {
@@ -19,9 +19,10 @@ export default function HouseholdList() {
     const [households, setHouseholds] = useState([]);
 
     useEffect(() => {
-        householdService.getAll()
-            .then(result => setHouseholds(result))
-            .catch(err => {
+        householdService
+            .getAll()
+            .then((result) => setHouseholds(result))
+            .catch((err) => {
                 console.log(err);
             });
     }, []);
@@ -33,10 +34,7 @@ export default function HouseholdList() {
     } = useDisclosure();
 
     const addHouseholdToState = (newHousehold) => {
-        setHouseholds(state => ([
-            ...state,
-            newHousehold,
-        ]));
+        setHouseholds((state) => [...state, newHousehold]);
     };
 
     return (
@@ -59,11 +57,13 @@ export default function HouseholdList() {
                     ))}
                 </Stack>
             </Stack>
-            <HouseholdCreate
-                isOpen={isCreateModalOpen}
-                onClose={onCloseCreateModal}
-                addHouseholdToState={addHouseholdToState}
-            />
+            {isCreateModalOpen && (
+                <HouseholdCreate
+                    isOpen={isCreateModalOpen}
+                    onClose={onCloseCreateModal}
+                    addHouseholdToState={addHouseholdToState}
+                />
+            )}
         </>
     );
 }
