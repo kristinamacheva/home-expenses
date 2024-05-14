@@ -11,6 +11,7 @@ import {
     Text,
     useColorModeValue,
 } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 
 export default function Login() {
     return (
@@ -51,6 +52,14 @@ export default function Login() {
                         <Button variant="primary" spacing={10}>
                             Вход
                         </Button>
+                        <Stack pt={4}>
+                            <Text align={"center"}>
+                                Нямате профил?{" "}
+                                <Link color={"themePurple.700"}>
+                                    Регистрация
+                                </Link>
+                            </Text>
+                        </Stack>
                         {/* <Stack spacing={10}>
                             <Stack
                                 direction={{ base: "column", sm: "row" }}
