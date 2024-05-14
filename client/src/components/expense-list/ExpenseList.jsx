@@ -1,11 +1,19 @@
 import { useState } from "react";
 import ExpenseListItem from "./expense-list-item/ExpenseListItem";
-import { Button, Flex, Spacer, Stack, useDisclosure } from "@chakra-ui/react";
+import {
+    Button,
+    Flex,
+    FormControl,
+    FormLabel,
+    Input,
+    Spacer,
+    Stack,
+    Text,
+    useDisclosure,
+} from "@chakra-ui/react";
 import ExpenseCreate from "./expense-create/ExpenseCreate";
 
 export default function ExpenseList() {
-    const userId = "1";
-
     const [expenses, setExpenses] = useState([
         {
             _id: "1",
@@ -66,29 +74,105 @@ export default function ExpenseList() {
         },
     ]);
 
+    const [searchValues, setSearchValues] = useState({
+        title: "",
+        startDate: "",
+        endDate: "",
+    });
+
     const {
         isOpen: isCreateModalOpen,
         onOpen: onOpenCreateModal,
         onClose: onCloseCreateModal,
     } = useDisclosure();
 
+    const onChange = (e) => {
+        setSearchValues((state) => ({
+            ...state,
+            [e.target.name]: e.target.value,
+        }));
+    };
+
+    const onSubmit = (e) => {
+        e.preventDefault();
+
+        console.log(searchValues);
+    };
+
+    const clearSearchFormHandler = () => {
+        setValues({
+            title: "",
+            startDate: "",
+            endDate: "",
+        });
+    };
+
+    const userId = "1";
+
     return (
         <>
-        <Flex justify="flex-end" mb="3" mx="1">
-            <Button variant="primary" onClick={onOpenCreateModal}>
-                + Създаване
-            </Button>
-        </Flex>
-        
+            <Flex justify="flex-end" mb="3" mx="1">
+                <Button variant="primary" onClick={onOpenCreateModal}>
+                    + Създаване
+                </Button>
+            </Flex>
+            <form onSubmit={onSubmit}>
+                <Text fontWeight="bold" fontSize="lg">
+                    Търсене
+                </Text>
+                <Stack spacing="2" direction={{ base: "column", lg: "row" }}>
+                    <FormControl>
+                        <FormLabel>Заглавие на разхода</FormLabel>
+                        <Input
+                            size="md"
+                            type="search"
+                            name="title"
+                            value={searchValues.title}
+                            onChange={onChange}
+                            placeholder="Въведете заглавие на разхода"
+                        />
+                    </FormControl>
+
+                    <FormControl>
+                        <FormLabel>Начална дата</FormLabel>
+                        <Input
+                            size="md"
+                            type="date"
+                            name="startDate"
+                            value={searchValues.startDate}
+                            onChange={onChange}
+                        />
+                    </FormControl>
+
+                    <FormControl>
+                        <FormLabel>Крайна дата</FormLabel>
+                        <Input
+                            size="md"
+                            type="date"
+                            name="endDate"
+                            value={searchValues.endDate}
+                            onChange={onChange}
+                        />
+                    </FormControl>
+                </Stack>
+                <Flex justify="flex-end" my="3" mx="1">
+                    <Button variant="primary" onClick={onSubmit}>
+                        Търсене
+                    </Button>
+                </Flex>
+            </form>
+
             <Stack>
                 {expenses.map((expense) => (
                     <ExpenseListItem key={expense._id} {...expense} />
                 ))}
             </Stack>
-            <ExpenseCreate
-                isOpen={isCreateModalOpen}
-                onClose={onCloseCreateModal}
-            />
+            {isCreateModalOpen && (
+                <ExpenseCreate
+                    isOpen={isCreateModalOpen}
+                    onClose={onCloseCreateModal}
+                />
+            )}
         </>
     );
 }
