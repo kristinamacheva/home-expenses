@@ -1,18 +1,4 @@
-const mongoose = require("mognoose");
-
-// {
-//     "_id": "1",
-//     "name": "Съквартиранти",
-//     "members": [
-//         { "userId": "1", "role": "Админ" },
-//         { "userId": "2", "role": "Член" }
-//     ],
-//     "admin": { "userId": "1" },
-//     "balance": [
-//         { "userId": "1", "sum": 60, "type": "+" },
-//         { "userId": "2", "sum": 60, "type": "-" }
-//     ],
-// },
+const mongoose = require('mongoose');
 
 const householdSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -34,10 +20,12 @@ const householdSchema = new mongoose.Schema({
     //             ref: "User",
     //             required: true,
     //         },
-    //         sum: { type: Number, required: true },
-    //         type: { type: String, enum: ["+", "-"], required: true },
+    //         sum: { type: Number, default: 0, required: true },
+    //         type: { type: String, enum: ["+", "-"], default: '+', required: true },
     //     },
     // ],
 });
 
-const Household = mongoose.model("Household", householdSchema);
+const Household = mongoose.model('Household', householdSchema);
+
+module.exports = Household;

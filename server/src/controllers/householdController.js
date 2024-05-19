@@ -1,30 +1,31 @@
 const router = require('express').Router();
-
 const householdManager = require('../managers/householdManager')
 
-router.get('/', (req, res) => {
-    const households = householdManager.getAll();
+router.get('/', async (req, res) => {
+    // TODO: lean?
+    const households = await householdManager.getAll().lean();
     res.json(households);
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const {
         name,
         members,
         admin,
     } = req.body;
 
-    const newHousehold = householdManager.create({
+    const newHousehold = await householdManager.create({
         name,
-        members,
-        admin,
+        // members,
+        // admin,
     });
 
     res.status(201).json(newHousehold);
 });
 
-router.get('/:householdId', (req, res) => {
-    const household = householdManager.getOne(req.params.householdId);
+router.get('/:householdId', async (req, res) => {
+    // TODO: lean?
+    const household = await householdManager.getOne(req.params.householdId).lean();
     res.json(household);
 });
 
