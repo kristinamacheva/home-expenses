@@ -12,12 +12,14 @@ router.post('/', async (req, res) => {
         name,
         members,
         admin,
+        balance,
     } = req.body;
 
     const newHousehold = await householdManager.create({
         name,
-        // members,
-        // admin,
+        members,
+        admin,
+        balance, 
     });
 
     res.status(201).json(newHousehold);

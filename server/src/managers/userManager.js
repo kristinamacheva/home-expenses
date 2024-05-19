@@ -1,7 +1,5 @@
 const User = require('../models/User');
 
-exports.create = async (userData) => {
+exports.register = (userData) => {
     User.create(userData);
-
-    return userData;
 };

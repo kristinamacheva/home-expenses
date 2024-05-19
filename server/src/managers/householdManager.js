@@ -60,11 +60,8 @@ exports.getOneReducedData = (householdId) => {
     return { name, members };
 };
 
-exports.create = async (householdData) => {
+exports.create = (householdData) => {
     // TODO: implement logic for the users
     const household = new Household(householdData);
-    // const household = new Household(householdData);
-    await household.save();
-
-    return household;
+    return household.save();
 };

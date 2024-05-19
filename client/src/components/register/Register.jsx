@@ -46,9 +46,8 @@ export default function Register() {
             password: values.password,
         };
 
-        const result = await authService.register(newUser);
+        await authService.register(newUser);
 
-        console.log(result);
 
         // try {
         //     const result = await householdService.create(newHousehold);
