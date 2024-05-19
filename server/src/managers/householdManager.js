@@ -1,4 +1,4 @@
-const Household = require('../models/Household');
+const Household = require("../models/Household");
 
 // const households = [
 //     {
@@ -49,6 +49,13 @@ const Household = require('../models/Household');
 exports.getAll = () => Household.find();
 
 exports.getOne = (householdId) => Household.findById(householdId);
+
+exports.getOneWithUsers = (householdId) =>
+    this.getOne(householdId)
+        .populate('members.user', '_id name email phone')
+        .populate('admin', 'name')
+        .populate('balance.user', '_id name');
+        // .populate('balance.user', '-_id name');
 
 // TODO: Send email instead of id?
 exports.getOneReducedData = (householdId) => {

@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 
 // TODO: make users unique in the array
+// TODO: fix _id
 const householdSchema = new mongoose.Schema({
     name: { type: String, required: true },
     members: [
         {
-            _id: {
+            user: {
                 type: mongoose.Types.ObjectId,
                 ref: 'User',
                 required: true,
@@ -16,7 +17,7 @@ const householdSchema = new mongoose.Schema({
     admin: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
     balance: [
         {
-            _id: {
+            user: {
                 type: mongoose.Types.ObjectId,
                 ref: 'User',
                 required: true,
