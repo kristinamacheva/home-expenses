@@ -11,9 +11,51 @@ import {
     Text,
     useColorModeValue,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Login() {
+    const [values, setValues] = useState({
+        email: "",
+        password: "",
+    });
+
+    const onChange = (e) => {
+        setValues((state) => ({
+            ...state,
+            [e.target.name]: e.target.value,
+        }));
+    };
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+
+        const currentUser = {
+            email: values.email,
+            password: values.password,
+        };
+
+        console.log(currentUser);
+
+        // try {
+        //     const result = await householdService.create(newHousehold);
+        //     console.log(result);
+
+        //     addHouseholdToState(result);
+        //     onCloseForm();
+        // } catch (err) {
+        //     //TODO Error notification - toast
+        //     console.log(err);
+        // }
+    };
+
+    const clearFormHandler = () => {
+        setValues({
+            email: "",
+            password: "",
+        });
+    };
+
     return (
         <Flex
             minH={"100vh"}
@@ -37,30 +79,47 @@ export default function Login() {
                     py={12}
                     px={{ base: 10, md: 20 }}
                 >
-                    <Stack spacing={4}>
-                        <Heading fontSize={"2xl"} mb={3} align={"center"}>
-                            Влезте в профила си
-                        </Heading>
-                        <FormControl id="email">
-                            <FormLabel>Имейл</FormLabel>
-                            <Input type="email" />
-                        </FormControl>
-                        <FormControl id="password">
-                            <FormLabel>Парола</FormLabel>
-                            <Input type="password" />
-                        </FormControl>
-                        <Button variant="primary" spacing={10}>
-                            Вход
-                        </Button>
-                        <Stack pt={4}>
-                            <Text align={"center"}>
-                                Нямате профил?{" "}
-                                <Link color={"themePurple.700"}>
-                                    Регистрация
-                                </Link>
-                            </Text>
-                        </Stack>
-                        {/* <Stack spacing={10}>
+                    <form onSubmit={onSubmit}>
+                        <Stack spacing={4}>
+                            <Heading fontSize={"2xl"} mb={3} align={"center"}>
+                                Влезте в профила си
+                            </Heading>
+                            <FormControl id="email">
+                                <FormLabel>Имейл</FormLabel>
+                                <Input
+                                    type="email"
+                                    name="email"
+                                    value={values.email}
+                                    onChange={onChange}
+                                    placeholder="Имейл"
+                                />
+                            </FormControl>
+                            <FormControl id="password">
+                                <FormLabel>Парола</FormLabel>
+                                <Input
+                                    type="password"
+                                    name="password"
+                                    value={values.password}
+                                    onChange={onChange}
+                                    placeholder="Парола"
+                                />
+                            </FormControl>
+                            <Button
+                                variant="primary"
+                                spacing={10}
+                                onClick={onSubmit}
+                            >
+                                Вход
+                            </Button>
+                            <Stack pt={4}>
+                                <Text align={"center"}>
+                                    Нямате профил?{" "}
+                                    <Link color={"themePurple.700"}>
+                                        Регистрация
+                                    </Link>
+                                </Text>
+                            </Stack>
+                            {/* <Stack spacing={10}>
                             <Stack
                                 direction={{ base: "column", sm: "row" }}
                                 align={"start"}
@@ -75,7 +134,8 @@ export default function Login() {
                                 Вход
                             </Button>
                         </Stack> */}
-                    </Stack>
+                        </Stack>
+                    </form>
                 </Box>
             </Stack>
         </Flex>
