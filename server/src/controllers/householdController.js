@@ -3,7 +3,7 @@ const householdManager = require('../managers/householdManager')
 
 router.get('/', async (req, res) => {
     // TODO: lean?
-    const households = await householdManager.getAll().lean();
+    const households = await householdManager.getAllWithUsers().lean();
     res.json(households);
 });
 

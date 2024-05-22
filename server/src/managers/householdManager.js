@@ -47,15 +47,20 @@ const Household = require("../models/Household");
 // TODO: send different response if the resourse doesnt exist or is not found
 // TODO: filter with search params in the db
 exports.getAll = () => Household.find();
+exports.getAllWithUsers = () =>
+    Household.find()
+        .populate("members.user", "_id name email phone")
+        .populate("admin", "name")
+        .populate("balance.user", "_id name");
 
 exports.getOne = (householdId) => Household.findById(householdId);
 
 exports.getOneWithUsers = (householdId) =>
     this.getOne(householdId)
-        .populate('members.user', '_id name email phone')
-        .populate('admin', 'name')
-        .populate('balance.user', '_id name');
-        // .populate('balance.user', '-_id name');
+        .populate("members.user", "_id name email phone")
+        .populate("admin", "name")
+        .populate("balance.user", "_id name");
+// .populate('balance.user', '-_id name');
 
 // TODO: Send email instead of id?
 exports.getOneReducedData = (householdId) => {

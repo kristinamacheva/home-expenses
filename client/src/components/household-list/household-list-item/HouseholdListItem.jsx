@@ -28,22 +28,28 @@ export default function HouseholdListItem({
         onClose: onCloseEditModal,
     } = useDisclosure();
 
-    const currentUserId = "1";
+    const currentUserId = "6649f627d4819c1373f8b8e9";
 
-    const userBalance = balance.find((user) => user.userId === currentUserId);
+    const userBalance = balance.find((balanceEntry) => balanceEntry.user._id === currentUserId);
     //TODO: fix the number type if necessary
     const userBalanceSum = userBalance ? userBalance.sum : 0;
-    const badgeColorScheme = userBalance.type === "-" ? "red" : "green";
+    // TODO: color
+    const badgeColorScheme = userBalance ? (userBalance.type === "-" ? "red" : "green") : "gray";
 
     let badgeText;
 
-    if (userBalance.type === "-") {
-        badgeText = `Дължите ${userBalanceSum} лв.`;
+    // TODO: error if no user?
+    if (userBalance) {
+        if (userBalance.type === "-") {
+            badgeText = `Дължите ${userBalanceSum} лв.`;
+        } else {
+            badgeText =
+                userBalanceSum === 0
+                    ? "Нямате дългове"
+                    : `Дължат Ви ${userBalanceSum} лв.`;
+        }
     } else {
-        badgeText =
-            userBalanceSum === 0
-                ? "Нямате дългове"
-                : `Дължат Ви ${userBalanceSum} лв.`;
+        badgeText = "Няма информация за баланса";
     }
 
     return (
@@ -81,18 +87,14 @@ export default function HouseholdListItem({
                         </Box>
                     </Stack>
                     <AvatarGroup size="md" max={2}>
-                        <Avatar
-                            name="Ryan Florence"
-                            background={"themeYellow.900"}
-                        />
-                        <Avatar
-                            name="Segun Adebayo"
-                            src="https://bit.ly/sage-adebayo"
-                        />
-                        <Avatar
-                            name="Kent Dodds"
-                            src="https://bit.ly/kent-c-dodds"
-                        />
+                        {members.map((member) => (
+                            <Avatar
+                                key={member.user._id}
+                                name={member.user.name}
+                                src={member.user.avatar || ""}
+                                background={"themeYellow.900"}
+                            />
+                        ))}
                     </AvatarGroup>
                 </Stack>
                 <HStack
@@ -114,7 +116,7 @@ export default function HouseholdListItem({
                         <>
                         </>
                     )} */}
-                    {currentUserId === admin.userId && (
+                    {currentUserId === admin._id && (
                         <>
                             <IconButton
                                 aria-label="Редактирайте"

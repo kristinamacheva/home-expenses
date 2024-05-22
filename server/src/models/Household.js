@@ -6,6 +6,7 @@ const householdSchema = new mongoose.Schema({
     name: { type: String, required: true },
     members: [
         {
+            // TODO: type
             user: {
                 type: mongoose.Types.ObjectId,
                 ref: 'User',
