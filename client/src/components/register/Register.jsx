@@ -26,8 +26,10 @@ export default function Register() {
         email: "",
         phone: "",
         password: "",
+        repeatPassword: "",
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [showRePassword, setShowRePassword] = useState(false);
 
     const onChange = (e) => {
         setValues((state) => ({
@@ -44,6 +46,7 @@ export default function Register() {
             email: values.email,
             phone: values.phone,
             password: values.password,
+            repeatPassword: values.repeatPassword,
         };
         console.log(newUser);
         const result = await authService.register(newUser);
@@ -68,6 +71,7 @@ export default function Register() {
             email: "",
             phone: "",
             password: "",
+            repeatPassword: "",
         });
     };
 
@@ -154,6 +158,41 @@ export default function Register() {
                                             }
                                         >
                                             {showPassword ? (
+                                                <Icon as={FaEye} boxSize={3} />
+                                            ) : (
+                                                <Icon
+                                                    as={FaEyeSlash}
+                                                    boxSize={3}
+                                                />
+                                            )}
+                                        </Button>
+                                    </InputRightElement>
+                                </InputGroup>
+                            </FormControl>
+                            <FormControl id="repeatPassword" isRequired>
+                                <FormLabel>Повторете парола</FormLabel>
+                                <InputGroup>
+                                    <Input
+                                        type={
+                                            showRePassword ? "text" : "password"
+                                        }
+                                        name="repeatPassword"
+                                        value={values.repeatPassword}
+                                        onChange={onChange}
+                                        placeholder="Повторете парола"
+                                    />
+                                    <InputRightElement h={"full"}>
+                                        <Button
+                                            bg="transparent"
+                                            variant={"ghost"}
+                                            onClick={() =>
+                                                setShowRePassword(
+                                                    (showRePassword) =>
+                                                        !showRePassword
+                                                )
+                                            }
+                                        >
+                                            {showRePassword ? (
                                                 <Icon as={FaEye} boxSize={3} />
                                             ) : (
                                                 <Icon

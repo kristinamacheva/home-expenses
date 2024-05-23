@@ -9,10 +9,11 @@ router.post('/registraciq', async (req, res) => {
         email,
         phone,
         password,
+        repeatPassword,
     } = req.body;
 
     try {
-        const newUser = await userManager.register({ name, email, phone, password, });
+        const newUser = await userManager.register({ name, email, phone, password, repeatPassword });
         res.status(201).json(newUser);
     } catch (err) {
         console.log(err);
