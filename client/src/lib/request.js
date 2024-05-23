@@ -26,6 +26,7 @@ const request = async (method, url, data) => {
     const response = await fetch(url, {
         ...buildOptions(data),
         method,
+        credentials: 'include' 
     });
 
     // 204 - no content

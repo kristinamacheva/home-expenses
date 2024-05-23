@@ -28,6 +28,9 @@ router.post('/vhod', async (req, res) => {
 
     try {
         const user = await userManager.login({ email, password });
+
+        res.cookie('email', user.email);
+
         res.status(201).json(user);
     } catch (err) {
         console.log(err);
