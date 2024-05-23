@@ -45,8 +45,9 @@ export default function Register() {
             phone: values.phone,
             password: values.password,
         };
-
-        await authService.register(newUser);
+        console.log(newUser);
+        const result = await authService.register(newUser);
+        console.log(result);
 
 
         // try {
