@@ -20,4 +20,18 @@ router.post('/registraciq', async (req, res) => {
     }
 });
 
+router.post('/vhod', async (req, res) => {
+    const {
+        email,
+        password,
+    } = req.body;
+
+    try {
+        const user = await userManager.login({ email, password });
+        res.status(201).json(user);
+    } catch (err) {
+        console.log(err);
+    }
+});
+
 module.exports = router;

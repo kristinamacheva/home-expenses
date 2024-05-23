@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import * as authService from '../../services/authService';
 
 export default function Login() {
     const [values, setValues] = useState({
@@ -35,7 +36,8 @@ export default function Login() {
             password: values.password,
         };
 
-        console.log(currentUser);
+        const result = await authService.login(currentUser);
+        console.log(result);
 
         // try {
         //     const result = await householdService.create(newHousehold);

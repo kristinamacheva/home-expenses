@@ -19,6 +19,7 @@ export const register = async ({ name, email, phone, password, repeatPassword })
         password,
         repeatPassword
     });
+    
     return result;
 };
 
