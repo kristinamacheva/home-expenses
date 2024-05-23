@@ -28,6 +28,7 @@ router.post('/', async (req, res) => {
 router.get('/:householdId', async (req, res) => {
     // TODO: lean?
     const household = await householdManager.getOneWithUsers(req.params.householdId).lean();
+    console.log(req.user);
     res.json(household);
 });
 

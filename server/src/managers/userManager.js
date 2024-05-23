@@ -1,4 +1,6 @@
 const bcrypt = require('bcrypt');
+const jwt = require('../lib/jwt');
+const { SECRET } = require('../config/config');
 
 const User = require('../models/User');
 
@@ -18,5 +20,12 @@ exports.login = async ({ email, password }) => {
         throw new Error('Cannot find email or password');
     }
 
-    return user;
+    const payload = {
+        _id: user._id,
+        email: user.email,
+    }
+
+    const token = await jwt.sign(payload, SECRET, { expiresIn: '2d'});
+
+    return token;
 };

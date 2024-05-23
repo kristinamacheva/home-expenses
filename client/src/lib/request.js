@@ -22,6 +22,7 @@ const buildOptions = (data) => {
     return options;
 }
 
+// TODO: credentials
 const request = async (method, url, data) => {
     const response = await fetch(url, {
         ...buildOptions(data),
