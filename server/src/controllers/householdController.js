@@ -11,14 +11,14 @@ router.post('/', async (req, res) => {
     const {
         name,
         members,
-        admin,
+        // admin,
         balance,
     } = req.body;
 
     const newHousehold = await householdManager.create({
         name,
         members,
-        admin,
+        admin: req.user._id,
         balance, 
     });
 

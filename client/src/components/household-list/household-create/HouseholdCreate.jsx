@@ -24,7 +24,9 @@ export default function HouseholdCreate({ isOpen, onClose, addHouseholdToState }
         name: "",
         members: [{ email: "", role: "" }],
     });
-    const roles = ["Член", "Дете"];
+    const roles = ["Админ", "Член", "Дете"];
+
+    const userId = "6649f627d4819c1373f8b8e9";
 
     const onMemberAddInput = () => {
         setValues({
@@ -57,16 +59,12 @@ export default function HouseholdCreate({ isOpen, onClose, addHouseholdToState }
 
         const newHousehold = {
             name: values.name,
-            members: [
-                { userId: "1", role: "Член" },
-                { userId: "3", role: "Член" }
-            ],
-            admin: { userId: "2" }
+            members: values.members,
+            admin: userId,
         };
 
         try {
             const result = await householdService.create(newHousehold);
-            console.log(result);
 
             addHouseholdToState(result);
             onCloseForm(); 

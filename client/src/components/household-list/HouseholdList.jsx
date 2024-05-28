@@ -15,17 +15,18 @@ import * as householdService from "../../services/householdService";
 import HouseholdCreate from "./household-create/HouseholdCreate";
 
 export default function HouseholdList() {
-    const userId = "1";
     const [households, setHouseholds] = useState([]);
-
+    
     useEffect(() => {
         householdService
-            .getAll()
-            .then((result) => setHouseholds(result))
-            .catch((err) => {
-                console.log(err);
-            });
+        .getAll()
+        .then((result) => setHouseholds(result))
+        .catch((err) => {
+            console.log(err);
+        });
     }, []);
+    
+    const userId = "6649f627d4819c1373f8b8e9";
 
     const {
         isOpen: isCreateModalOpen,
@@ -33,8 +34,9 @@ export default function HouseholdList() {
         onClose: onCloseCreateModal,
     } = useDisclosure();
 
+    // TODO: unique key error
     const addHouseholdToState = (newHousehold) => {
-        setHouseholds((state) => [...state, newHousehold]);
+        setHouseholds((state) => ([...state, newHousehold]));
     };
 
     return (
