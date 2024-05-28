@@ -1,9 +1,9 @@
 import * as request from "../lib/request";
 
-const baseUrl = "http://localhost:5000/potrebiteli";
+const baseUrl = "http://localhost:5000/users";
 
 export const login = async ({ email, password }) => {
-    const result = await request.post(`${baseUrl}/vhod`, {
+    const result = await request.post(`${baseUrl}/login`, {
         email,
         password,
     });
@@ -12,7 +12,7 @@ export const login = async ({ email, password }) => {
 };
 
 export const register = async ({ name, email, phone, password, repeatPassword }) => {
-    const result = await request.post(`${baseUrl}/registraciq`, {
+    const result = await request.post(`${baseUrl}/register`, {
         name,
         email,
         phone,

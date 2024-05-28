@@ -7,9 +7,9 @@ exports.auth = async (req, res, next) => {
     if (token) {
         try {
             // returns payload
-            const user = await jwt.verify(token, SECRET);
+            const decodedToken = await jwt.verify(token, SECRET);
 
-            req.user = user;
+            req.user = decodedToken;
 
             next();
         } catch(err) {

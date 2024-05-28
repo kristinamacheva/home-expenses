@@ -1,6 +1,6 @@
 import * as request from "../lib/request";
 
-const baseUrl = 'http://localhost:5000/domakinstva';
+const baseUrl = 'http://localhost:5000/households';
 
 export const getAll = async () => {
     const result = await request.get(baseUrl);
