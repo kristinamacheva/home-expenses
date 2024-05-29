@@ -14,6 +14,8 @@ import {
 import { FaEye, FaPen } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import HouseholdEdit from "./household-edit/HouseholdEdit";
+import { useContext } from "react";
+import AuthContext from "../../../contexts/authContext";
 
 export default function HouseholdListItem({
     _id,
@@ -28,9 +30,9 @@ export default function HouseholdListItem({
         onClose: onCloseEditModal,
     } = useDisclosure();
 
-    const currentUserId = "6649f627d4819c1373f8b8e9";
+    const { userId } = useContext(AuthContext);
 
-    const userBalance = balance.find((balanceEntry) => balanceEntry.user._id === currentUserId);
+    const userBalance = balance.find((balanceEntry) => balanceEntry.user._id === userId);
     //TODO: fix the number type if necessary
     const userBalanceSum = userBalance ? userBalance.sum : 0;
     // TODO: color
@@ -116,7 +118,7 @@ export default function HouseholdListItem({
                         <>
                         </>
                     )} */}
-                    {currentUserId === admin._id && (
+                    {userId === admin._id && (
                         <>
                             <IconButton
                                 aria-label="Редактирайте"

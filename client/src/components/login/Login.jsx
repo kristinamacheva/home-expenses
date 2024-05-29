@@ -15,7 +15,6 @@ import {
 import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
-// import * as authService from "../../services/authService";
 
 export default function Login() {
     const { loginSubmitHandler } = useContext(AuthContext);

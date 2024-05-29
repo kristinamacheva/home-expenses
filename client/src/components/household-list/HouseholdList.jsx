@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import HouseholdListItem from "./household-list-item/HouseholdListItem";
 import {
     Button,
@@ -13,6 +13,7 @@ import {
 
 import * as householdService from "../../services/householdService";
 import HouseholdCreate from "./household-create/HouseholdCreate";
+import AuthContext from "../../contexts/authContext";
 
 export default function HouseholdList() {
     const [households, setHouseholds] = useState([]);
@@ -26,7 +27,7 @@ export default function HouseholdList() {
         });
     }, []);
     
-    const userId = "6649f627d4819c1373f8b8e9";
+    const { userId } = useContext(AuthContext);
 
     const {
         isOpen: isCreateModalOpen,
