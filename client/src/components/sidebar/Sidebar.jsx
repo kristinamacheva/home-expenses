@@ -181,7 +181,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                                 <MenuItem>Настройки</MenuItem>
                             </Link>
                             <MenuDivider />
-                            <Link to="/logout">
+                            <Link to={Path.Logout}>
                                 <MenuItem>Изход</MenuItem>
                             </Link>
                         </MenuList>

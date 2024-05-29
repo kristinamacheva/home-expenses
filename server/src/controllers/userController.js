@@ -58,4 +58,16 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.get('/logout', (req, res) => {
+    try {
+        // TODO: invalidate token
+        res.clearCookie('auth');
+        
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (err) {
+        console.error('Logout error:', err);
+        res.status(500).json({ message: 'Logout failed' });
+    }
+});
+
 module.exports = router;

@@ -23,4 +23,4 @@ export const register = async ({ name, email, phone, password, repeatPassword })
     return result;
 };
 
-// export const logout = () => request.get(`${baseUrl}/izhod`);
+export const logout = () => request.get(`${baseUrl}/logout`);

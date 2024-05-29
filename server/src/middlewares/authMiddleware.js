@@ -14,6 +14,9 @@ exports.auth = async (req, res, next) => {
             next();
         } catch(err) {
             res.clearCookie('auth');
+            res.status(401).json({
+                message: 'You are not authorized!',
+            })
         }
     } else {
         next();

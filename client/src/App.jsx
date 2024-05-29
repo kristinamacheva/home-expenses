@@ -3,13 +3,13 @@ import { Routes, Route} from 'react-router-dom';
 import Path from "./paths";
 
 import Login from "./components/login/Login";
-import Logout from "./components/logout/Logout";
 import Register from "./components/register/Register";
 import Sidebar from "./components/sidebar/Sidebar";
 import HouseholdList from './components/household-list/HouseholdList';
 import Home from './components/home/Home';
 import HouseholdDetails from './components/household-details/HouseholdDetails';
 import NotFound from './components/not-found/NotFound';
+import Logout from './components/logout/Logout';
 
 function App() {
     return (
