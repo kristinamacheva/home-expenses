@@ -34,3 +34,11 @@ export const create = async (householdData) => {
     return result;
 };
 
+export const edit = async (householdId, householdData) => {
+    const result = await request.put(`${baseUrl}/${householdId}`, householdData);
+
+    return result;
+};
+
+export const remove = async (householdId) => request.remove(`${baseUrl}/${householdId}`);
+
