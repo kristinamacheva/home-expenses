@@ -9,11 +9,12 @@ import {
     Button,
     Heading,
     Text,
+    Link as ChakraLink,
     useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import * as authService from '../../services/authService';
+import * as authService from "../../services/authService";
 
 export default function Login() {
     const [values, setValues] = useState({
@@ -116,9 +117,13 @@ export default function Login() {
                             <Stack pt={4}>
                                 <Text align={"center"}>
                                     Нямате профил?{" "}
-                                    <Link color={"themePurple.700"}>
+                                    <ChakraLink
+                                        as={Link}
+                                        to={`/registraciq`}
+                                        color={"themePurple.700"}
+                                    >
                                         Регистрация
-                                    </Link>
+                                    </ChakraLink>
                                 </Text>
                             </Stack>
                             {/* <Stack spacing={10}>

@@ -10,14 +10,14 @@ import {
     Text,
     InputGroup,
     InputRightElement,
-    Link,
+    Link as ChakraLink,
     useColorModeValue,
     Icon,
 } from "@chakra-ui/react";
 
 import * as authService from '../../services/authService';
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
-
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 export default function Register() {
@@ -216,7 +216,7 @@ export default function Register() {
                             <Stack pt={4}>
                                 <Text align={"center"}>
                                     Вече имате профил?{" "}
-                                    <Link color={"themePurple.700"}>Вход</Link>
+                                    <ChakraLink as={Link} to={`/vhod`} color={"themePurple.700"}>Вход</ChakraLink>
                                 </Text>
                             </Stack>
                         </Stack>
