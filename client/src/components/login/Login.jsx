@@ -12,11 +12,14 @@ import {
     Link as ChakraLink,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import * as authService from "../../services/authService";
+import AuthContext from "../../contexts/authContext";
+// import * as authService from "../../services/authService";
 
 export default function Login() {
+    const { loginSubmitHandler } = useContext(AuthContext);
+
     const [values, setValues] = useState({
         email: "",
         password: "",
@@ -37,8 +40,8 @@ export default function Login() {
             password: values.password,
         };
 
-        const result = await authService.login(currentUser);
-        console.log(result);
+        loginSubmitHandler(currentUser)
+        
 
         // try {
         //     const result = await householdService.create(newHousehold);

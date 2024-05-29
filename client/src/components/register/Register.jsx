@@ -18,9 +18,11 @@ import {
 import * as authService from '../../services/authService';
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import AuthContext from "../../contexts/authContext";
 
 export default function Register() {
+    const { registerSubmitHandler } = useContext(AuthContext);
     const [values, setValues] = useState({
         name: "",
         email: "",
@@ -48,10 +50,8 @@ export default function Register() {
             password: values.password,
             repeatPassword: values.repeatPassword,
         };
-        console.log(newUser);
-        const result = await authService.register(newUser);
-        console.log(result);
-
+        
+        registerSubmitHandler(newUser);
 
         // try {
         //     const result = await householdService.create(newHousehold);
