@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 const userManager = require('../managers/userManager');
 
-router.post('/registraciq', async (req, res) => {
+router.post('/register', async (req, res) => {
     // TODO: add user data to db
     const {
         name,
@@ -13,28 +13,48 @@ router.post('/registraciq', async (req, res) => {
     } = req.body;
 
     try {
-        const newUser = await userManager.register({ name, email, phone, password, repeatPassword });
-        res.status(201).json(newUser);
+        // TODO: user login
+        const { token, user } = await userManager.register({ name, email, phone, password, repeatPassword });
+
+        res.cookie('auth', token, { httpOnly: true });
+
+        res.status(200).json({ 
+            _id: user._id,
+            email: user.email,
+            name: user.name,
+            phone: user.phone, 
+        });
     } catch (err) {
         console.log(err);
+        res.status(400).json({ 
+            message: 'Some error' ,
+        });
     }
 });
 
-router.post('/vhod', async (req, res) => {
+router.post('/login', async (req, res) => {
     const {
         email,
         password,
     } = req.body;
 
     try {
-        const token = await userManager.login({ email, password });
+        const { token, user } = await userManager.login({ email, password });
 
         res.cookie('auth', token, { httpOnly: true });
 
         // TODO
-        res.status(200).json({ success: true });
+        res.status(200).json({ 
+            _id: user._id,
+            email: user.email,
+            name: user.name,
+            phone: user.phone, 
+        });
     } catch (err) {
         console.log(err);
+        res.status(400).json({ 
+            message: 'Some error' ,
+        });
     }
 });
 

@@ -4,9 +4,12 @@ const { SECRET } = require('../config/config');
 
 const User = require('../models/User');
 
-exports.register = (userData) => {
-    const user = new User(userData);
-    return user.save();
+exports.register = async (userData) => {
+    const user = await User.create(userData);
+
+    const result = getAuthResult(user);
+
+    return result;
 };
 
 exports.login = async ({ email, password }) => {
@@ -20,6 +23,12 @@ exports.login = async ({ email, password }) => {
         throw new Error('Cannot find email or password');
     }
 
+    const result = getAuthResult(user);
+
+    return result;
+};
+
+async function getAuthResult(user) {
     const payload = {
         _id: user._id,
         email: user.email,
@@ -27,5 +36,8 @@ exports.login = async ({ email, password }) => {
 
     const token = await jwt.sign(payload, SECRET, { expiresIn: '2d'});
 
-    return token;
-};
+    return {
+        token,
+        user,
+    };
+}
