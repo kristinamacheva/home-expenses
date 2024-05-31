@@ -20,14 +20,15 @@ import {
     MenuItem,
     MenuList,
 } from "@chakra-ui/react";
-import { FiMenu, FiChevronDown } from "react-icons/fi";
+import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
 
-import { FaHouse, FaPeopleRoof, FaList } from "react-icons/fa6";
+import { FaHouse, FaPeopleRoof, FaList, FaChildren } from "react-icons/fa6";
 import Path from "../../paths";
 
 const LinkItems = [
     { name: "Начало", icon: FaHouse, to: Path.Home },
     { name: "Домакинства", icon: FaPeopleRoof, to: Path.HouseholdList },
+    { name: "Джобни", icon: FaChildren, to: "/allowance" },
     { name: "Категории", icon: FaList, to: "/expense-categories" },
 ];
 
@@ -135,7 +136,19 @@ const MobileNav = ({ onOpen, ...rest }) => {
                 Домоводител
             </Text>
 
-            <HStack spacing={{ base: "0", md: "6" }} alignItems={"center"}>
+            <HStack spacing={{ base: "2", md: "3" }} alignItems={"center"}>
+                <IconButton
+                    size="lg"
+                    variant="ghost"
+                    aria-label="open menu"
+                    icon={<FiBell />}
+                    color={useColorModeValue("white")}
+                    _hover={{
+                        color: useColorModeValue("green.800"),
+                        bg: useColorModeValue("white"),
+                    }}
+                />
+                <Flex alignItems={"center"}>
                     <Menu>
                         <MenuButton
                             py={2}
@@ -145,7 +158,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                             <HStack>
                                 <Avatar
                                     size={"sm"}
-                                    name='Kristina Macheva'
+                                    name="Kristina Macheva"
                                     background={"themeYellow.900"}
                                 />
                                 <VStack
@@ -186,12 +199,13 @@ const MobileNav = ({ onOpen, ...rest }) => {
                             </Link>
                         </MenuList>
                     </Menu>
+                </Flex>
             </HStack>
         </Flex>
     );
 };
 
-export default function Sidebar({children}) {
+export default function Sidebar({ children }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     return (
@@ -218,5 +232,4 @@ export default function Sidebar({children}) {
             </Box>
         </Box>
     );
-};
-
+}
