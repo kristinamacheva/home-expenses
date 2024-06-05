@@ -43,7 +43,7 @@ router.post('/login', async (req, res) => {
 
         res.cookie('auth', token, { httpOnly: true });
 
-        // TODO
+        // TODO -status codes
         res.status(200).json({ 
             _id: user._id,
             email: user.email,

@@ -48,11 +48,21 @@ const User = require("../models/User");
 // TODO: send different response if the resourse doesnt exist or is not found
 // TODO: filter with search params in the db
 exports.getAll = () => Household.find();
-exports.getAllWithUsers = () =>
-    Household.find()
+
+exports.getAllWithUsers = async (userId) => {
+    const result = await Household.find({ 'members.user': userId })
         .populate("members.user", "_id name email phone")
         .populate("admin", "name")
         .populate("balance.user", "_id name");
+
+    return result;
+}  
+
+// exports.getAllWithUsers = () =>
+//     Household.find()
+//         .populate("members.user", "_id name email phone")
+//         .populate("admin", "name")
+//         .populate("balance.user", "_id name");        
 
 exports.getOne = (householdId) => Household.findById(householdId);
 
@@ -65,11 +75,13 @@ exports.getOneWithUsers = (householdId) =>
 
 // TODO: Send email instead of id?
 exports.getOneReducedData = (householdId) => {
-    const household = households.find((x) => x._id == householdId);
+    const household = this.getOne(householdId)
+        .populate("members.user", "_id name email phone")
     // if (!household) return null;
 
     const { name, members } = household;
 
+    log
     return { name, members };
 };
 
@@ -137,6 +149,11 @@ exports.create = async (householdData) => {
         throw error;
     }
 };
+
+// TODO: Validation, users
+exports.update = (householdId, householdData) => Household.findByIdAndUpdate(householdId, householdData);
+
+exports.delete = (householdId) => Household.findByIdAndDelete(householdId);
 
 // exports.create = (householdData) => {
 //     // TODO: implement logic for the users
