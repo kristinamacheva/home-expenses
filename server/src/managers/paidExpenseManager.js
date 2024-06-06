@@ -2,7 +2,10 @@ const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
 
-exports.getAll = (householdId) => PaidExpense.find({ household: householdId });
+exports.getAll = (householdId) => {
+    return PaidExpense.find({ household: householdId })
+        .select('_id title category creator amount date balance expenseStatus');
+};
 
 exports.getOne = (paidExpenseId) => PaidExpense.findById(paidExpenseId);
 
