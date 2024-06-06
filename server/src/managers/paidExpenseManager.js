@@ -107,6 +107,31 @@ exports.create = async (paidExpenseData) => {
         // Save the household to the database
         await newPaidExpense.save();
         console.log("Paid Expense created:", newPaidExpense);
+
+        // TODO: do this only when all users have approved
+        // Update the household balance based on the new balance of the expense
+        balance.forEach(newEntry => {
+            const existingEntry = expenseHousehold.balance.find(entry => entry.user.equals(newEntry.user));
+        
+            // Determine the current sum considering the current type
+            let currentSum = existingEntry.type === '+' ? existingEntry.sum : -existingEntry.sum;
+
+            // Update the sum based on the type of operation
+            newEntry.type === '+' ? currentSum += newEntry.sum : currentSum -= newEntry.sum;
+        
+            // Update the type based on the sum and ensure the sum is always positive
+            if (currentSum >= 0) {
+                existingEntry.sum = currentSum;
+                existingEntry.type = '+';
+            } else {
+                existingEntry.sum = Math.abs(currentSum);
+                existingEntry.type = '-';
+            }
+        });
+
+        await expenseHousehold.save();
+        console.log("Household balance updated:", expenseHousehold);
+
         return newPaidExpense;
     } catch (error) {
         console.error("Error creating paid expense:", error);
