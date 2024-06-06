@@ -22,6 +22,7 @@ export default function ExpenseListItem({
     owed,
     balance,
     category,
+    status,
     creator,
     household,
     expenseDate,
@@ -49,6 +50,15 @@ export default function ExpenseListItem({
         balanceText = "Не участвате в разхода";
         badgeColor = "gray";
     }
+    
+    let statusColor = '';
+    if (status === 'Одобрен') {
+        statusColor = "green";
+    } else if (status === 'За одобрение') {
+        statusColor = "gray";
+    } else if (status === 'Отхвърлен') {
+        statusColor = "red";
+    }
 
     return (
         <Card
@@ -66,24 +76,33 @@ export default function ExpenseListItem({
             alignItems={{ md: "center" }}
         >
             <Stack direction="column" spacing={{ base: "1", md: "0" }}>
-                <Stack direction="row" spacing="2" justifyContent={{ base: "space-between", lg: "initial"}}>    
+                <Stack
+                    direction="row"
+                    spacing="2"
+                    justifyContent={{ base: "space-between", lg: "initial" }}
+                >
                     <Heading as="h3" size="md">
                         {title}
                     </Heading>
                     <Box display="inline-block">
                         <Badge
                             variant="subtle"
-                            background={"themePurple.400"}
+                            background={`${statusColor}.300`}
                             rounded="full"
                             px="1.5"
                             py="0.2"
                             textTransform="none"
                         >
-                            {category}
+                            {status}
                         </Badge>
                     </Box>
                 </Stack>
 
+                <Box display="inline-block">
+                    <Badge variant="subtle" background={"themePurple.200"} color={"themePurple.800"}>
+                    {category}
+                    </Badge>
+                </Box>
                 <Text color={"gray.500"} fontSize="sm">
                     {expenseDate}
                 </Text>
@@ -108,7 +127,11 @@ export default function ExpenseListItem({
                         </Badge>
                     </Box>
                 </Flex>
-                <HStack spacing="0" w={["auto", "auto", "120px"]} justifyContent="flex-end">
+                <HStack
+                    spacing="0"
+                    w={["auto", "auto", "120px"]}
+                    justifyContent="flex-end"
+                >
                     <IconButton
                         aria-label="Детайли"
                         title="Детайли"

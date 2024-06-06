@@ -82,7 +82,7 @@ export default function HouseholdCreate({ isOpen, onClose, addHouseholdToState }
     // const reload = () => window.location.reload();
 
     const onCloseForm = () => {
-        clearFormHandler();
+        // clearFormHandler();
         onClose();
         // reload();
     };

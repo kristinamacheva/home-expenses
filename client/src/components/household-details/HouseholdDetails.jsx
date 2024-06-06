@@ -43,16 +43,12 @@ export default function HouseholdDetails() {
                     </Heading>
                     <AvatarGroup size="md" max={2}>
                         <Avatar
-                            name="Ryan Florence"
+                            name="Кристина Мачева"
                             background={"themeYellow.900"}
                         />
                         <Avatar
-                            name="Segun Adebayo"
-                            src="https://bit.ly/sage-adebayo"
-                        />
-                        <Avatar
-                            name="Kent Dodds"
-                            src="https://bit.ly/kent-c-dodds"
+                            name="Мария Иванова"
+                            background={"blue.300"}
                         />
                     </AvatarGroup>
                     {/* <Spacer />

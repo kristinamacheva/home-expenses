@@ -2,6 +2,7 @@ import { useState } from "react";
 import ExpenseListItem from "./expense-list-item/ExpenseListItem";
 import {
     Button,
+    Checkbox,
     Flex,
     FormControl,
     FormLabel,
@@ -30,6 +31,7 @@ export default function ExpenseList() {
                 { userId: "2", sum: 60, type: "-" },
             ],
             category: "Храна",
+            status: "За одобрение",
             creator: { userId: "1" },
             household: { householdId: "1" },
             expenseDate: "01.05.2024",
@@ -49,6 +51,7 @@ export default function ExpenseList() {
                 { userId: "2", sum: 150, type: "+" },
             ],
             category: "Уреди",
+            status: "Одобрен",
             creator: { userId: "2" },
             household: { householdId: "1" },
             expenseDate: "06.05.2024",
@@ -68,6 +71,7 @@ export default function ExpenseList() {
                 { userId: "2", sum: 150, type: "-" },
             ],
             category: "Уреди",
+            status: "За одобрение",
             creator: { userId: "1" },
             household: { householdId: "1" },
             expenseDate: "08.05.2024",
@@ -76,6 +80,7 @@ export default function ExpenseList() {
 
     const [searchValues, setSearchValues] = useState({
         title: "",
+        category: "",
         startDate: "",
         endDate: "",
     });
@@ -102,6 +107,7 @@ export default function ExpenseList() {
     const clearSearchFormHandler = () => {
         setValues({
             title: "",
+            category: "",
             startDate: "",
             endDate: "",
         });
@@ -122,14 +128,26 @@ export default function ExpenseList() {
                 </Text>
                 <Stack spacing="2" direction={{ base: "column", lg: "row" }}>
                     <FormControl>
-                        <FormLabel>Заглавие на разхода</FormLabel>
+                        <FormLabel>Заглавие на разход</FormLabel>
                         <Input
                             size="md"
                             type="search"
                             name="title"
                             value={searchValues.title}
                             onChange={onChange}
-                            placeholder="Въведете заглавие на разхода"
+                            placeholder="Въведете заглавие"
+                        />
+                    </FormControl>
+
+                    <FormControl>
+                        <FormLabel>Категория на разход</FormLabel>
+                        <Input
+                            size="md"
+                            type="search"
+                            name="category"
+                            value={searchValues.category}
+                            onChange={onChange}
+                            placeholder="Въведете категория"
                         />
                     </FormControl>
 
@@ -154,6 +172,17 @@ export default function ExpenseList() {
                             onChange={onChange}
                         />
                     </FormControl>
+                </Stack>
+                <Stack spacing="4" direction="row" mt="4">
+                    <Checkbox colorScheme="themePurple.400" defaultChecked>
+                        Одобрен
+                    </Checkbox>
+                    <Checkbox colorScheme="themePurple.400" defaultChecked>
+                        За одобрение
+                    </Checkbox>
+                    <Checkbox colorScheme="themePurple.400" defaultChecked>
+                        Отхвърлен
+                    </Checkbox>
                 </Stack>
                 <Flex justify="flex-end" my="3" mx="1">
                     <Button variant="primary" onClick={onSubmit}>
