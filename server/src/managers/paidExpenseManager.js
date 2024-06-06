@@ -22,15 +22,20 @@ exports.create = async (paidExpenseData) => {
         } = paidExpenseData;
 
         // Fetch the admin user by ID
-        const creatorUser = await User.findById(creator);
-        if (!creatorUser) {
-            throw new Error(`Creator user with ID ${creator} not found`);
+        const expenseCreator = await User.findById(creator);
+        if (!expenseCreator) {
+            throw new Error(`Creator with ID ${creator} not found`);
         }
 
         const expenseHousehold = await Household.findById(household);
         if (!expenseHousehold) {
-            throw new Error(`Household user with ID ${household} not found`);
+            throw new Error(`Household with ID ${household} not found`);
         }
+
+        // Extract member IDs from the household
+        const householdMemberIds = expenseHousehold.members.map((member) =>
+            member.user.toString()
+        );
 
         // Collect all unique user IDs from paid and owed arrays
         const uniqueUserIds = new Set([
@@ -38,10 +43,30 @@ exports.create = async (paidExpenseData) => {
             ...owed.map((o) => o.user.toString()),
         ]);
 
+        // Check if all users are members of the household
+        for (const userId of uniqueUserIds) {
+            if (!householdMemberIds.includes(userId)) {
+                throw new Error(`User with ID ${userId} is not a member of the household`);
+            }
+        }
+
         const userApprovals = Array.from(uniqueUserIds).map((userId) => ({
             user: userId,
             status: userId === creator.toString() ? "Одобрен" : "За одобрение",
         }));
+
+        // Calculate the total paid and owed sums
+        const totalPaid = paid.reduce((sum, entry) => sum + entry.sum, 0);
+        const totalOwed = owed.reduce((sum, entry) => sum + entry.sum, 0);
+
+        if (totalPaid !== totalOwed) {
+            throw new Error('Total paid amount does not match total owed amount');
+        }
+
+        // Check if the total amount matches the sum of paid and owed amounts
+        if (totalPaid !== amount) {
+            throw new Error('Total paid/owed amount does not match the specified amount');
+        }
 
         // Calculate the balance array
         const balance = Array.from(uniqueUserIds).map((userId) => {
@@ -73,7 +98,7 @@ exports.create = async (paidExpenseData) => {
             owed,
             household,
             userApprovals,
-            balance
+            balance,
         });
 
         // Save the household to the database
