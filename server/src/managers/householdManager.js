@@ -75,12 +75,12 @@ exports.getOneWithUsersAndBalance = (householdId) =>
 
 exports.getAllMembers = async (householdId) => {
     const allMembers = await Household.findById(householdId)
-    .populate("members.user", "_id name")
-    .select("members");
+        .populate("members.user", "_id name")
+        .select("members");
 
     return allMembers.members;
-}
-    
+};
+
 exports.getAllNonChildMembers = async (householdId) => {
     // TODO: try using direct mongoose query
     try {
@@ -149,33 +149,32 @@ exports.create = async (householdData) => {
 
         // Construct members array with roles and user IDs, including the admin
         const memberList = [
-            ...members.map((member) => {
-                const currentUser = memberUsers.find(
-                    (user) => user.email === member.email
-                );
-                return {
-                    user: currentUser._id,
-                    role: member.role,
-                };
-            }),
+            ...members
+                .map((member) => {
+                    const currentUser = memberUsers.find(
+                        (user) => user.email === member.email
+                    );
+                    return {
+                        user: currentUser._id,
+                        role: member.role,
+                    };
+                }),
             {
                 user: adminUser._id,
                 role: "Админ",
             },
         ];
 
+        const nonChildMembers = memberList.filter(member => member.role !== "Дете");
+
         // Construct balance array, including the admin
         const balanceList = [
-            ...memberUsers.map((user) => ({
-                user: user._id,
+            ...nonChildMembers.
+            map((member) => ({
+                user: member.user,
                 sum: 0, // Default sum
                 type: "+", // Default type
-            })),
-            {
-                user: adminUser._id,
-                sum: 0, // Default sum
-                type: "+", // Default type
-            },
+            }))
         ];
 
         // Create the new household
