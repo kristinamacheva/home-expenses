@@ -25,11 +25,13 @@ router.post('/', async (req, res) => {
         const newHousehold = await householdManager.create({
             name,
             members,
-            admin: req.user._id,
+            // admin: req.user._id,
+            admin: '664f630fb14becfeb98d2e1f',
         });
-    
+
         res.status(201).json(newHousehold);
     } catch (err) {
+        console.log(err);
         res.status(400).json({
             message: 'Cannot create household'
         });
@@ -38,9 +40,24 @@ router.post('/', async (req, res) => {
 
 router.get('/:householdId', async (req, res) => {
     // TODO: lean?
-    const household = await householdManager.getOneWithUsers(req.params.householdId).lean();
+    const household = await householdManager.getOneWithUsersAndBalance(req.params.householdId).lean();
     console.log(req.user);
     res.json(household);
+});
+
+router.get('/:householdId/members', async (req, res) => {
+    const users = await householdManager.getAllMembers(req.params.householdId);
+    res.json(users);
+});
+
+router.get('/:householdId/non-child-members', async (req, res) => {
+    const users = await householdManager.getAllNonChildMembers(req.params.householdId);
+    res.json(users);
+});
+
+router.get('/:householdId/child-members', async (req, res) => {
+    const users = await householdManager.getAllChildMembers(req.params.householdId);
+    res.json(users);
 });
 
 router.get('/:householdId/reduced', async (req, res) => {
