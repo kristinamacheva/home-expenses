@@ -13,7 +13,7 @@ const householdSchema = new mongoose.Schema({
                 required: true,
                 unique: true,
             },
-            role: { type: String, enum: ['Админ', 'Член'], required: true },
+            role: { type: String, enum: ['Админ', 'Член', 'Дете'], required: true },
         },
     ],
     admin: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
