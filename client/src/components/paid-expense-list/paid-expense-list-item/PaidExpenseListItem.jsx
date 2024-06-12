@@ -10,29 +10,28 @@ import {
     HStack,
     IconButton,
 } from "@chakra-ui/react";
+import { useContext } from "react";
 import { FaEye, FaPen, FaRegTrashCan } from "react-icons/fa6";
 import { Link, useParams } from "react-router-dom";
+import AuthContext from "../../../contexts/authContext";
 
-export default function ExpenseListItem({
+// TODO: send only necessary data here
+export default function PaidExpenseListItem({
     _id,
     title,
-    amount,
-    split,
-    paid,
-    owed,
-    balance,
     category,
-    status,
     creator,
-    household,
-    expenseDate,
+    amount,
+    date,
+    balance,
+    expenseStatus,
 }) {
     const { householdId } = useParams();
 
-    const currentUserId = "1";
+    const { userId } = useContext(AuthContext);
 
     const filteredBalance = balance.filter(
-        (currentBalance) => currentBalance.userId === currentUserId
+        (currentBalance) => currentBalance.user === userId
     );
 
     let balanceText = "";
@@ -52,11 +51,11 @@ export default function ExpenseListItem({
     }
     
     let statusColor = '';
-    if (status === 'Одобрен') {
+    if (expenseStatus === 'Одобрен') {
         statusColor = "green";
-    } else if (status === 'За одобрение') {
+    } else if (expenseStatus === 'За одобрение') {
         statusColor = "gray";
-    } else if (status === 'Отхвърлен') {
+    } else if (expenseStatus === 'Отхвърлен') {
         statusColor = "red";
     }
 
@@ -93,7 +92,7 @@ export default function ExpenseListItem({
                             py="0.2"
                             textTransform="none"
                         >
-                            {status}
+                            {expenseStatus}
                         </Badge>
                     </Box>
                 </Stack>
@@ -104,7 +103,7 @@ export default function ExpenseListItem({
                     </Badge>
                 </Box>
                 <Text color={"gray.500"} fontSize="sm">
-                    {expenseDate}
+                    {new Date(date).toLocaleDateString('bg-BG')}
                 </Text>
             </Stack>
             <Stack
@@ -144,7 +143,7 @@ export default function ExpenseListItem({
                         <>
                         </>
                     )} */}
-                    {currentUserId === creator.userId && (
+                    {userId === creator && (
                         <>
                             <IconButton
                                 aria-label="Редактирайте"

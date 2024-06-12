@@ -1,5 +1,5 @@
-import { useState } from "react";
-import ExpenseListItem from "./expense-list-item/ExpenseListItem";
+import { useContext, useEffect, useState } from "react";
+import PaidExpenseListItem from "./paid-expense-list-item/PaidExpenseListItem";
 import {
     Button,
     Checkbox,
@@ -12,71 +12,24 @@ import {
     Text,
     useDisclosure,
 } from "@chakra-ui/react";
-import ExpenseCreate from "./expense-create/ExpenseCreate";
+import PaidExpenseCreate from "./paid-expense-create/PaidExpenseCreate";
+import AuthContext from "../../contexts/authContext";
+import * as paidExpenseService from "../../services/paidExpenseService";
+import { useParams } from "react-router-dom";
 
-export default function ExpenseList() {
-    const [expenses, setExpenses] = useState([
-        {
-            _id: "1",
-            title: "Пазаруване в Лекси",
-            amount: 120,
-            split: "even",
-            paid: [{ userId: "1", sum: 120 }],
-            owed: [
-                { userId: "1", sum: 60 },
-                { userId: "2", sum: 60 },
-            ],
-            balance: [
-                { userId: "1", sum: 60, type: "+" },
-                { userId: "2", sum: 60, type: "-" },
-            ],
-            category: "Храна",
-            status: "За одобрение",
-            creator: { userId: "1" },
-            household: { householdId: "1" },
-            expenseDate: "01.05.2024",
-        },
-        {
-            _id: "2",
-            title: "Нова печка",
-            amount: 200,
-            split: "manual",
-            paid: [{ userId: "2", sum: 200 }],
-            owed: [
-                { userId: "1", sum: 150 },
-                { userId: "2", sum: 50 },
-            ],
-            balance: [
-                { userId: "1", sum: 150, type: "-" },
-                { userId: "2", sum: 150, type: "+" },
-            ],
-            category: "Уреди",
-            status: "Одобрен",
-            creator: { userId: "2" },
-            household: { householdId: "1" },
-            expenseDate: "06.05.2024",
-        },
-        {
-            _id: "3",
-            title: "Климатик за общата стая",
-            amount: 300,
-            split: "percent",
-            paid: [{ userId: "1", sum: 300 }],
-            owed: [
-                { userId: "1", sum: 150 },
-                { userId: "2", sum: 150 },
-            ],
-            balance: [
-                { userId: "1", sum: 150, type: "+" },
-                { userId: "2", sum: 150, type: "-" },
-            ],
-            category: "Уреди",
-            status: "За одобрение",
-            creator: { userId: "1" },
-            household: { householdId: "1" },
-            expenseDate: "08.05.2024",
-        },
-    ]);
+export default function PaidExpenseList() {
+    const [paidExpenses, setPaidExpenses] = useState([]);
+    const { householdId } = useParams();
+    
+    useEffect(() => {
+        paidExpenseService
+        .getAll(householdId)
+        .then((result) => setPaidExpenses(result))
+        .catch((err) => {
+            console.log(err);
+        });
+    }, []);
+    
 
     const [searchValues, setSearchValues] = useState({
         title: "",
@@ -113,7 +66,7 @@ export default function ExpenseList() {
         });
     };
 
-    const userId = "1";
+    const { userId } = useContext(AuthContext);
 
     return (
         <>
@@ -192,12 +145,12 @@ export default function ExpenseList() {
             </form>
 
             <Stack>
-                {expenses.map((expense) => (
-                    <ExpenseListItem key={expense._id} {...expense} />
+                {paidExpenses.map((paidExpense) => (
+                    <PaidExpenseListItem key={paidExpense._id} {...paidExpense} />
                 ))}
             </Stack>
             {isCreateModalOpen && (
-                <ExpenseCreate
+                <PaidExpenseCreate
                     isOpen={isCreateModalOpen}
                     onClose={onCloseCreateModal}
                 />

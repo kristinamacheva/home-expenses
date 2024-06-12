@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import * as householdService from '../../services/householdService';
-import ExpenseList from "../expense-list/ExpenseList";
+import PaidExpenseList from "../paid-expense-list/PaidExpenseList";
 // import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 
 export default function HouseholdDetails() {
@@ -76,7 +76,7 @@ export default function HouseholdDetails() {
                             </TabList>
                             <TabPanels>
                                 <TabPanel px="2" pt="2">
-                                    <ExpenseList />
+                                    <PaidExpenseList />
                                 </TabPanel>
                                 <TabPanel px="2">
                                     <p>Неплатени</p>

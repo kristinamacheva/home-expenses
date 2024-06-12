@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+    Avatar,
     Box,
     Button,
     ButtonGroup,
+    Card,
     Divider,
     FormControl,
     FormLabel,
     HStack,
+    IconButton,
     Input,
     InputGroup,
     InputRightAddon,
@@ -22,16 +25,54 @@ import {
     Text,
 } from "@chakra-ui/react";
 import categoriesOptions from "../../../data/categoriesOptions ";
-import moment from 'moment';
+import moment from "moment";
+import { useContext } from "react";
+import AuthContext from "../../../contexts/authContext";
+import { FaRegTrashCan } from "react-icons/fa6";
+import * as householdService from "../../../services/householdService";
+import { useParams } from "react-router-dom";
+import Equally from "./split-types/Equally";
 
-export default function ExpenseCreate({ isOpen, onClose }) {
+export default function PaidExpenseCreate({ isOpen, onClose }) {
+    // const newPaidExpense = await paidExpenseManager.create({
+    //     title,
+    //     category,
+    //     // creator: req.user._id,
+    //     creator: '664f630fb14becfeb98d2e1f',
+    //     amount,
+    //     date,
+    //     paidSplitType,
+    //     paid,
+    //     owedSplitType,
+    //     owed,
+    //     household: req.householdId,
+    // });
+    const { userId, name } = useContext(AuthContext);
+    const { householdId } = useParams();
+
+    const [householdMembers, setHouseholdMembers] = useState([]);
+    const [paid, setPaid] = useState([]);
+    const [owed, setOwed] = useState([]);
+
+    useEffect(() => {
+        householdService
+            .getAllNonChildMembers(householdId)
+            .then((result) => setHouseholdMembers(result))
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
+
+    console.log(householdMembers);
+
     const initialValues = {
         title: "",
         amount: "0",
         category: "",
-        date: moment().format('YYYY-MM-DD'),
+        date: moment().format("YYYY-MM-DD"),
         payersOption: "",
-        splittingOption: "",
+        paidSplitType: "",
+        owedSplitType: "",
     };
 
     const [values, setValues] = useState(initialValues);
@@ -145,7 +186,7 @@ export default function ExpenseCreate({ isOpen, onClose }) {
                         </Stack>
                         <Divider />
                         <Stack mt="3" spacing="4">
-                            <FormControl mb={4}>
+                            <FormControl mb={2}>
                                 <FormLabel>Платец*</FormLabel>
                                 <Select
                                     name="payersOption"
@@ -161,12 +202,79 @@ export default function ExpenseCreate({ isOpen, onClose }) {
                                     </option>
                                 </Select>
                             </FormControl>
+
                             {values.payersOption === "currentUser" && (
-                                <Text>текущ потребител</Text>
+                                <Card
+                                    p="4"
+                                    width="47%"
+                                    display="flex"
+                                    direction="row"
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                >
+                                    <Stack
+                                        display="flex"
+                                        alignItems="center"
+                                        direction="row"
+                                        mr="2"
+                                    >
+                                        <Avatar
+                                            name={name}
+                                            // src={avatar || ""}
+                                            background={"themeYellow.900"}
+                                            mr="3"
+                                        />
+                                        <Text>{name}</Text>
+                                    </Stack>
+                                    <Stack
+                                        display="flex"
+                                        alignItems="center"
+                                        direction="row"
+                                    >
+                                        <Text mr="1">{values.amount} лв.</Text>
+                                        <IconButton
+                                            aria-label="Изтрийте"
+                                            title="Изтрийте"
+                                            icon={
+                                                <FaRegTrashCan fontSize="20px" />
+                                            }
+                                            variant="ghost"
+                                            color="themePurple.800"
+                                        />
+                                    </Stack>
+                                </Card>
                             )}
 
                             {values.payersOption === "changedUser" && (
-                                <Text>други потребители</Text>
+                                <Stack>
+                                    <Stack>
+                                        <FormControl mb={2}>
+                                            <FormLabel>
+                                                Метод на разпределяне*
+                                            </FormLabel>
+                                            <Select
+                                                name="paidSplitType"
+                                                value={values.paidSplitType}
+                                                onChange={onChange}
+                                                placeholder="Изберете метод"
+                                            >
+                                                <option value="Поравно">
+                                                    Поравно
+                                                </option>
+                                                <option value="Ръчно">
+                                                    Ръчно
+                                                </option>
+                                            </Select>
+                                        </FormControl>
+                                    </Stack>
+                                    {values.paidSplitType === "Поравно" && (
+                                        <Equally
+                                            amount={values.amount}
+                                            members={householdMembers}
+                                            // onUpdate={handlePaidEquallyUpdate}
+                                        />
+                                    )}
+                                </Stack>
                             )}
                         </Stack>
                         <Stack mt="3" spacing="4">
@@ -184,7 +292,11 @@ export default function ExpenseCreate({ isOpen, onClose }) {
                                 </Select>
                             </FormControl>
                             {values.splittingOption === "equally" && (
-                                <Text>Поравно</Text>
+                                <Equally
+                                    amount={values.amount}
+                                    members={householdMembers}
+                                    // onUpdate={handleOwedEquallyUpdate}
+                                />
                             )}
 
                             {values.splittingOption === "percent" && (
