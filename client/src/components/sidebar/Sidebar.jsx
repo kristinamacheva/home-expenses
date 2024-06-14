@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link, Outlet } from "react-router-dom";
 import {
     IconButton,
@@ -24,6 +24,7 @@ import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
 
 import { FaHouse, FaPeopleRoof, FaList, FaChildren } from "react-icons/fa6";
 import Path from "../../paths";
+import AuthContext from "../../contexts/authContext";
 
 const LinkItems = [
     { name: "Начало", icon: FaHouse, to: Path.Home },
@@ -101,6 +102,8 @@ const NavItem = ({ icon, children, to, ...rest }) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }) => {
+    const { userId, name } = useContext(AuthContext);
+
     return (
         <Flex
             px={{ base: 4, md: 4 }}
@@ -158,7 +161,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                             <HStack>
                                 <Avatar
                                     size={"sm"}
-                                    name="Kristina Macheva"
+                                    name={name}
                                     background={"themeYellow.900"}
                                 />
                                 <VStack
@@ -172,7 +175,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                                         color={useColorModeValue("white")}
                                         fontWeight="semibold"
                                     >
-                                        Кристина Мачева
+                                        {name}
                                     </Text>
                                 </VStack>
                                 <Box
