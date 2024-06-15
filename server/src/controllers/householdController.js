@@ -45,24 +45,26 @@ router.get('/:householdId', async (req, res) => {
     res.json(household);
 });
 
+// TODO: better approach
 router.get('/:householdId/members', async (req, res) => {
-    const users = await householdManager.getAllMembers(req.params.householdId);
-    res.json(users);
-});
+    const { role, details } = req.query;
+    let users;
 
-router.get('/:householdId/members/details', async (req, res) => {
-    const users = await householdManager.getAllMembersDetails(req.params.householdId);
-    res.json(users);
-});
+    try {
+        if (details === 'true') {
+            users = await householdManager.getAllMembersDetails(req.params.householdId);
+        } else if (role === 'child') {
+            users = await householdManager.getAllChildMembers(req.params.householdId);
+        } else if (role === 'not-child') {
+            users = await householdManager.getAllNonChildMembers(req.params.householdId);
+        } else {
+            users = await householdManager.getAllMembers(req.params.householdId);
+        }
 
-router.get('/:householdId/non-child-members', async (req, res) => {
-    const users = await householdManager.getAllNonChildMembers(req.params.householdId);
-    res.json(users);
-});
-
-router.get('/:householdId/child-members', async (req, res) => {
-    const users = await householdManager.getAllChildMembers(req.params.householdId);
-    res.json(users);
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching members' });
+    }
 });
 
 router.get('/:householdId/reduced', async (req, res) => {
