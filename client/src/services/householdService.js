@@ -39,6 +39,17 @@ export const getAllNonChildMembers = async (householdId) => {
     }
 }
 
+export const getAllMembersDetails = async (householdId) => {
+    try {
+        const result = await request.get(`${baseUrl}/${householdId}/members/details`);
+        console.log(result);
+        return result;
+    } catch (error) {
+        console.error('Error fetching members details:', error);
+        return null; 
+    }
+}
+
 export const create = async (householdData) => {
     const result = await request.post(baseUrl, householdData);
     

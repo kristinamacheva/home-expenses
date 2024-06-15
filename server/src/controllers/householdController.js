@@ -50,6 +50,11 @@ router.get('/:householdId/members', async (req, res) => {
     res.json(users);
 });
 
+router.get('/:householdId/members/details', async (req, res) => {
+    const users = await householdManager.getAllMembersDetails(req.params.householdId);
+    res.json(users);
+});
+
 router.get('/:householdId/non-child-members', async (req, res) => {
     const users = await householdManager.getAllNonChildMembers(req.params.householdId);
     res.json(users);

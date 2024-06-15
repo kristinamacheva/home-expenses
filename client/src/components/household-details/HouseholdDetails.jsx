@@ -16,6 +16,7 @@ import { useParams } from "react-router-dom";
 
 import * as householdService from '../../services/householdService';
 import PaidExpenseList from "../paid-expense-list/PaidExpenseList";
+import MemberList from "../member/member-list/MemberList";
 // import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 
 export default function HouseholdDetails() {
@@ -88,7 +89,7 @@ export default function HouseholdDetails() {
                         </Tabs>
                     </TabPanel>
                     <TabPanel>
-                        <p>Членове</p>
+                        <MemberList/>
                     </TabPanel>
                 </TabPanels>
             </Tabs>
