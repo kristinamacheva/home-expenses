@@ -10,6 +10,7 @@ import {
     IconButton,
     HStack,
     useDisclosure,
+    Flex,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import * as householdService from "../../../services/householdService";
@@ -24,17 +25,30 @@ export default function MemberList() {
     useEffect(() => {
         householdService
             .getAllMembersDetails(householdId)
-            .then((result) => setMembers(result))
+            .then((result) => {
+                const sortedMembers = result.sort((a, b) => {
+                    if (a.user.name < b.user.name) return -1;
+                    if (a.user.name > b.user.name) return 1;
+                    return 0;
+                });
+                setMembers(sortedMembers);
+            })
             .catch((err) => {
                 console.log(err);
             });
-    }, []);
+    }, [householdId]);
 
     return (
-        <Stack mt="4">
+        <Flex
+            mt="4"
+            wrap="wrap"
+            direction={{ base: "column", lg: "row" }} 
+            gap="4"
+            align={{ base: "center", lg: "initial" }}
+        >
             {members.map((member) => (
                 <MemberListItem key={member._id} {...member} />
             ))}
-        </Stack>
+        </Flex>
     );
 }

@@ -10,7 +10,12 @@ import {
     IconButton,
     HStack,
     useDisclosure,
+    Divider,
+    Text,
+    Icon,
 } from "@chakra-ui/react";
+
+import { FaEnvelope, FaPhone } from "react-icons/fa6";
 
 export default function MemberListItem({ user, role }) {
     return (
@@ -18,30 +23,28 @@ export default function MemberListItem({ user, role }) {
             <Card
                 px="5"
                 py="5"
-                mx="4"
-                my="1"
                 boxShadow="md"
                 background="white"
                 spacing="4"
-                direction={{ base: "column", md: "row" }}
-                justifyContent="space-between"
-                alignItems={{ md: "center" }}
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                width="280px"
+                height="210px"
             >
                 <Stack
-                    direction={{ base: "column", md: "row" }}
-                    alignItems={{ md: "center" }}
+                    direction="column"
+                    alignItems="center"
                     justifyContent="center"
                     spacing={{ base: "2", md: "4" }}
                 >
-                    <Stack direction="row" alignItems="center">
                     <Avatar
                         name={user.name}
                         src={user.avatar || ""}
                         background={"themeYellow.900"}
                         mr={{ base: "1", md: "2" }}
                     />
-                    <Stack direction="column" spacing={{ base: "1", md: "0" }}>
-                    
+                    <Stack spacing={{ base: "1", md: "0" }} alignItems="center">
                         <Heading as="h4" size="sm">
                             {user.name}
                         </Heading>
@@ -49,16 +52,19 @@ export default function MemberListItem({ user, role }) {
                             <Badge variant="subtle">{role}</Badge>
                         </Box>
                     </Stack>
-
+                    <Stack spacing={{ base: "1", md: "0" }}>
+                        {user.phone && (
+                            <HStack>
+                                <Icon as={FaPhone} color="themePurple.800" />
+                                <Text>{user.phone}</Text>
+                            </HStack>
+                        )}
+                        <HStack>
+                            <Icon as={FaEnvelope} color="themePurple.800" />
+                            <Text>{user.email}</Text>
+                        </HStack>
                     </Stack>
-                    
-                    
                 </Stack>
-                <HStack
-                    spacing="0"
-                    w={["auto", "auto", "90px"]}
-                    justifyContent="flex-end"
-                ></HStack>
             </Card>
         </>
     );
