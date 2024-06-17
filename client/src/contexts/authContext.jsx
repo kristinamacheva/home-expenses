@@ -41,7 +41,9 @@ export const AuthProvider = ({
         name: user.name,
         email: user.email,
         phone: user.phone,
-        // isAuthenticated: !!auth.accessToken,
+        avatar: user.avatar,
+        avatarColor: user.avatarColor,
+        isAuthenticated: !!user._id,
     };
 
     return (
