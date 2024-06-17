@@ -48,7 +48,7 @@ export default function HouseholdListItem({
         } else {
             badgeText =
                 userBalanceSum === 0
-                    ? "Нямате дългове"
+                    ? "Нямате задължения"
                     : `Дължат Ви ${userBalanceSum} лв.`;
         }
     } else {

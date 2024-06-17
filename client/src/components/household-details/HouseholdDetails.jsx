@@ -17,9 +17,11 @@ import { useParams } from "react-router-dom";
 import * as householdService from '../../services/householdService';
 import PaidExpenseList from "../paid-expense-list/PaidExpenseList";
 import MemberList from "../member/member-list/MemberList";
+import BalanceList from "../balance-list/BalanceList";
 // import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 
 export default function HouseholdDetails() {
+    // TODO: load all details here and pass as props or make seperate requests
     const [household, setHousehold] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     
@@ -74,7 +76,7 @@ export default function HouseholdDetails() {
 
                 <TabPanels>
                     <TabPanel>
-                        <p>Баланс</p>
+                        <BalanceList />
                     </TabPanel>
                     <TabPanel>
                         <Tabs isLazy variant="soft-rounded" colorScheme="tabsPurple">

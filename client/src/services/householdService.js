@@ -50,6 +50,17 @@ export const getAllMembersDetails = async (householdId) => {
     }
 }
 
+export const getAllBalancesDetails = async (householdId) => {
+    try {
+        const result = await request.get(`${baseUrl}/${householdId}/balances?details=true`);
+        console.log(result);
+        return result;
+    } catch (error) {
+        console.error('Error fetching balances details:', error);
+        return null; 
+    }
+}
+
 export const create = async (householdData) => {
     const result = await request.post(baseUrl, householdData);
     
