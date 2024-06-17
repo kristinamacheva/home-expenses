@@ -102,7 +102,7 @@ const NavItem = ({ icon, children, to, ...rest }) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }) => {
-    const { userId, name } = useContext(AuthContext);
+    const { userId, name, avatar, avatarColor } = useContext(AuthContext);
 
     return (
         <Flex
@@ -162,7 +162,8 @@ const MobileNav = ({ onOpen, ...rest }) => {
                                 <Avatar
                                     size={"sm"}
                                     name={name}
-                                    background={"themeYellow.900"}
+                                    src={avatar}
+                                    background={avatarColor}
                                 />
                                 <VStack
                                     display={{ base: "none", md: "flex" }}
@@ -190,7 +191,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                             bg={useColorModeValue("white")}
                             borderColor={useColorModeValue("gray.200")}
                         >
-                            <Link to="/profile">
+                            <Link to={Path.Profile}>
                                 <MenuItem>Профил</MenuItem>
                             </Link>
                             <Link to="/settings">
