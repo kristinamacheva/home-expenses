@@ -107,7 +107,7 @@ export default function HouseholdListItem({
                 >
                     <IconButton
                         as={Link}
-                        to={`/domakinstva/${_id}`}
+                        to={`/households/${_id}`}
                         aria-label="Детайли"
                         title="Детайли"
                         icon={<FaEye fontSize="20px" />}

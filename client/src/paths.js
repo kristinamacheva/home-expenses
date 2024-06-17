@@ -1,11 +1,12 @@
 const Path = {
     Home: '/',
-    Logout: 'izhod',
-    HouseholdList: 'domakinstva',
-    HouseholdCreate: 'domakinstva/suzdavane',
-    HouseholdDetails: 'domakinstva/:householdId',
-    Login: '/vhod',
-    Register: '/registraciq',
+    Logout: 'logout',
+    HouseholdList: 'households',
+    HouseholdCreate: 'households/create',
+    HouseholdDetails: 'households/:householdId',
+    Login: '/login',
+    Register: '/register',
+    Profile: '/profile',
 };
 
 export default Path;
