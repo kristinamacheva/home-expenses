@@ -13,28 +13,34 @@ import NotFound from "./components/not-found/NotFound";
 import Logout from "./components/logout/Logout";
 import ProfileEdit from "./components/profile/profile-edit/ProfileEdit";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AuthGuard from "./components/guards/AuthGuard";
 
 function App() {
     return (
         <ErrorBoundary>
             <AuthProvider>
                 <Routes>
-                    <Route path={Path.Home} element={<Sidebar />}>
-                        <Route index element={<Home />} />
-                        <Route
-                            path={Path.HouseholdList}
-                            element={<HouseholdList />}
-                        />
-                        <Route
-                            path={Path.HouseholdDetails}
-                            element={<HouseholdDetails />}
-                        />
-                        <Route path={Path.Profile} element={<ProfileEdit />} />
-                        <Route path={Path.Logout} element={<Logout />} />
+                    <Route element={<AuthGuard />}>
+                        <Route element={<Sidebar />}>
+                            <Route path={Path.Home} element={<Home />} />
+                            <Route
+                                path={Path.HouseholdList}
+                                element={<HouseholdList />}
+                            />
+                            <Route
+                                path={Path.HouseholdDetails}
+                                element={<HouseholdDetails />}
+                            />
+                            <Route
+                                path={Path.Profile}
+                                element={<ProfileEdit />}
+                            />
+                            <Route path={Path.Logout} element={<Logout />} />
+                        </Route>
+                        <Route path="*" element={<NotFound />} />
                     </Route>
                     <Route path={Path.Login} element={<Login />} />
                     <Route path={Path.Register} element={<Register />} />
-                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </AuthProvider>
         </ErrorBoundary>
