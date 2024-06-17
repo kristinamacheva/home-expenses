@@ -89,6 +89,22 @@ exports.getAllMembersDetails = async (householdId) => {
     return allMembers.members;
 };
 
+exports.getAllBalances = async (householdId) => {
+    const allBalances = await Household.findById(householdId)
+        .populate("balance.user", "_id name")
+        .select("balance");
+
+    return allBalances;
+};
+
+exports.getAllBalancesDetails = async (householdId) => {
+    const allMembersDetails = await Household.findById(householdId)
+        .populate("balance.user", "_id name avatar avatarColor")
+        .select("balance");
+
+    return allMembersDetails;
+};
+
 exports.getAllNonChildMembers = async (householdId) => {
     // TODO: try using direct mongoose query
     try {

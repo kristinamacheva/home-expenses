@@ -67,6 +67,23 @@ router.get('/:householdId/members', async (req, res) => {
     }
 });
 
+router.get('/:householdId/balances', async (req, res) => {
+    const { details } = req.query;
+    let balances;
+
+    try {
+        if (details === 'true') {
+            balances = await householdManager.getAllBalancesDetails(req.params.householdId);
+        } else {
+            balances = await householdManager.getAllBalances(req.params.householdId);
+        }
+
+        res.json(balances);
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching balances' });
+    }
+});
+
 router.get('/:householdId/reduced', async (req, res) => {
     const household = await householdManager.getOneReducedData(req.params.householdId);
     res.json(household);
