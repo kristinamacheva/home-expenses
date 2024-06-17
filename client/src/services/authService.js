@@ -1,4 +1,6 @@
+import { useContext } from "react";
 import * as request from "../lib/request";
+import AuthContext from "../contexts/authContext";
 
 const baseUrl = "http://localhost:5000/users";
 
@@ -16,6 +18,26 @@ export const register = async ({ name, email, phone, password, repeatPassword })
         name,
         email,
         phone,
+        password,
+        repeatPassword
+    });
+    
+    return result;
+};
+
+export const getProfile = async () => {
+    const result = await request.get(`${baseUrl}/profile`);
+
+    return result;
+};
+
+export const update = async ({ avatar, name, email, phone, oldPassword, password, repeatPassword }) => {
+    const result = await request.put(`${baseUrl}/profile`, {
+        avatar,
+        name,
+        email,
+        phone,
+        oldPassword,
         password,
         repeatPassword
     });

@@ -28,14 +28,23 @@ export const AuthProvider = ({
         navigate(Path.Home);
     };
 
+    const updateSubmitHandler = async (values) => {
+        const result = await authService.update(values);
+        setUser(result);
+
+        navigate(Path.Profile);
+    };
+
     const logoutHandler = () => {
         setUser({});
     }
 
     //auth state се пропагира през provider-а
+    // TODO: add avatar
     const values = { 
         loginSubmitHandler, 
         registerSubmitHandler,
+        updateSubmitHandler,
         logoutHandler,
         userId: user._id,
         name: user.name,
