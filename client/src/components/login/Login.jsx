@@ -15,6 +15,7 @@ import {
 import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
+import Path from "../../paths";
 
 export default function Login() {
     const { loginSubmitHandler } = useContext(AuthContext);
@@ -121,7 +122,7 @@ export default function Login() {
                                     Нямате профил?{" "}
                                     <ChakraLink
                                         as={Link}
-                                        to={`/registraciq`}
+                                        to={Path.Register}
                                         color={"themePurple.700"}
                                     >
                                         Регистрация
