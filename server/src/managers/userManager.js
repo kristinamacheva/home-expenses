@@ -30,6 +30,63 @@ exports.login = async ({ email, password }) => {
     return result;
 };
 
+exports.getProfile = async (userId) => {
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+        throw new Error("Cannot find user");
+    }
+
+    return user;
+};
+
+exports.update = async ({
+    userId,
+    avatar,
+    name,
+    email,
+    phone,
+    oldPassword,
+    password,
+    repeatPassword,
+}) => {
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new Error("Cannot find user");
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== userId) {
+        throw new Error("Email already exists");
+    } 
+
+    const isValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isValid) {
+        throw new Error("Cannot update - password is incorrect");
+    }
+
+    user.name = name;
+    user.phone = phone;
+    user.avatar = avatar;
+    user.email = email;
+    
+    // Check if password fields are provided and not empty
+    if (password && password !== '') {
+        // Check if repeatPassword is provided
+        if (repeatPassword && repeatPassword !== '') {
+            user.password = password;
+            user.repeatPassword = repeatPassword;
+        } else {
+            throw new Error("Passwords do not match");
+        }
+    }
+
+    await user.save();
+
+    const result = getAuthResult(user);
+
+    return result;
+};
+
 async function getAuthResult(user) {
     const payload = {
         _id: user._id,

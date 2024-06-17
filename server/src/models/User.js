@@ -35,7 +35,9 @@ userSchema.virtual('repeatPassword').set(function(value) {
     }
 });
 
-userSchema.pre('save', async function() {
+userSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) return next();
+
     const hash = await bcrypt.hash(this.password, 10);
 
     // delete plain password and save hash in db
