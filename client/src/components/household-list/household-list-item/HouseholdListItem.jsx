@@ -12,6 +12,7 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 import { FaEye, FaPen } from "react-icons/fa6";
+import { FaSignOutAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import HouseholdEdit from "./household-edit/HouseholdEdit";
 import { useContext } from "react";
@@ -113,11 +114,6 @@ export default function HouseholdListItem({
                         variant="ghost"
                         color="themePurple.800"
                     />
-                    {/* TODO: implement isAdmin logic */}
-                    {/* {(currentUserId === creator.userId || isAdmin(currentUserId)) && (
-                        <>
-                        </>
-                    )} */}
                     {userId === admin._id && (
                         <>
                             <IconButton
@@ -137,6 +133,14 @@ export default function HouseholdListItem({
                         /> */}
                         </>
                     )}
+                    <IconButton
+                        as={Link}
+                        aria-label="Напуснете"
+                        title="Напуснете"
+                        icon={<FaSignOutAlt fontSize="20px" />}
+                        variant="ghost"
+                        color="themePurple.800"
+                    />
                 </HStack>
             </Card>
             {isEditModalOpen && (
