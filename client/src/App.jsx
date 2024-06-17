@@ -14,6 +14,7 @@ import Logout from "./components/logout/Logout";
 import ProfileEdit from "./components/profile/profile-edit/ProfileEdit";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AuthGuard from "./components/guards/AuthGuard";
+import GuestGuard from "./components/guards/GuestGuard";
 
 function App() {
     return (
@@ -39,8 +40,10 @@ function App() {
                         </Route>
                         <Route path="*" element={<NotFound />} />
                     </Route>
-                    <Route path={Path.Login} element={<Login />} />
-                    <Route path={Path.Register} element={<Register />} />
+                    <Route element={<GuestGuard />}>
+                        <Route path={Path.Login} element={<Login />} />
+                        <Route path={Path.Register} element={<Register />} />
+                    </Route>
                 </Routes>
             </AuthProvider>
         </ErrorBoundary>
