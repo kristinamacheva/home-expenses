@@ -15,6 +15,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         // unique: true,
     },
+    avatar: {
+        type: String,
+        default: '',
+    },
+    avatarColor: {
+        type: String,
+        required: true,
+    },
     password: {
         type: String,
         required: true,

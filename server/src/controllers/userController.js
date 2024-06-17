@@ -23,6 +23,8 @@ router.post('/register', async (req, res) => {
             email: user.email,
             name: user.name,
             phone: user.phone, 
+            avatar: user.avatar, 
+            avatarColor: user.avatarColor, 
         });
     } catch (err) {
         console.log(err);
@@ -49,6 +51,7 @@ router.post('/login', async (req, res) => {
             email: user.email,
             name: user.name,
             phone: user.phone, 
+            avatarColor: user.avatarColor, 
         });
     } catch (err) {
         console.log(err);
