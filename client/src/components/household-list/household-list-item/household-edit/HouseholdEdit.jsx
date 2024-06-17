@@ -23,7 +23,7 @@ import * as householdService from "../../../../services/householdService";
 export default function HouseholdEdit({ isOpen, onClose, householdId }) {
     //request for email?
     // TODO: return only the id or email directly, manage newMembers in a seperate state
-    const [isLoading, setisLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [household, setHousehold] = useState({
         name: "",
         members: [{ user: { _id: "", email: "" }, role: "" }],
@@ -35,7 +35,7 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
     });
 
     useEffect(() => {
-        setisLoading(true);
+        setIsLoading(true);
         householdService
             .getOne(householdId)
             .then((result) => {
@@ -47,11 +47,11 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                     name: result.name,
                     members: result.members,
                 }));
-                setisLoading(false);
+                setIsLoading(false);
             })
             .catch((err) => {
                 console.log(err);
-                setisLoading(false);
+                setIsLoading(false);
             });
     }, [householdId]);
 

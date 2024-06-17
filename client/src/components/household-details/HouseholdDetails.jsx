@@ -21,19 +21,27 @@ import MemberList from "../member/member-list/MemberList";
 
 export default function HouseholdDetails() {
     const [household, setHousehold] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
     
     const { householdId } = useParams();
 
     useEffect(() => {
         // TODO household not found case
+        setIsLoading(true);
         householdService.getOne(householdId)
             .then(result => {
                 setHousehold(result);
+                setIsLoading(false);
             })
-            // .catch(err => {
-            //     console.log(err);
-            // });
+            .catch(err => {
+                console.log(err);
+                setIsLoading(false);
+            });
     }, [householdId]);
+
+    if (isLoading) {
+        return <Spinner size="lg" />;
+    }
 
     return (
         <>   
@@ -43,14 +51,14 @@ export default function HouseholdDetails() {
                         {household.name}
                     </Heading>
                     <AvatarGroup size="md" max={2}>
-                        <Avatar
-                            name="Кристина Мачева"
-                            background={"themeYellow.900"}
-                        />
-                        <Avatar
-                            name="Мария Иванова"
-                            background={"blue.300"}
-                        />
+                        {household.members.map((member) => (
+                            <Avatar
+                                key={member.user._id}
+                                name={member.user.name}
+                                src={member.user.avatar}
+                                background={member.user.avatarColor}
+                            />
+                        ))}
                     </AvatarGroup>
                     {/* <Spacer />
                     <Button variant="primary">Редактиране</Button> */}

@@ -34,8 +34,8 @@ export default function MemberListItem({ user, role }) {
             >
                 <Avatar
                     name={user.name}
-                    src={user.avatar || ""}
-                    background={"themeYellow.900"}
+                    src={user.avatar}  
+                    background={user.avatarColor}
                 />
                 <Stack spacing="0.5" alignItems="center">
                     <Heading as="h4" size="sm">

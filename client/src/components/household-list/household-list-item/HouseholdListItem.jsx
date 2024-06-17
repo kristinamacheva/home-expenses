@@ -94,8 +94,8 @@ export default function HouseholdListItem({
                             <Avatar
                                 key={member.user._id}
                                 name={member.user.name}
-                                src={member.user.avatar || ""}
-                                background={"themeYellow.900"}
+                                src={member.user.avatar}
+                                background={member.user.avatarColor}
                             />
                         ))}
                     </AvatarGroup>
