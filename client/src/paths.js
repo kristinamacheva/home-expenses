@@ -4,6 +4,7 @@ const Path = {
     HouseholdList: 'households',
     HouseholdCreate: 'households/create',
     HouseholdDetails: 'households/:householdId',
+    HouseholdInvitations: 'household-invitations',
     Login: '/login',
     Register: '/register',
     Profile: '/profile',
