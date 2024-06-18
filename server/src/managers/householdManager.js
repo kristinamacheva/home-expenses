@@ -1,4 +1,5 @@
 const Household = require("../models/Household");
+const HouseholdInvitation = require("../models/HouseholdInvitation");
 const User = require("../models/User");
 
 // TODO: send different response if the resourse doesnt exist or is not found
@@ -8,7 +9,7 @@ exports.getAll = () => Household.find();
 exports.getAllWithUsers = async (userId) => {
     const result = await Household.find({ "members.user": userId })
         .populate("members.user", "_id name email phone")
-        .populate("admin", "name")
+        // .populate("admins", "name")
         .populate("balance.user", "_id name");
 
     return result;
@@ -25,7 +26,7 @@ exports.getOne = (householdId) => Household.findById(householdId);
 exports.getOneWithUsersAndBalance = (householdId) =>
     this.getOne(householdId)
         .populate("members.user", "_id name email phone")
-        .populate("admin", "name")
+        // .populate("admins", "name")
         .populate("balance.user", "_id name");
 // .populate('balance.user', '-_id name');
 
@@ -116,60 +117,59 @@ exports.create = async (householdData) => {
         // Fetch the admin user by ID
         const adminUser = await User.findById(admin);
         if (!adminUser) {
-            throw new Error(`Admin user with ID ${admin} not found`);
+            throw new Error(`Admin user not found`);
+        }
+
+        // Check for duplicate emails in members
+        const uniqueEmails = new Set();
+        for (const member of members) {
+            if (uniqueEmails.has(member.email)) {
+                throw new Error(`Duplicate email found: ${member.email}`);
+            }
+            uniqueEmails.add(member.email);
         }
 
         // Fetch member users by their emails
-        const memberEmails = members.map((member) => member.email);
-        const memberUsers = await User.find({ email: { $in: memberEmails } });
+        // const memberEmails = members.map((member) => member.email);
+        const memberUsers = await User.find({ email: { $in: Array.from(uniqueEmails) } }).select('_id email');
+        // console.log(memberUsers);
 
-        if (memberUsers.length !== memberEmails.length) {
+        if (memberUsers.length !== uniqueEmails.size) {
             throw new Error("Some member emails not found");
         }
-
-        // Construct members array with roles and user IDs, including the admin
-        const memberList = [
-            ...members
-                .map((member) => {
-                    const currentUser = memberUsers.find(
-                        (user) => user.email === member.email
-                    );
-                    return {
-                        user: currentUser._id,
-                        role: member.role,
-                    };
-                }),
-            {
-                user: adminUser._id,
-                role: "Админ",
-            },
-        ];
-
-        const nonChildMembers = memberList.filter(member => member.role !== "Дете");
-
-        // Construct balance array, including the admin
-        const balanceList = [
-            ...nonChildMembers.
-            map((member) => ({
-                user: member.user,
-                sum: 0, // Default sum
-                type: "+", // Default type
-            }))
-        ];
-
-        // Identify all admin users
-        const adminUsers = memberList.filter(member => member.role === "Админ").map(admin => admin.user);
 
         // Create the new household
         const newHousehold = new Household({
             name,
-            admins: adminUsers,
-            members: memberList,
-            balance: balanceList,
+            members: [{
+                user: adminUser._id,
+                role: "Админ",
+            }],
+            admins: [adminUser._id],
+            balance: [{
+                user: adminUser._id,
+                sum: 0, // Default sum
+                type: "+", // Default type
+            }],
         });
 
         // Save the household to the database
         await newHousehold.save();
+
+        // Create invitations for each member
+        for (const member of members) {
+            const currentUser = memberUsers.find((user) => user.email === member.email);
+
+            const invitation = new HouseholdInvitation({
+                user: currentUser._id,
+                household: newHousehold._id, 
+                role: member.role,
+                creator: adminUser._id,
+            });
+
+            await invitation.save();
+        }
+
         console.log("Household created:", newHousehold);
         return newHousehold;
     } catch (error) {
@@ -177,6 +177,75 @@ exports.create = async (householdData) => {
         throw error;
     }
 };
+
+// exports.create = async (householdData) => {
+//     try {
+//         const { name, members, admin } = householdData;
+
+//         // Fetch the admin user by ID
+//         const adminUser = await User.findById(admin);
+//         if (!adminUser) {
+//             throw new Error(`Admin user with ID ${admin} not found`);
+//         }
+
+//         // Fetch member users by their emails
+//         const memberEmails = members.map((member) => member.email);
+//         const memberUsers = await User.find({ email: { $in: memberEmails } });
+
+//         if (memberUsers.length !== memberEmails.length) {
+//             throw new Error("Some member emails not found");
+//         }
+
+//         // Construct members array with roles and user IDs, including the admin
+//         const memberList = [
+//             ...members
+//                 .map((member) => {
+//                     const currentUser = memberUsers.find(
+//                         (user) => user.email === member.email
+//                     );
+//                     return {
+//                         user: currentUser._id,
+//                         role: member.role,
+//                     };
+//                 }),
+//             {
+//                 user: adminUser._id,
+//                 role: "Админ",
+//             },
+//         ];
+
+//         const nonChildMembers = memberList.filter(member => member.role !== "Дете");
+
+//         // Construct balance array, including the admin
+//         const balanceList = [
+//             ...nonChildMembers.
+//             map((member) => ({
+//                 user: member.user,
+//                 sum: 0, // Default sum
+//                 type: "+", // Default type
+//             }))
+//         ];
+
+//         // Identify all admin users
+//         const adminUsers = memberList.filter(member => member.role === "Админ").map(admin => admin.user);
+
+//         // Create the new household
+//         const newHousehold = new Household({
+//             name,
+//             admins: adminUsers,
+//             members: memberList,
+//             balance: balanceList,
+//         });
+
+//         // Save the household to the database
+//         await newHousehold.save();
+//         console.log("Household created:", newHousehold);
+//         return newHousehold;
+//     } catch (error) {
+//         console.error("Error creating household:", error);
+//         throw error;
+//     }
+// };
 
 // TODO: Validation, users
 exports.update = (householdId, householdData) =>
