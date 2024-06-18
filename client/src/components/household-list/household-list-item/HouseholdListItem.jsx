@@ -23,7 +23,7 @@ export default function HouseholdListItem({
     name,
     members,
     balance,
-    admin,
+    admins,
 }) {
     const {
         isOpen: isEditModalOpen,
@@ -32,6 +32,9 @@ export default function HouseholdListItem({
     } = useDisclosure();
 
     const { userId } = useContext(AuthContext);
+    const isAdmin = admins.includes(userId);
+    console.log(admins);
+    console.log(isAdmin);
 
     const userBalance = balance.find((balanceEntry) => balanceEntry.user._id === userId);
     //TODO: fix the number type if necessary
@@ -114,7 +117,7 @@ export default function HouseholdListItem({
                         variant="ghost"
                         color="themePurple.800"
                     />
-                    {userId === admin._id && (
+                    {isAdmin && (
                         <>
                             <IconButton
                                 aria-label="Редактирайте"
