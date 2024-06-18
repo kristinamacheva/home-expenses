@@ -25,8 +25,8 @@ router.post('/', async (req, res) => {
         const newHousehold = await householdManager.create({
             name,
             members,
-            // admin: req.user._id,
-            admin: '664f630fb14becfeb98d2e1f',
+            admin: req.user._id,
+            // admin: '664f630fb14becfeb98d2e1f',
         });
 
         res.status(201).json(newHousehold);

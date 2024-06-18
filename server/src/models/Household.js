@@ -16,7 +16,7 @@ const householdSchema = new mongoose.Schema({
             role: { type: String, enum: ['Админ', 'Член', 'Дете'], required: true },
         },
     ],
-    admin: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
+    admins: [{ type: mongoose.Types.ObjectId, ref: 'User', required: true }],
     balance: [
         {
             user: {

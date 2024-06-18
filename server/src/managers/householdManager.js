@@ -1,50 +1,6 @@
 const Household = require("../models/Household");
 const User = require("../models/User");
 
-// const households = [
-//     {
-//         "_id": "1",
-//         "name": "Съквартиранти",
-//         "members": [
-//             { "userId": "1", "role": "Админ" },
-//             { "userId": "2", "role": "Член" }
-//         ],
-//         "admin": { "userId": "1" },
-//         "balance": [
-//             { "userId": "1", "sum": 60, "type": "+" },
-//             { "userId": "2", "sum": 60, "type": "-" }
-//         ],
-//     },
-//     {
-//         "_id": "2",
-//         "name": "Вкъщи",
-//         "members": [
-//             { "userId": "1", "role": "Член" },
-//             { "userId": "2", "role": "Член" },
-//             { "userId": "3", "role": "Админ" }
-//         ],
-//         "admin": { "userId": "3" },
-//         "balance": [
-//             { "userId": "1", "sum": 30, "type": "-" },
-//             { "userId": "2", "sum": 30, "type": "-" },
-//             { "userId": "3", "sum": 60, "type": "+" }
-//         ],
-//     },
-//     {
-//         "_id": "3",
-//         "name": "Обмен",
-//         "members": [
-//             { "userId": "1", "role": "Член" },
-//             { "userId": "2", "role": "Админ" }
-//         ],
-//         "admin": { "userId": "2" },
-//         "balance": [
-//             { "userId": "1", "sum": 0, "type": "+" },
-//             { "userId": "2", "sum": 0, "type": "+" }
-//         ],
-//     }
-// ]
-
 // TODO: send different response if the resourse doesnt exist or is not found
 // TODO: filter with search params in the db
 exports.getAll = () => Household.find();
@@ -201,10 +157,13 @@ exports.create = async (householdData) => {
             }))
         ];
 
+        // Identify all admin users
+        const adminUsers = memberList.filter(member => member.role === "Админ").map(admin => admin.user);
+
         // Create the new household
         const newHousehold = new Household({
             name,
-            admin: adminUser._id,
+            admins: adminUsers,
             members: memberList,
             balance: balanceList,
         });
