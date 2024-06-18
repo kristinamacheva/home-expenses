@@ -15,6 +15,7 @@ import ProfileEdit from "./components/profile/profile-edit/ProfileEdit";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AuthGuard from "./components/guards/AuthGuard";
 import GuestGuard from "./components/guards/GuestGuard";
+import HouseholdInvitationList from "./components/household-invitation-list/HouseholdInvitationList";
 
 function App() {
     return (
@@ -31,6 +32,10 @@ function App() {
                             <Route
                                 path={Path.HouseholdDetails}
                                 element={<HouseholdDetails />}
+                            />
+                            <Route
+                                path={Path.HouseholdInvitations}
+                                element={<HouseholdInvitationList/>}
                             />
                             <Route
                                 path={Path.Profile}
