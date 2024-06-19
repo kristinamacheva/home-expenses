@@ -111,7 +111,13 @@ router.put('/:householdId/leave', isAuth, async (req, res) => {
             message: 'Successfully left the household',
         });
     } catch (error) {
-        res.status(500).json(error.message);
+        if (error.statusCode) {
+            res.status(error.statusCode).json({ message: error.message });
+        } else {
+            // Fallback to a generic server error
+            console.error('Error in leaving household:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
     }
 });
 

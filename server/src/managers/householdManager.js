@@ -131,7 +131,9 @@ exports.create = async (householdData) => {
 
         // Fetch member users by their emails
         // const memberEmails = members.map((member) => member.email);
-        const memberUsers = await User.find({ email: { $in: Array.from(uniqueEmails) } }).select('_id email');
+        const memberUsers = await User.find({
+            email: { $in: Array.from(uniqueEmails) },
+        }).select("_id email");
         // console.log(memberUsers);
 
         if (memberUsers.length !== uniqueEmails.size) {
@@ -141,28 +143,35 @@ exports.create = async (householdData) => {
         // Create the new household
         const newHousehold = new Household({
             name,
-            members: [{
-                user: adminUser._id,
-                role: "Админ",
-            }],
+            members: [
+                {
+                    user: adminUser._id,
+                    role: "Админ",
+                },
+            ],
             admins: [adminUser._id],
-            balance: [{
-                user: adminUser._id,
-                sum: 0, // Default sum
-                type: "+", // Default type
-            }],
+            balance: [
+                {
+                    user: adminUser._id,
+                    sum: 0, // Default sum
+                    type: "+", // Default type
+                },
+            ],
         });
 
         // Save the household to the database
         await newHousehold.save();
 
+        //TODO: check if user is already a member
         // Create invitations for each member
         for (const member of members) {
-            const currentUser = memberUsers.find((user) => user.email === member.email);
+            const currentUser = memberUsers.find(
+                (user) => user.email === member.email
+            );
 
             const invitation = new HouseholdInvitation({
                 user: currentUser._id,
-                household: newHousehold._id, 
+                household: newHousehold._id,
                 role: member.role,
                 creator: adminUser._id,
             });
@@ -246,6 +255,61 @@ exports.create = async (householdData) => {
 //         throw error;
 //     }
 // };
+
+// TODO: fix error status
+exports.leave = async (userId, householdId) => {
+    try {
+        const household = await Household.findById(householdId);
+        if (!household) {
+            throw new Error("Household not found");
+        }
+
+        // Check if the user is a member of the household
+        const userIndex = household.members.findIndex(
+            (member) => member.user.toString() === userId
+        );
+        if (userIndex === -1) {
+            const error = {
+                message: "Потребителят не е член на домакинството",
+                statusCode: 404 
+            };
+            throw error;
+        }
+
+        // Check if the user is an admin (using admins array)
+        const isAdmin = household.admins.some(admin => admin.toString() === userId);
+        if (isAdmin) {
+            // If the user is an admin, check if they are the last admin
+            if (household.admins.length === 1) {
+                const error = new Error("You are the only admin in the household and cannot leave");
+                error.statusCode = 403; 
+                throw error;
+            }
+        }
+
+        // Check if the user's role is not "Дете"
+        const userRole = household.members[userIndex].role;
+        if (userRole !== 'Дете') {
+            // Check if the user has a non-zero balance sum
+            const userBalance = household.balance.find(
+                (entry) => entry.user.toString() === userId
+            );
+            if (userBalance && userBalance.sum !== 0) {
+                throw new Error("User cannot leave the household with a non-zero balance");
+            }
+        }
+
+        // Remove the user from the members array
+        household.members.splice(userIndex, 1);
+
+        // Save the updated household
+        await household.save();
+
+        return { message: "Successfully left the household" };
+    } catch (error) {
+        throw error;
+    }
+};
 
 // TODO: Validation, users
 exports.update = (householdId, householdData) =>
