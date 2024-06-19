@@ -9,6 +9,7 @@ import {
     Stack,
     useDisclosure,
     Card,
+    useToast
 } from "@chakra-ui/react";
 
 import * as householdService from "../../services/householdService";
@@ -17,17 +18,28 @@ import AuthContext from "../../contexts/authContext";
 
 export default function HouseholdList() {
     const [households, setHouseholds] = useState([]);
+    const { userId, logoutHandler } = useContext(AuthContext);
+    const toast = useToast();
     
     useEffect(() => {
         householdService
         .getAll()
         .then((result) => setHouseholds(result))
-        .catch((err) => {
-            console.log(err);
+        .catch((error) => {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message,
+                    status: 'error',
+                    duration: 6000,
+                    isClosable: true,
+                    position: 'bottom'
+                  })
+            }
         });
     }, []);
     
-    const { userId } = useContext(AuthContext);
 
     const {
         isOpen: isCreateModalOpen,
@@ -38,6 +50,12 @@ export default function HouseholdList() {
     // TODO: unique key error
     const addHouseholdToState = (newHousehold) => {
         setHouseholds((state) => ([...state, newHousehold]));
+    };
+
+    const removeHouseholdFromState = (householdId) => {
+        setHouseholds((prevHouseholds) => (
+            prevHouseholds.filter((household) => household._id !== householdId)
+        ));
     };
 
     return (
@@ -56,7 +74,7 @@ export default function HouseholdList() {
                 </Card>
                 <Stack mt="4">
                     {households.map((household) => (
-                        <HouseholdListItem key={household._id} {...household} />
+                        <HouseholdListItem key={household._id} {...household} removeHouseholdFromState={removeHouseholdFromState}/>
                     ))}
                 </Stack>
             </Stack>

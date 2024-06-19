@@ -37,6 +37,8 @@ export const AuthProvider = ({
 
     const logoutHandler = () => {
         setUser({});
+
+        navigate(Path.Login);
     }
 
     //auth state се пропагира през provider-а

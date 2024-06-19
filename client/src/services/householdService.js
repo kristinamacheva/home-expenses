@@ -73,5 +73,11 @@ export const edit = async (householdId, householdData) => {
     return result;
 };
 
+export const leave = async (householdId) => {
+    const result = await request.put(`${baseUrl}/${householdId}/leave`);
+
+    return result;
+};
+
 export const remove = async (householdId) => request.remove(`${baseUrl}/${householdId}`);
 

@@ -10,6 +10,7 @@ import {
     IconButton,
     HStack,
     useDisclosure,
+    useToast  
 } from "@chakra-ui/react";
 import { FaEye, FaPen } from "react-icons/fa6";
 import { FaSignOutAlt } from "react-icons/fa";
@@ -17,6 +18,7 @@ import { Link } from "react-router-dom";
 import HouseholdEdit from "./household-edit/HouseholdEdit";
 import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
+import * as householdService from "../../../services/householdService";
 
 export default function HouseholdListItem({
     _id,
@@ -24,6 +26,7 @@ export default function HouseholdListItem({
     members,
     balance,
     admins,
+    removeHouseholdFromState
 }) {
     const {
         isOpen: isEditModalOpen,
@@ -31,10 +34,30 @@ export default function HouseholdListItem({
         onClose: onCloseEditModal,
     } = useDisclosure();
 
-    const { userId } = useContext(AuthContext);
+    const { userId, logoutHandler } = useContext(AuthContext);
+    const toast = useToast();
+
+    const leaveHouseholdHandler = async (householdId) => {
+        try {
+            const result = await householdService.leave(householdId);
+            console.log(result.message);
+            removeHouseholdFromState(householdId); 
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message,
+                    status: 'error',
+                    duration: 6000,
+                    isClosable: true,
+                    position: 'bottom'
+                  })
+            }
+        }
+    };
+
     const isAdmin = admins.includes(userId);
-    console.log(admins);
-    console.log(isAdmin);
 
     const userBalance = balance.find((balanceEntry) => balanceEntry.user._id === userId);
     //TODO: fix the number type if necessary
@@ -143,6 +166,7 @@ export default function HouseholdListItem({
                         icon={<FaSignOutAlt fontSize="20px" />}
                         variant="ghost"
                         color="themePurple.800"
+                        onClick={() => leaveHouseholdHandler(_id)}
                     />
                 </HStack>
             </Card>

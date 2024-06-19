@@ -37,8 +37,13 @@ const request = async (method, url, data) => {
 
     const result = await response.json();
 
+    // TODO: refactor?
     if (!response.ok) {
-        throw result;
+        const error = {
+            status: response.status,
+            message: result.message || 'Request failed',
+        };
+        throw error;
     }
 
     return result;
