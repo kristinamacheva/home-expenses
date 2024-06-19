@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
 const userManager = require('../managers/userManager');
+const { isAuth } = require('../middlewares/authMiddleware');
 
 router.post('/register', async (req, res) => {
     // TODO: add user data to db
@@ -61,7 +62,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/profile', async (req, res) => {
+router.get('/profile', isAuth, async (req, res) => {
     try {
         const userId = req.user._id;
         const user = await userManager.getProfile(userId);
@@ -73,7 +74,7 @@ router.get('/profile', async (req, res) => {
     }
 });
 
-router.put('/profile', async (req, res) => {
+router.put('/profile', isAuth, async (req, res) => {
     try {
         const {
             avatar,
@@ -105,7 +106,7 @@ router.put('/profile', async (req, res) => {
     }
 });
 
-router.get('/logout', (req, res) => {
+router.get('/logout', isAuth, (req, res) => {
     try {
         // TODO: invalidate token
         res.clearCookie('auth');

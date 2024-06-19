@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const paidExpenseManager = require("../managers/paidExpenseManager");
+const { isAuth } = require('../middlewares/authMiddleware');
 
-router.get("/", async (req, res) => {
+router.get("/", isAuth, async (req, res) => {
     try {
         const householdId = req.householdId;
         const paidExpneses = await paidExpenseManager.getAll(householdId);
@@ -13,7 +14,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", isAuth, async (req, res) => {
     const {
         title,
         category,

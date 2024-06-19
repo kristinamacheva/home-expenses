@@ -25,3 +25,14 @@ exports.auth = async (req, res, next) => {
         next();
     }
 };
+
+// checks if you are authenticated
+exports.isAuth = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({
+            message: 'You are not authorized!',
+        })
+    }
+
+    next();
+};

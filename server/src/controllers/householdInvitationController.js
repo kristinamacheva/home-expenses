@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const householdInvitationManager = require('../managers/householdInvitationManager');
+const { isAuth } = require('../middlewares/authMiddleware');
 
-router.get('/', async (req, res) => {
+router.get('/', isAuth, async (req, res) => {
     // TODO: lean?
     try {
         const userId = req.user._id;
@@ -13,7 +14,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.delete('/:invitationId/accept', async (req, res) => {
+router.delete('/:invitationId/accept', isAuth, async (req, res) => {
     // TODO: lean?
     try {
         const userId = req.user._id;
@@ -27,7 +28,7 @@ router.delete('/:invitationId/accept', async (req, res) => {
     }
 });
 
-router.delete('/:invitationId/reject', async (req, res) => {
+router.delete('/:invitationId/reject', isAuth, async (req, res) => {
     // TODO: lean?
     try {
         const userId = req.user._id;

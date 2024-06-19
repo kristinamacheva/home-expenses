@@ -2,8 +2,9 @@ const router = require('express').Router();
 const householdManager = require('../managers/householdManager');
 const getHousehold = require('../middlewares/householdMiddleware');
 const paidExpenseController = require('./paidExpenseController');
+const { isAuth } = require('../middlewares/authMiddleware');
 
-router.get('/', async (req, res) => {
+router.get('/', isAuth, async (req, res) => {
     // TODO: lean?
     try {
         const userId = req.user._id;
@@ -15,7 +16,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', isAuth, async (req, res) => {
     const {
         name,
         members,
@@ -38,7 +39,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.get('/:householdId', async (req, res) => {
+router.get('/:householdId', isAuth, async (req, res) => {
     // TODO: lean?
     const household = await householdManager.getOneWithUsersAndBalance(req.params.householdId).lean();
     console.log(req.user);
@@ -46,7 +47,7 @@ router.get('/:householdId', async (req, res) => {
 });
 
 // TODO: better approach
-router.get('/:householdId/members', async (req, res) => {
+router.get('/:householdId/members', isAuth, async (req, res) => {
     const { role, details } = req.query;
     let users;
 
@@ -67,7 +68,7 @@ router.get('/:householdId/members', async (req, res) => {
     }
 });
 
-router.get('/:householdId/balances', async (req, res) => {
+router.get('/:householdId/balances', isAuth, async (req, res) => {
     const { details } = req.query;
     let balances;
 
@@ -84,22 +85,37 @@ router.get('/:householdId/balances', async (req, res) => {
     }
 });
 
-router.get('/:householdId/reduced', async (req, res) => {
+router.get('/:householdId/reduced', isAuth, async (req, res) => {
     const household = await householdManager.getOneReducedData(req.params.householdId);
     res.json(household);
 });
 
 // TODO: update status
-router.put('/:householdId', async (req, res) => {
+router.put('/:householdId', isAuth, async (req, res) => {
     const household = await householdManager.update(req.params.householdId, req.body);
     res.json(household);
 });
 
-router.delete('/:householdId', async (req, res) => {
+router.delete('/:householdId', isAuth, async (req, res) => {
     await householdManager.delete(req.params.householdId);
     // TODO: result
     res.status(204).end();
 });
+
+router.put('/:householdId/leave', isAuth, async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const householdId = req.params.householdId;
+        const result = await householdManager.leave(userId, householdId);
+        res.status(200).json({
+            message: 'Successfully left the household',
+        });
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
+});
+
+module.exports = router;
 
 router.use('/:householdId/paidExpenses', getHousehold, paidExpenseController);
 
