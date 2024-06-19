@@ -1,6 +1,5 @@
 const bcrypt = require("bcrypt");
 const jwt = require("../lib/jwt");
-const { SECRET } = require("../config/config");
 
 const User = require("../models/User");
 const { getRandomColor } = require("../utils/color/color");
@@ -88,12 +87,17 @@ exports.update = async ({
 };
 
 async function getAuthResult(user) {
+    const ACCESS_TOKEN = {
+        secret: process.env.AUTH_ACCESS_TOKEN_SECRET,
+        expiry: process.env.AUTH_ACCESS_TOKEN_EXPIRY,
+    };
+
     const payload = {
         _id: user._id,
         email: user.email,
     };
 
-    const token = await jwt.sign(payload, SECRET, { expiresIn: "2d" });
+    const token = await jwt.sign(payload, ACCESS_TOKEN.secret, { expiresIn: ACCESS_TOKEN.expiry });
 
     return {
         token,

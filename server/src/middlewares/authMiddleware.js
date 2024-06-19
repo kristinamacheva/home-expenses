@@ -1,13 +1,16 @@
 const jwt = require('../lib/jwt');
-const { SECRET } = require('../config/config');
 
 exports.auth = async (req, res, next) => {
+    const ACCESS_TOKEN = {
+        secret: process.env.AUTH_ACCESS_TOKEN_SECRET,
+    };
+
     const token = req.cookies['auth'];
 
     if (token) {
         try {
             // returns payload
-            const decodedToken = await jwt.verify(token, SECRET);
+            const decodedToken = await jwt.verify(token, ACCESS_TOKEN.secret);
 
             req.user = decodedToken;
 
