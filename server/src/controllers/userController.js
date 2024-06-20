@@ -1,10 +1,24 @@
 const router = require('express').Router();
 
+const { validationResult } = require('express-validator');
 const userManager = require('../managers/userManager');
 const { isAuth } = require('../middlewares/authMiddleware');
+const { loginValidator, registerValidator } = require('../validators/userValidator');
 
-router.post('/register', async (req, res) => {
-    // TODO: add user data to db
+router.post('/register', registerValidator, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({
+            message: 'Данните са некоректни',
+            errors: errors.array().map(err => ({
+                field: err.path,
+                message: err.msg
+            }))
+        });
+    }
+
     const {
         name,
         email,
@@ -35,7 +49,20 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginValidator, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({
+            message: 'Данните са некоректни',
+            errors: errors.array().map(err => ({
+                field: err.path,
+                message: err.msg
+            }))
+        });
+    }
+
     const {
         email,
         password,
