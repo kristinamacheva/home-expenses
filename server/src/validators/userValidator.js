@@ -9,7 +9,8 @@ module.exports.loginValidator = [
         .withMessage("Имейлът не може да бъде празен")
         .bail()
         .isEmail()
-        .withMessage("Имейлът е невалиден"),
+        .withMessage("Имейлът е невалиден")
+        .normalizeEmail(),
     body("password").trim().notEmpty().withMessage("Паролата не може да бъде празна"),
 ];
 
