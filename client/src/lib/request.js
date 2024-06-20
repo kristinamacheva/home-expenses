@@ -42,7 +42,9 @@ const request = async (method, url, data) => {
         const error = {
             status: response.status,
             message: result.message || 'Request failed',
+            errors: result.errors || []
         };
+        console.log(error);
         throw error;
     }
 

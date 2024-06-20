@@ -5,24 +5,38 @@ import AuthContext from "../contexts/authContext";
 const baseUrl = "http://localhost:5000/users";
 
 export const login = async ({ email, password }) => {
-    const result = await request.post(`${baseUrl}/login`, {
-        email,
-        password,
-    });
+    try {
+        const result = await request.post(`${baseUrl}/login`, {
+            email,
+            password,
+        });
 
-    return result;
+        return result;
+    } catch (error) {
+        console.error('Login failed:', error);
+        console.log(error);
+
+        throw error;
+    }
 };
 
 export const register = async ({ name, email, phone, password, repeatPassword }) => {
-    const result = await request.post(`${baseUrl}/register`, {
-        name,
-        email,
-        phone,
-        password,
-        repeatPassword
-    });
-    
-    return result;
+    try {
+        const result = await request.post(`${baseUrl}/register`, {
+            name,
+            email,
+            phone,
+            password,
+            repeatPassword
+        });
+
+        return result;
+    } catch (error) {
+        console.error('Register failed:', error);
+        console.log(error);
+
+        throw error;
+    }
 };
 
 export const getProfile = async () => {
