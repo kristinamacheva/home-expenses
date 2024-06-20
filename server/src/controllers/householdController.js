@@ -4,10 +4,10 @@ const getHousehold = require('../middlewares/householdMiddleware');
 const paidExpenseController = require('./paidExpenseController');
 const { isAuth } = require('../middlewares/authMiddleware');
 
-router.get('/', isAuth, async (req, res) => {
+router.get('/', async (req, res) => {
     // TODO: lean?
     try {
-        const userId = req.user._id;
+        const userId = req.userId
         const households = await householdManager.getAllWithUsers(userId);
         res.json(households);
     } catch (error) {
@@ -16,7 +16,7 @@ router.get('/', isAuth, async (req, res) => {
     }
 });
 
-router.post('/', isAuth, async (req, res) => {
+router.post('/', async (req, res) => {
     const {
         name,
         members,
@@ -26,7 +26,7 @@ router.post('/', isAuth, async (req, res) => {
         const newHousehold = await householdManager.create({
             name,
             members,
-            admin: req.user._id,
+            admin: req.userId,
             // admin: '664f630fb14becfeb98d2e1f',
         });
 
@@ -39,10 +39,12 @@ router.post('/', isAuth, async (req, res) => {
     }
 });
 
+// Middleware to get householdId
+router.use('/:householdId', getHousehold);
+
 router.get('/:householdId', isAuth, async (req, res) => {
     // TODO: lean?
     const household = await householdManager.getOneWithUsersAndBalance(req.params.householdId).lean();
-    console.log(req.user);
     res.json(household);
 });
 
@@ -104,7 +106,7 @@ router.delete('/:householdId', isAuth, async (req, res) => {
 
 router.put('/:householdId/leave', isAuth, async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.userId;
         const householdId = req.params.householdId;
         const result = await householdManager.leave(userId, householdId);
         res.status(200).json({
@@ -121,8 +123,6 @@ router.put('/:householdId/leave', isAuth, async (req, res) => {
     }
 });
 
-module.exports = router;
-
-router.use('/:householdId/paidExpenses', getHousehold, paidExpenseController);
+router.use('/:householdId/paidExpenses', paidExpenseController);
 
 module.exports = router;

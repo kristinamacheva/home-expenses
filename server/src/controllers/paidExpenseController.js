@@ -30,8 +30,8 @@ router.post("/", isAuth, async (req, res) => {
         const newPaidExpense = await paidExpenseManager.create({
             title,
             category,
-            // creator: req.user._id,
-            creator: '664f630fb14becfeb98d2e1f',
+            creator: req.userId,
+            // creator: '664f630fb14becfeb98d2e1f',
             amount,
             date,
             paidSplitType,

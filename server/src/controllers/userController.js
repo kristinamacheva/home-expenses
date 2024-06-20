@@ -64,7 +64,7 @@ router.post('/login', async (req, res) => {
 
 router.get('/profile', isAuth, async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.userId;
         const user = await userManager.getProfile(userId);
 
         res.json(user);
@@ -86,7 +86,7 @@ router.put('/profile', isAuth, async (req, res) => {
             repeatPassword,
         } = req.body;
 
-        const userId = req.user._id;
+        const userId = req.userId;
 
         const { token, user } = await userManager.update({ userId, avatar, name, email, phone, oldPassword, password, repeatPassword });
 

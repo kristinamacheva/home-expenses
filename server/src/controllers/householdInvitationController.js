@@ -5,7 +5,7 @@ const { isAuth } = require('../middlewares/authMiddleware');
 router.get('/', isAuth, async (req, res) => {
     // TODO: lean?
     try {
-        const userId = req.user._id;
+        const userId = req.userId;
         const invitations = await householdInvitationManager.getAll(userId);
         res.json(invitations);
     } catch (error) {
@@ -17,7 +17,7 @@ router.get('/', isAuth, async (req, res) => {
 router.delete('/:invitationId/accept', isAuth, async (req, res) => {
     // TODO: lean?
     try {
-        const userId = req.user._id;
+        const userId = req.userId;
         const invitationId = req.params.invitationId;
         const householdId = await householdInvitationManager.accept(userId, invitationId);
         
@@ -31,7 +31,7 @@ router.delete('/:invitationId/accept', isAuth, async (req, res) => {
 router.delete('/:invitationId/reject', isAuth, async (req, res) => {
     // TODO: lean?
     try {
-        const userId = req.user._id;
+        const userId = req.userId;
         const invitationId = req.params.invitationId;
         const result = await householdInvitationManager.reject(userId, invitationId);
         
