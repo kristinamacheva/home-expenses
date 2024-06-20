@@ -26,14 +26,7 @@ exports.create = async (paidExpenseData) => {
 
         // Fetch the admin user by ID
         const expenseCreator = await User.findById(creator);
-        if (!expenseCreator) {
-            throw new Error(`Creator with ID ${creator} not found`);
-        }
-
         const expenseHousehold = await Household.findById(household);
-        if (!expenseHousehold) {
-            throw new Error(`Household with ID ${household} not found`);
-        }
 
         // Extract member IDs from the household
         const householdMemberIds = expenseHousehold.members.map((member) =>

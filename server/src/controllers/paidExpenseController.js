@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const paidExpenseManager = require("../managers/paidExpenseManager");
 const { isAuth } = require('../middlewares/authMiddleware');
+const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
 
-router.get("/", isAuth, async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const householdId = req.householdId;
         const paidExpneses = await paidExpenseManager.getAll(householdId);
@@ -14,7 +15,7 @@ router.get("/", isAuth, async (req, res) => {
     }
 });
 
-router.post("/", isAuth, async (req, res) => {
+router.post("/", async (req, res) => {
     const {
         title,
         category,
@@ -49,6 +50,8 @@ router.post("/", isAuth, async (req, res) => {
         });
     }
 });
+
+router.use('/:paidExpenseId', getPaidExpense);
 
 // router.get('/:paidExpenseId', async (req, res) => {
 //     // TODO: lean?

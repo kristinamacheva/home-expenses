@@ -31,9 +31,6 @@ exports.login = async ({ email, password }) => {
 
 exports.getProfile = async (userId) => {
     const user = await User.findById(userId).select("-password");
-    if (!user) {
-        throw new Error("Cannot find user");
-    }
 
     return user;
 };
@@ -49,9 +46,6 @@ exports.update = async ({
     repeatPassword,
 }) => {
     const user = await User.findById(userId);
-    if (!user) {
-        throw new Error("Cannot find user");
-    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser && existingUser._id.toString() !== userId) {

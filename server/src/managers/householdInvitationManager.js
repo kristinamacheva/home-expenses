@@ -11,68 +11,38 @@ exports.getAll = async (userId) => {
     return result;
 };
 
-const verify = {
-    // Verify user existence by ID
-    user: async (userId) => {
-        const user = await User.findById(userId);
-        if (!user) {
-            throw new Error('User not found');
-        }
-        return user;
-    },
-
-    // Verify invitation existence by ID
-    invitation: async (invitationId) => {
-        const invitation = await HouseholdInvitation.findById(invitationId);
-        if (!invitation) {
-            throw new Error('Invitation not found');
-        }
-        return invitation;
-    },
-
-    // Verify household existence by ID
-    household: async (householdId) => {
-        const household = await Household.findById(householdId);
-        if (!household) {
-            throw new Error('Household not found');
-        }
-        return household;
-    }
-};
-
 exports.accept = async (userId, invitationId) => {
     try {
-        // Verify user existence
-        const user = await verify.user(userId);
-
-        // Verify invitation existence
-        const invitation = await verify.invitation(invitationId);
+        const invitation = await HouseholdInvitation.findById(invitationId);
 
         // Verify that the invitation is for the current user
         if (invitation.user.toString() !== userId) {
             throw new Error('Unauthorized: User does not match invitation');
         }
 
-        // Retrieve household information
-        const household = await verify.household(invitation.household);
+        const household = await Household.findById(invitation.household);
+
+        if (!household) {
+            throw new Error('Household not found');
+        }
 
         const role = invitation.role;
 
         // Add user to the household members
         household.members.push({
-            user: user._id,
+            user: userId,
             role: role
         });
 
         // Update admins array if the user's role is "Админ"
         if (role === 'Админ') {
-            household.admins.push(user._id);
+            household.admins.push(userId);
         }
 
         // Add to balance with default values if the user's role is not "Дете"
         if (role !== 'Дете') {
             household.balance.push({
-                user: user._id,
+                user: userId,
                 sum: 0,   
                 type: "+", 
             });
@@ -93,11 +63,7 @@ exports.accept = async (userId, invitationId) => {
 
 exports.reject = async (userId, invitationId) => {
     try {
-        // Verify user existence
-        const user = await verify.user(userId);
-
-        // Verify invitation existence
-        const invitation = await verify.invitation(invitationId);
+        const invitation = await HouseholdInvitation.findById(invitationId);
 
         // Verify that the invitation is for the current user
         if (invitation.user.toString() !== userId) {

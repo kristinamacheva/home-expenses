@@ -260,9 +260,6 @@ exports.create = async (householdData) => {
 exports.leave = async (userId, householdId) => {
     try {
         const household = await Household.findById(householdId);
-        if (!household) {
-            throw new Error("Household not found");
-        }
 
         // Check if the user is a member of the household
         const userIndex = household.members.findIndex(

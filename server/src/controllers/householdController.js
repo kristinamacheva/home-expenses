@@ -3,6 +3,7 @@ const householdManager = require('../managers/householdManager');
 const getHousehold = require('../middlewares/householdMiddleware');
 const paidExpenseController = require('./paidExpenseController');
 const { isAuth } = require('../middlewares/authMiddleware');
+const getPaidExpense = require('../middlewares/paidExpenseMiddleware');
 
 router.get('/', async (req, res) => {
     // TODO: lean?
@@ -42,26 +43,29 @@ router.post('/', async (req, res) => {
 // Middleware to get householdId
 router.use('/:householdId', getHousehold);
 
-router.get('/:householdId', isAuth, async (req, res) => {
+router.get('/:householdId', async (req, res) => {
     // TODO: lean?
-    const household = await householdManager.getOneWithUsersAndBalance(req.params.householdId).lean();
+    const householdId = req.householdId;
+
+    const household = await householdManager.getOneWithUsersAndBalance(householdId).lean();
     res.json(household);
 });
 
 // TODO: better approach
-router.get('/:householdId/members', isAuth, async (req, res) => {
+router.get('/:householdId/members', async (req, res) => {
     const { role, details } = req.query;
     let users;
+    const householdId = req.householdId;
 
     try {
         if (details === 'true') {
-            users = await householdManager.getAllMembersDetails(req.params.householdId);
+            users = await householdManager.getAllMembersDetails(householdId);
         } else if (role === 'child') {
-            users = await householdManager.getAllChildMembers(req.params.householdId);
+            users = await householdManager.getAllChildMembers(householdId);
         } else if (role === 'not-child') {
-            users = await householdManager.getAllNonChildMembers(req.params.householdId);
+            users = await householdManager.getAllNonChildMembers(householdId);
         } else {
-            users = await householdManager.getAllMembers(req.params.householdId);
+            users = await householdManager.getAllMembers(householdId);
         }
 
         res.json(users);
@@ -70,15 +74,16 @@ router.get('/:householdId/members', isAuth, async (req, res) => {
     }
 });
 
-router.get('/:householdId/balances', isAuth, async (req, res) => {
+router.get('/:householdId/balances', async (req, res) => {
     const { details } = req.query;
     let balances;
+    const householdId = req.householdId;
 
     try {
         if (details === 'true') {
-            balances = await householdManager.getAllBalancesDetails(req.params.householdId);
+            balances = await householdManager.getAllBalancesDetails(householdId);
         } else {
-            balances = await householdManager.getAllBalances(req.params.householdId);
+            balances = await householdManager.getAllBalances(householdId);
         }
 
         res.json(balances);
@@ -87,27 +92,33 @@ router.get('/:householdId/balances', isAuth, async (req, res) => {
     }
 });
 
-router.get('/:householdId/reduced', isAuth, async (req, res) => {
-    const household = await householdManager.getOneReducedData(req.params.householdId);
+router.get('/:householdId/reduced', async (req, res) => {
+    const householdId = req.householdId;
+
+    const household = await householdManager.getOneReducedData(householdId);
     res.json(household);
 });
 
 // TODO: update status
-router.put('/:householdId', isAuth, async (req, res) => {
-    const household = await householdManager.update(req.params.householdId, req.body);
+router.put('/:householdId', async (req, res) => {
+    const householdId = req.householdId;
+
+    const household = await householdManager.update(householdId, req.body);
     res.json(household);
 });
 
-router.delete('/:householdId', isAuth, async (req, res) => {
-    await householdManager.delete(req.params.householdId);
+router.delete('/:householdId', async (req, res) => {
+    const householdId = req.householdId;
+
+    await householdManager.delete(householdId);
     // TODO: result
     res.status(204).end();
 });
 
-router.put('/:householdId/leave', isAuth, async (req, res) => {
+router.put('/:householdId/leave', async (req, res) => {
     try {
         const userId = req.userId;
-        const householdId = req.params.householdId;
+        const householdId = req.householdId;
         const result = await householdManager.leave(userId, householdId);
         res.status(200).json({
             message: 'Successfully left the household',
@@ -123,6 +134,6 @@ router.put('/:householdId/leave', isAuth, async (req, res) => {
     }
 });
 
-router.use('/:householdId/paidExpenses', paidExpenseController);
+router.use('/:householdId/paidExpenses', getPaidExpense, paidExpenseController);
 
 module.exports = router;
