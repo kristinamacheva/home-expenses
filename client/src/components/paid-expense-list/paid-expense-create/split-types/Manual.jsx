@@ -48,31 +48,48 @@ export default function Manual({
 
     // TODO: update state only when the amounts are correct - if not - error
     const handleMessageChange = (newAmounts) => {
-        const totalEntered = newAmounts.reduce(
-            (acc, member) => acc + member.sum,
+        const totalEnteredInCents = newAmounts.reduce(
+            (acc, member) => acc + parseFloat(member.sum) * 100,
             0
         );
-        if (totalEntered > amount) {
+    
+        const totalAmountInCents = amount * 100;
+    
+        if (totalEnteredInCents > totalAmountInCents) {
             setMessageColor("red.400");
             setMessage(
                 `Сборът от сумите надвишава сумата на разхода с ${
-                    totalEntered - amount
+                    ((totalEnteredInCents - totalAmountInCents) / 100).toFixed(2)
                 } лв.`
             );
-        } else if (totalEntered < amount) {
+        } else if (totalEnteredInCents < totalAmountInCents) {
             setMessageColor("red.400");
-            setMessage(`Трябва да доплатите още ${amount - totalEntered} лв.`);
+            setMessage(
+                `Трябва да доплатите още ${((totalAmountInCents - totalEnteredInCents) / 100).toFixed(2)} лв.`
+            );
         } else {
             setMessageColor("green.400");
             setMessage("Сборът от сумите е равен на сумата на разхода");
         }
+    
         onUpdate(newAmounts, message);
     };
-
+    
     const handleChange = (id, value) => {
+        // Restricting input to 2 decimal places
+        const regex = /^\d*([\,\.]?\d{0,2})?$/;
+        // const regex = /^\d*([\,\.]?\d{0,2})?$/;
+        // TODO: . issue
+        
+        if (!regex.test(value)) {
+            // If input does not match the regex, do not update state
+            return;
+        }
+
         const newAmounts = manualAmounts.map((entry) =>
             entry._id === id ? { ...entry, sum: parseFloat(value) || 0 } : entry
         );
+        
         setManualAmounts(newAmounts);
         handleMessageChange(newAmounts);
     };
@@ -91,35 +108,6 @@ export default function Manual({
         setManualAmounts(newAmounts);
         handleMessageChange(newAmounts);
     };
-
-    // const handleChange = (index, value) => {
-    //     const newAmounts = [...manualAmounts];
-    //     newAmounts[index].sum = parseFloat(value) || 0;
-    //     setManualAmounts(newAmounts);
-
-    //     const totalEntered = newAmounts.reduce((acc, member) => acc + member.sum, 0);
-    //     if (totalEntered > amount) {
-    //         setError('Total entered amounts exceed the total amount');
-    //     } else {
-    //         setError('');
-    //         onUpdate(newAmounts);
-    //     }
-    // };
-
-    // const onMemberRemove = (index) => {
-    //     if (splitManualMembers.length <= 2) {
-    //         return;
-    //     }
-
-    //     const updatedMembers = [...splitManualMembers];
-    //     updatedMembers.splice(index, 1);
-    //     setSplitManualMembers(updatedMembers);
-
-    //     const newAmounts = [...manualAmounts];
-    //     newAmounts.splice(index, 1);
-    //     setManualAmounts(newAmounts);
-    //     onUpdate(newAmounts);
-    // };
 
     return (
         <Flex
