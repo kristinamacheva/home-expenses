@@ -27,18 +27,30 @@ router.post("/", async (req, res) => {
         owed,
     } = req.body;
 
+    const parsedPaid = paid.map((entry) => ({
+        user: entry._id,
+        sum: parseFloat(entry.sum),
+    }));
+
+    const parsedOwed = owed.map((entry) => ({
+        user: entry._id,
+        sum: parseFloat(entry.sum),
+    }));
+
+    const parsedAmount = parseFloat(amount);
+
     try {
         const newPaidExpense = await paidExpenseManager.create({
             title,
             category,
             creator: req.userId,
             // creator: '664f630fb14becfeb98d2e1f',
-            amount,
+            amount: parsedAmount,
             date,
             paidSplitType,
-            paid,
+            paid: parsedPaid,
             owedSplitType,
-            owed,
+            owed: parsedOwed,
             household: req.householdId,
         });
 

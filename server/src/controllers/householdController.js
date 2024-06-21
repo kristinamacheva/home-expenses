@@ -134,6 +134,6 @@ router.put('/:householdId/leave', async (req, res) => {
     }
 });
 
-router.use('/:householdId/paidExpenses', getPaidExpense, paidExpenseController);
+router.use('/:householdId/paidExpenses', paidExpenseController);
 
 module.exports = router;
