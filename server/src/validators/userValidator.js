@@ -33,7 +33,7 @@ module.exports.registerValidator = [
             }
         }),
     body("phone")
-        .optional() // Makes the phone field optional
+        .optional({checkFalsy: true}) // Makes the phone field optional
         .isMobilePhone("any") // Validates that the phone is a valid mobile phone number
         .withMessage("Невалиден телефонен номер"),
     body("password")
@@ -42,7 +42,7 @@ module.exports.registerValidator = [
         .withMessage("Паролата не може да бъде празна")
         .bail()
         .isLength({ min: 8 })
-        .withMessage("Паролата трябва да е поне с 8 символа")
+        .withMessage("Паролата трябва да е поне 8 символа")
         .bail()
         .matches(/\d/)
         .withMessage("Паролата трябва да съдържа поне една цифра")
@@ -50,7 +50,7 @@ module.exports.registerValidator = [
         .matches(/[a-zA-Z]/)
         .withMessage("Паролата трябва да съдържа поне една буква")
         .bail()
-        .matches(/[!@#$%^&*(),.?":{}|<>-_]/)
+        .matches(/[!@#$%^&*(),.?":{}|<>\-_]/)
         .withMessage("Паролата трябва да съдържа поне един специален символ"),
     body("repeatPassword")
         .trim()
