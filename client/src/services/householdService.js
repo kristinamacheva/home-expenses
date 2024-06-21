@@ -30,7 +30,7 @@ export const getOneReducedData = async (householdId) => {
 
 export const getAllNonChildMembers = async (householdId) => {
     try {
-        const result = await request.get(`${baseUrl}/${householdId}/members?role=not-child'`);
+        const result = await request.get(`${baseUrl}/${householdId}/members?role=not-child`);
         console.log(result);
         return result;
     } catch (error) {
