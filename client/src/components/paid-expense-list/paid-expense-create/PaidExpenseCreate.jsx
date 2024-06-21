@@ -30,8 +30,20 @@ import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
 import { FaRegTrashCan } from "react-icons/fa6";
 import * as householdService from "../../../services/householdService";
+import * as paidExpenseService from "../../../services/paidExpenseService";
 import { useParams } from "react-router-dom";
 import Equally from "./split-types/Equally";
+import Manual from "./split-types/Manual";
+
+const initialValues = {
+    title: "",
+    amount: "0",
+    category: "",
+    date: moment().format("YYYY-MM-DD"),
+    payersOptionField: "",
+    paidSplitTypeField: "",
+    owedSplitTypeField: "",
+};
 
 export default function PaidExpenseCreate({ isOpen, onClose }) {
     // const newPaidExpense = await paidExpenseManager.create({
@@ -54,6 +66,8 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     const [paid, setPaid] = useState([]);
     const [owed, setOwed] = useState([]);
 
+    const [values, setValues] = useState(initialValues);
+
     useEffect(() => {
         householdService
             .getAllNonChildMembers(householdId)
@@ -65,18 +79,6 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
 
     console.log(householdMembers);
 
-    const initialValues = {
-        title: "",
-        amount: "0",
-        category: "",
-        date: moment().format("YYYY-MM-DD"),
-        payersOption: "",
-        paidSplitType: "",
-        owedSplitType: "",
-    };
-
-    const [values, setValues] = useState(initialValues);
-
     const onChange = (e) => {
         setValues((state) => ({
             ...state,
@@ -87,18 +89,63 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     const onSubmit = (e) => {
         e.preventDefault();
 
-        console.log(values);
+        // TODO: Check if the options are selected first
+        // ["Единично", "Поравно", "Ръчно"],
+        let paidSplitType = "";
+        if (values.payersOptionField === "currentUser") {
+            setPaid([{ _id: userId, sum: values.amount }]);
+            paidSplitType = "Единично";
+        } else {
+            values.paidSplitTypeField === "equally"
+                ? (paidSplitType = "Поравно")
+                : (paidSplitType = "Ръчно");
+        }
+
+        const owedSplitType =
+            values.splittingOption === "equally"
+                ? "Поравно"
+                : values.splittingOption === "percent"
+                ? "Процент"
+                : "Ръчно";
+
+        const newPaidExpense = {
+            title: values.title,
+            amount: values.amount,
+            date: values.date,
+            paidSplitType: paidSplitType,
+            paid: paid,
+            owedSplitType: owedSplitType,
+            owed: owed,
+        };
+
+        console.log(newPaidExpense);
+        paidExpenseService.create(householdId, newPaidExpense);
     };
 
-    const clearFormHandler = () => {
-        setValues(initialValues);
-    };
+    // const clearFormHandler = () => {
+    //     setValues(initialValues);
+    // };
 
     const onCloseForm = () => {
-        clearFormHandler();
+        // clearFormHandler();
         onClose();
     };
 
+    const handlePaidEquallyUpdate = (splitEquallyMembers) => {
+        setPaid(splitEquallyMembers);
+    };
+
+    const handlePaidManualUpdate = (paidManualMembers, message) => {
+        if (message === "Сборът от сумите е равен на сумата на разхода") {
+            setPaid(paidManualMembers);
+        }
+    };
+
+    const handleOwedEquallyUpdate = (owedEquallyMembers) => {
+        setOwed(owedEquallyMembers);
+    };
+
+    // TODO: Други потребители, единично опция
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>
             <ModalOverlay />
@@ -117,7 +164,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                             <FormControl mb={4}>
                                 <FormLabel>Заглавие*</FormLabel>
                                 <Input
-                                    type="number"
+                                    type="text"
                                     name="title"
                                     value={values.title}
                                     onChange={onChange}
@@ -189,8 +236,8 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                             <FormControl mb={2}>
                                 <FormLabel>Платец*</FormLabel>
                                 <Select
-                                    name="payersOption"
-                                    value={values.payersOption}
+                                    name="payersOptionField"
+                                    value={values.payersOptionField}
                                     onChange={onChange}
                                     placeholder="Изберете платец"
                                 >
@@ -203,7 +250,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                 </Select>
                             </FormControl>
 
-                            {values.payersOption === "currentUser" && (
+                            {values.payersOptionField === "currentUser" && (
                                 <Card
                                     p="4"
                                     width="47%"
@@ -232,20 +279,11 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                         direction="row"
                                     >
                                         <Text mr="1">{values.amount} лв.</Text>
-                                        <IconButton
-                                            aria-label="Изтрийте"
-                                            title="Изтрийте"
-                                            icon={
-                                                <FaRegTrashCan fontSize="20px" />
-                                            }
-                                            variant="ghost"
-                                            color="themePurple.800"
-                                        />
                                     </Stack>
                                 </Card>
                             )}
 
-                            {values.payersOption === "changedUser" && (
+                            {values.payersOptionField === "changedUser" && (
                                 <Stack>
                                     <Stack>
                                         <FormControl mb={2}>
@@ -253,25 +291,37 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                                 Метод на разпределяне*
                                             </FormLabel>
                                             <Select
-                                                name="paidSplitType"
-                                                value={values.paidSplitType}
+                                                name="paidSplitTypeField"
+                                                value={
+                                                    values.paidSplitTypeField
+                                                }
                                                 onChange={onChange}
                                                 placeholder="Изберете метод"
                                             >
-                                                <option value="Поравно">
+                                                <option value="equally">
                                                     Поравно
                                                 </option>
-                                                <option value="Ръчно">
+                                                <option value="manual">
                                                     Ръчно
                                                 </option>
                                             </Select>
                                         </FormControl>
                                     </Stack>
-                                    {values.paidSplitType === "Поравно" && (
+                                    {values.paidSplitTypeField ===
+                                        "equally" && (
                                         <Equally
                                             amount={values.amount}
                                             members={householdMembers}
-                                            // onUpdate={handlePaidEquallyUpdate}
+                                            onUpdate={handlePaidEquallyUpdate}
+                                            showCreatorDeleteButton={false}
+                                        />
+                                    )}
+                                    {values.paidSplitTypeField === "manual" && (
+                                        <Manual
+                                            amount={values.amount}
+                                            members={householdMembers}
+                                            onUpdate={handlePaidManualUpdate}
+                                            showCreatorDeleteButton={false}
                                         />
                                     )}
                                 </Stack>
@@ -295,7 +345,8 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                 <Equally
                                     amount={values.amount}
                                     members={householdMembers}
-                                    // onUpdate={handleOwedEquallyUpdate}
+                                    onUpdate={handleOwedEquallyUpdate}
+                                    showCreatorDeleteButton={true}
                                 />
                             )}
 
@@ -304,7 +355,12 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                             )}
 
                             {values.splittingOption === "manual" && (
-                                <Text>Ръчно</Text>
+                                <Manual
+                                    amount={values.amount}
+                                    members={householdMembers}
+                                    onUpdate={handlePaidManualUpdate}
+                                    showCreatorDeleteButton={true}
+                                />
                             )}
                         </Stack>
                     </form>
