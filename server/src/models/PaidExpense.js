@@ -2,39 +2,72 @@ const mongoose = require("mongoose");
 
 const paidExpenseSchema = new mongoose.Schema(
     {
-        title: { type: String, required: true },
+        title: {
+            type: String,
+            required: [true, "Полето 'Заглавие' е задължително"],
+        },
         category: { type: String },
-        creator: { type: mongoose.Types.ObjectId, ref: "User", required: true },
-        amount: { type: Number, required: true },
-        date: { type: Date, required: true },
+        creator: {
+            type: mongoose.Types.ObjectId,
+            ref: "User",
+            required: [true, "Полето 'Създател' е задължително"],
+        },
+        amount: {
+            type: Number,
+            required: [true, "Полето 'Сума' е задължително"],
+        },
+        date: { type: Date, required: [true, "Полето 'Дата' е задължително"] },
         paidSplitType: {
             type: String,
-            enum: ["Единично", "Поравно", "Ръчно"],
-            required: true,
+            enum: {
+                values: ["Единично", "Поравно", "Ръчно"],
+                message:
+                    "Невалиден тип на разпределение за плащане. Позволени стойности са 'Единично', 'Поравно' или 'Ръчно'.",
+            },
+            required: [
+                true,
+                "Полето 'Тип на разпределение за плащане' е задължително",
+            ],
         },
         paid: [
             {
                 user: {
                     type: mongoose.Types.ObjectId,
                     ref: "User",
-                    required: true,
+                    required: [true, "Полето 'Платец' е задължително"],
                 },
-                sum: { type: Number, required: true },
+                sum: {
+                    type: Number,
+                    required: [true, "Полето 'Сума за плащане' е задължително"],
+                },
             },
         ],
         owedSplitType: {
             type: String,
-            enum: ["Поравно", "Процентно", "Ръчно"],
-            required: true,
+            enum: {
+                values: ["Поравно", "Процентно", "Ръчно"],
+                message:
+                    "Невалиден тип на разпределение на задължение. Позволени стойности са 'Поравно', 'Процентно' или 'Ръчно'.",
+            },
+            required: [
+                true,
+                "Полето 'Тип на разпределение на задължение' е задължително",
+            ],
         },
         owed: [
             {
                 user: {
                     type: mongoose.Types.ObjectId,
                     ref: "User",
-                    required: true,
+                    required: [
+                        true,
+                        "Полето 'Потребител за дължима сума' е задължително",
+                    ],
                 },
-                sum: { type: Number, required: true },
+                sum: {
+                    type: Number,
+                    required: [true, "Полето 'Дължима сума' е задължително"],
+                },
             },
         ],
         balance: [
@@ -42,16 +75,33 @@ const paidExpenseSchema = new mongoose.Schema(
                 user: {
                     type: mongoose.Types.ObjectId,
                     ref: "User",
-                    required: true,
+                    required: [
+                        true,
+                        "Полето 'Потребител за баланс' е задължително",
+                    ],
                 },
-                sum: { type: Number, required: true },
-                type: { type: String, enum: ["+", "-"], required: true },
+                sum: {
+                    type: Number,
+                    required: [true, "Полето 'Сума за баланс' е задължително"],
+                },
+                type: {
+                    type: String,
+                    enum: {
+                        values: ["+", "-"],
+                        message:
+                            "Невалиден тип на баланс. Позволени стойности са '+' или '-'.",
+                    },
+                    required: [true, "Полето 'Тип на баланс' е задължително"],
+                },
             },
         ],
         expenseStatus: {
             type: String,
-            enum: ["Одобрен", "За одобрение", "Отхвърлен"],
-            required: true,
+            enum: {
+                values: ["Одобрен", "За одобрение", "Отхвърлен"],
+                message:
+                    "Невалиден статус на разхода. Позволени стойности са 'Одобрен', 'За одобрение' или 'Отхвърлен'.",
+            },
             default: "За одобрение",
         },
         userApprovals: [
@@ -63,7 +113,11 @@ const paidExpenseSchema = new mongoose.Schema(
                 },
                 status: {
                     type: String,
-                    enum: ["Одобрен", "За одобрение", "Отхвърлен"],
+                    enum: {
+                        values: ["Одобрен", "За одобрение", "Отхвърлен"],
+                        message:
+                            "Невалиден статус за одобрение. Позволени стойности са 'Одобрен', 'За одобрение' или 'Отхвърлен'.",
+                    },
                     default: "За одобрение",
                 },
             },
@@ -71,13 +125,13 @@ const paidExpenseSchema = new mongoose.Schema(
         household: {
             type: mongoose.Types.ObjectId,
             ref: "Household",
-            required: true,
+            required: [true, "Полето 'Домакинство' е задължително"],
         },
     },
-    // automatically adds and manages createdAt and updatedAt fields 
-    { 
-        timestamps: true 
-    },
+    // automatically adds and manages createdAt and updatedAt fields
+    {
+        timestamps: true,
+    }
 );
 
 const PaidExpense = mongoose.model("PaidExpense", paidExpenseSchema);

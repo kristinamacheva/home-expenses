@@ -4,22 +4,25 @@ const householdInvitationSchema = new mongoose.Schema({
     user: {
         type: mongoose.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: [true, 'Полето потребител е задължително'],
     },
     household: {
         type: mongoose.Types.ObjectId,
         ref: 'Household',
-        required: true,
+        required: [true, 'Полето домакинство е задължително'],
     },
     role: {
         type: String,
-        enum: ['Админ', 'Член', 'Дете'],
-        required: true,
+        enum: {
+            values: ['Админ', 'Член', 'Дете'],
+            message: 'Невалидна роля. Позволени стойности са "Админ", "Член" или "Дете".',
+        },
+        required: [true, 'Полето роля е задължително'],
     },
     creator: {
         type: mongoose.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: [true, 'Полето създател е задължително'],
     },
 });
 

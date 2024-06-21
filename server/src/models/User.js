@@ -1,15 +1,19 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: [true, "Името е задължително поле"],
     },
     email: {
         type: String,
-        required: true,
-        unique: true,
+        required: [true, "Имейлът е задължително поле"],
+        unique: {
+            value: true,
+            message: "Имейлът е зает",
+        },
+        lowercase: true,
     },
     phone: {
         type: String,
@@ -17,26 +21,28 @@ const userSchema = new mongoose.Schema({
     },
     avatar: {
         type: String,
-        default: '',
+        default: "",
     },
     avatarColor: {
         type: String,
-        required: true,
+        required: [true, "Цветът на аватара е задължително поле"],
+        match: [/^#([0-9A-F]{3}|[0-9A-F]{6})$/i, "Невалиден цвят на аватара"],
     },
     password: {
         type: String,
-        required: true,
+        required: [true, "Паролата е задължително поле"],
+        minLength: [8, "Паролата трябва да е поне 8 символа"],
     },
 });
 
-userSchema.virtual('repeatPassword').set(function(value) {
+userSchema.virtual("repeatPassword").set(function (value) {
     if (value !== this.password) {
-        throw new Error('Passsword missmatch!');
+        throw new Error("Passsword missmatch!");
     }
 });
 
-userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
 
     const hash = await bcrypt.hash(this.password, 10);
 
@@ -53,6 +59,6 @@ userSchema.set("toJSON", {
     },
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
