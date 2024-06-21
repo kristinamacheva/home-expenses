@@ -79,10 +79,23 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
 
     console.log(householdMembers);
 
+    // TODO: error?
     const onChange = (e) => {
+        let value = e.target.value;
+        if (e.target.name === "amount") {
+            const regex = /^\d*([\,\.]?\d{0,2})?$/;
+
+            if (!regex.test(e.target.value)) {
+                // If input does not match the regex, do not update state
+                return;
+            }
+
+            value = parseFloat(value) || 0;
+        }
+
         setValues((state) => ({
             ...state,
-            [e.target.name]: e.target.value,
+            [e.target.name]: value,
         }));
     };
 
