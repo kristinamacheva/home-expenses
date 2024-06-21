@@ -12,7 +12,12 @@ import { useContext, useEffect, useState } from "react";
 import { FaRegTrashCan } from "react-icons/fa6";
 import AuthContext from "../../../../contexts/authContext";
 
-export default function Equally({ amount, members, onUpdate }) {
+export default function Equally({
+    amount,
+    members,
+    onUpdate,
+    showCreatorDeleteButton,
+}) {
     // TODO: 0 members validation
     const { userId } = useContext(AuthContext);
     const [splitEquallyMembers, setSplitEquallyMembers] = useState([]);
@@ -27,7 +32,7 @@ export default function Equally({ amount, members, onUpdate }) {
         setSplitEquallyMembers(updatedMembers);
     }, []);
 
-    const equalSplit = useEqualSplit(amount, splitEquallyMembers);
+    const equalSplit = useEqualSplit(amount, splitEquallyMembers, onUpdate);
     console.log(amount);
     console.log(splitEquallyMembers);
 
@@ -38,13 +43,19 @@ export default function Equally({ amount, members, onUpdate }) {
         }
 
         // Filter out the member with the specified id
-        const updatedMembers = splitEquallyMembers.filter(member => member._id !== id);
+        const updatedMembers = splitEquallyMembers.filter(
+            (member) => member._id !== id
+        );
         setSplitEquallyMembers(updatedMembers);
         // TODO: notify the parent component
     };
 
     return (
-        <Flex wrap={{ base: "nowrap", lg: "wrap" }} direction={{ base: "column", lg: "row" }} justifyContent="space-between">
+        <Flex
+            wrap={{ base: "nowrap", lg: "wrap" }}
+            direction={{ base: "column", lg: "row" }}
+            justifyContent="space-between"
+        >
             {equalSplit.map((member) => (
                 <Card
                     key={member._id}
@@ -72,16 +83,32 @@ export default function Equally({ amount, members, onUpdate }) {
                     </Stack>
                     <Stack display="flex" alignItems="center" direction="row">
                         <Text mr="1">{member.sum} лв.</Text>
-                        {splitEquallyMembers.length > 2 && member._id !== userId && (
-                            <IconButton
-                                aria-label="Изтрийте"
-                                title="Изтрийте"
-                                icon={<FaRegTrashCan fontSize="20px" />}
-                                variant="ghost"
-                                color="themePurple.800"
-                                onClick={() => onMemberRemove(member._id)}
-                            />
-                        )}
+                        {splitEquallyMembers.length > 2 &&
+                            ((member._id !== userId && (
+                                <IconButton
+                                    aria-label="Изтрийте"
+                                    title="Изтрийте"
+                                    icon={<FaRegTrashCan fontSize="20px" />}
+                                    variant="ghost"
+                                    color="themePurple.800"
+                                    onClick={() => onMemberRemove(member._id)}
+                                />
+                            )) ||
+                                (member._id === userId &&
+                                    showCreatorDeleteButton && (
+                                        <IconButton
+                                            aria-label="Изтрийте"
+                                            title="Изтрийте"
+                                            icon={
+                                                <FaRegTrashCan fontSize="20px" />
+                                            }
+                                            variant="ghost"
+                                            color="themePurple.800"
+                                            onClick={() =>
+                                                onMemberRemove(member._id)
+                                            }
+                                        />
+                                    )))}
                     </Stack>
                 </Card>
             ))}
