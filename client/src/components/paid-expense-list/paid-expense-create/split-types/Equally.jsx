@@ -8,11 +8,13 @@ import {
     Text,
 } from "@chakra-ui/react";
 import useEqualSplit from "../../../../hooks/useEqualSplit";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaRegTrashCan } from "react-icons/fa6";
+import AuthContext from "../../../../contexts/authContext";
 
 export default function Equally({ amount, members, onUpdate }) {
     // TODO: 0 members validation
+    const { userId } = useContext(AuthContext);
     const [splitEquallyMembers, setSplitEquallyMembers] = useState([]);
 
     useEffect(() => {
@@ -30,6 +32,12 @@ export default function Equally({ amount, members, onUpdate }) {
     console.log(splitEquallyMembers);
 
     const onMemberRemove = (id) => {
+        // Prevent removal if there is only one member
+        if (splitEquallyMembers.length <= 2) {
+            return;
+        }
+
+        // Filter out the member with the specified id
         const updatedMembers = splitEquallyMembers.filter(member => member._id !== id);
         setSplitEquallyMembers(updatedMembers);
         // TODO: notify the parent component
@@ -64,14 +72,16 @@ export default function Equally({ amount, members, onUpdate }) {
                     </Stack>
                     <Stack display="flex" alignItems="center" direction="row">
                         <Text mr="1">{member.sum} лв.</Text>
-                        <IconButton
-                            aria-label="Изтрийте"
-                            title="Изтрийте"
-                            icon={<FaRegTrashCan fontSize="20px" />}
-                            variant="ghost"
-                            color="themePurple.800"
-                            onClick={() => onMemberRemove(member._id)}
-                        />
+                        {splitEquallyMembers.length > 2 && member._id !== userId && (
+                            <IconButton
+                                aria-label="Изтрийте"
+                                title="Изтрийте"
+                                icon={<FaRegTrashCan fontSize="20px" />}
+                                variant="ghost"
+                                color="themePurple.800"
+                                onClick={() => onMemberRemove(member._id)}
+                            />
+                        )}
                     </Stack>
                 </Card>
             ))}
