@@ -8,6 +8,15 @@ export const getAll = async (householdId) => {
     return result;
 };
 
+export const create = async (householdId, paidExpenseData) => {
+    // console.log("service");
+    // console.log(paidExpenseData);
+    const url = baseUrl(householdId);
+    const result = await request.post(url, paidExpenseData);
+    
+    return result;
+};
+
 // export const getOne = async (householdId) => {
 //     try {
 //         const result = await request.get(`${baseUrl}/${householdId}`);
