@@ -97,8 +97,13 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     };
 
     const handlePaidManualUpdate = (paidManualMembers, message) => {
+        // Filter out users with sum === 0
+        const filteredPaidMembers = paidManualMembers.filter(
+            (member) => member.sum !== 0
+        );
+
         if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setPaid(paidManualMembers);
+            setPaid(filteredPaidMembers);
         } else {
             setPaid([]);
             // TODO: put message in array of errors
@@ -111,8 +116,13 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     };
 
     const handleOwedPercentUpdate = (owedPercentMembers, message) => {
+        // Filter out users with sum === 0
+        const filteredOwedMembers = owedPercentMembers.filter(
+            (member) => member.sum !== 0
+        );
+
         if (message === "Общият процент е 100%.") {
-            setOwed(owedPercentMembers);
+            setOwed(filteredOwedMembers);
         } else {
             setOwed([]);
             // TODO: put message in array of errors
@@ -121,8 +131,13 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     };
 
     const handleOwedManualUpdate = (owedManualMembers, message) => {
+        // Filter out users with sum === 0
+        const filteredOwedMembers = owedManualMembers.filter(
+            (member) => member.sum !== 0
+        );
+
         if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setOwed(owedManualMembers);
+            setOwed(filteredOwedMembers);
         } else {
             setOwed([]);
             // TODO: put message in array of errors
