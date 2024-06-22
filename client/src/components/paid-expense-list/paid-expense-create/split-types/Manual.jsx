@@ -94,7 +94,6 @@ export default function Manual({
         );
 
         setManualAmounts(newAmounts);
-        handleMessageChange(newAmounts);
     };
 
     const onMemberRemove = (id) => {
@@ -109,7 +108,6 @@ export default function Manual({
 
         const newAmounts = manualAmounts.filter((entry) => entry._id !== id);
         setManualAmounts(newAmounts);
-        handleMessageChange(newAmounts);
     };
 
     return (
