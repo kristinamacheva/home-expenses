@@ -33,8 +33,8 @@ export default function Equally({
     }, []);
 
     const equalSplit = useEqualSplit(amount, splitEquallyMembers, onUpdate);
-    console.log(amount);
-    console.log(splitEquallyMembers);
+    // console.log(amount);
+    // console.log(splitEquallyMembers);
 
     const onMemberRemove = (id) => {
         // Prevent removal if there is only one member
