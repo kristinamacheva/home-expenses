@@ -52,9 +52,12 @@ export default function Percent({
     }, []);
 
     useEffect(() => {
-        handleMessageChange(percentages);
         handleAmountChange(percentages);
     }, [amount, percentages]);
+
+    useEffect(() => {
+        handleMessageChange(percentages);
+    }, [percentAmounts]);
 
     const handleMessageChange = (newPercentages) => {
         const totalEnteredPercentage = newPercentages.reduce(
@@ -80,9 +83,9 @@ export default function Percent({
         } else {
             setMessageColor("green.400");
             setMessage("Общият процент е 100%.");
-
-            onUpdate(percentAmounts, message);
         }
+
+        onUpdate(percentAmounts, message);
     };
 
     const handleAmountChange = (newPercentages) => {
@@ -92,12 +95,14 @@ export default function Percent({
             _id: member._id,
             sum: Number(((member.percentage / 100) * totalAmountInCents) / 100),
         }));
+        console.log("updatedAmounts");
+        console.log(updatedAmounts);
 
         setPercentAmounts(updatedAmounts);
     };
 
     const handleChange = (id, value) => {
-        // Restricting input to 2 decimal places
+        // Restricting input to 2 digits
         const regex = /^\d{0,2}$/;
 
         if (!regex.test(value)) {
@@ -112,20 +117,6 @@ export default function Percent({
         );
 
         setPercentages(newPercentages);
-
-        // const newPercentAmounts = percentAmounts.map((entry) =>
-        //     entry._id === id
-        //         ? {
-        //               ...entry,
-        //               sum: Number(
-        //                   ((percentage / 100) * totalAmountInCents) / 100
-        //               ),
-        //           }
-        //         : entry
-        // );
-        
-        // setPercentAmounts(newPercentAmounts);
-        // handleMessageChange(newPercentages);
     };
 
     const onMemberRemove = (id) => {
@@ -140,9 +131,6 @@ export default function Percent({
 
         const newPercentages = percentages.filter((entry) => entry._id !== id);
         setPercentages(newPercentages);
-        // handleMessageChange(newPercentages);
-        // const newAmounts = percentAmounts.filter((entry) => entry._id !== id);
-        // handleAmountChange(newAmounts);
     };
 
     return (
