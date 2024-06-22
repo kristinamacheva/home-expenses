@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const paidExpenseManager = require("../managers/paidExpenseManager");
-const { isAuth } = require('../middlewares/authMiddleware');
+const { isAuth } = require("../middlewares/authMiddleware");
 const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
 
 router.get("/", async (req, res) => {
@@ -27,17 +27,21 @@ router.post("/", async (req, res) => {
         owed,
     } = req.body;
 
-    const parsedPaid = paid.map((entry) => ({
-        user: entry._id,
-        sum: parseFloat(entry.sum),
-    }));
+    const parsedPaid = paid
+        .map((entry) => ({
+            user: entry._id,
+            sum: Number(entry.sum.toFixed(2)),
+        }))
+        .filter((entry) => entry.sum !== 0);
 
-    const parsedOwed = owed.map((entry) => ({
-        user: entry._id,
-        sum: parseFloat(entry.sum),
-    }));
+    const parsedOwed = owed
+        .map((entry) => ({
+            user: entry._id,
+            sum: Number(entry.sum.toFixed(2)),
+        }))
+        .filter((entry) => entry.sum !== 0);
 
-    const parsedAmount = parseFloat(amount);
+    const parsedAmount = Number(amount.toFixed(2));
 
     try {
         const newPaidExpense = await paidExpenseManager.create({
@@ -63,7 +67,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.use('/:paidExpenseId', getPaidExpense);
+router.use("/:paidExpenseId", getPaidExpense);
 
 // router.get('/:paidExpenseId', async (req, res) => {
 //     // TODO: lean?
