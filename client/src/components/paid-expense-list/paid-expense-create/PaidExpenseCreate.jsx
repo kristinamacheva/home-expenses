@@ -35,6 +35,7 @@ import { useParams } from "react-router-dom";
 import Equally from "./split-types/Equally";
 import Manual from "./split-types/Manual";
 import Percent from "./split-types/Percent";
+import CurrentUser from "./split-types/CurrentUser";
 
 const initialValues = {
     title: "",
@@ -100,6 +101,36 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
         }));
     };
 
+    const handlePaidCurrentUpdate = () => {
+        setPaid([{ _id: userId, sum: values.amount }]);
+    };
+
+    const handlePaidEquallyUpdate = (splitEquallyMembers) => {
+        setPaid(splitEquallyMembers);
+    };
+
+    const handlePaidManualUpdate = (paidManualMembers, message) => {
+        if (message === "Сборът от сумите е равен на сумата на разхода.") {
+            setPaid(paidManualMembers);
+        }
+    };
+
+    const handleOwedEquallyUpdate = (owedEquallyMembers) => {
+        setOwed(owedEquallyMembers);
+    };
+
+    const handleOwedPercentUpdate = (owedPercentMembers, message) => {
+        if (message === "Общият процент е 100%.") {
+            setOwed(owedPercentMembers);
+        }
+    };
+
+    const handleOwedManualUpdate = (owedManualMembers, message) => {
+        if (message === "Сборът от сумите е равен на сумата на разхода.") {
+            setOwed(owedManualMembers);
+        }
+    };
+
     const onSubmit = (e) => {
         e.preventDefault();
 
@@ -107,7 +138,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
         // ["Единично", "Поравно", "Ръчно"],
         let paidSplitType = "";
         if (values.payersOptionField === "currentUser") {
-            setPaid([{ _id: userId, sum: values.amount }]);
+            console.log(paid);
             paidSplitType = "Единично";
         } else {
             values.paidSplitTypeField === "equally"
@@ -119,7 +150,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
             values.splittingOption === "equally"
                 ? "Поравно"
                 : values.splittingOption === "percent"
-                ? "Процент"
+                ? "Процентно"
                 : "Ръчно";
 
         const newPaidExpense = {
@@ -143,32 +174,6 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     const onCloseForm = () => {
         // clearFormHandler();
         onClose();
-    };
-
-    const handlePaidEquallyUpdate = (splitEquallyMembers) => {
-        setPaid(splitEquallyMembers);
-    };
-
-    const handlePaidManualUpdate = (paidManualMembers, message) => {
-        if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setPaid(paidManualMembers);
-        }
-    };
-
-    const handleOwedEquallyUpdate = (owedEquallyMembers) => {
-        setOwed(owedEquallyMembers);
-    };
-
-    const handleOwedPercentUpdate = (owedPercentMembers, message) => {
-        if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setOwed(owedPercentMembers);
-        }
-    };
-
-    const handleOwedManualUpdate = (owedManualMembers, message) => {
-        if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setOwed(owedManualMembers);
-        }
     };
 
     // TODO: Други потребители, единично опция
@@ -275,46 +280,12 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                     </option>
                                 </Select>
                             </FormControl>
-
                             {values.payersOptionField === "currentUser" && (
-                                <Card
-                                    p="4"
-                                    width="47%"
-                                    display="flex"
-                                    direction="row"
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                >
-                                    <Stack
-                                        display="flex"
-                                        alignItems="center"
-                                        direction="row"
-                                        mr="2"
-                                    >
-                                        <Avatar
-                                            name={name}
-                                            // src={avatar || ""}
-                                            background={"themeYellow.900"}
-                                            mr="3"
-                                        />
-                                        <Text>{name}</Text>
-                                    </Stack>
-                                    <Stack
-                                        display="flex"
-                                        alignItems="center"
-                                        direction="row"
-                                    >
-                                        <Text mr="1">
-                                            {(
-                                                (values.amount * 100) /
-                                                100
-                                            ).toFixed(2)}{" "}
-                                            лв.
-                                        </Text>
-                                    </Stack>
-                                </Card>
+                                <CurrentUser
+                                    amount={values.amount}
+                                    onUpdate={handlePaidCurrentUpdate}
+                                />
                             )}
-
                             {values.payersOptionField === "changedUser" && (
                                 <Stack>
                                     <Stack>
@@ -369,7 +340,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                     placeholder="Изберете метод"
                                 >
                                     <option value="equally">Поравно</option>
-                                    <option value="percent">Процент</option>
+                                    <option value="percent">Процентно</option>
                                     <option value="manual">Ръчно</option>
                                 </Select>
                             </FormControl>
