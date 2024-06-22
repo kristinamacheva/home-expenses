@@ -58,16 +58,17 @@ exports.create = async (paidExpenseData) => {
             status: userId === creator.toString() ? "Одобрен" : "За одобрение",
         }));
 
-        // Calculate the total paid and owed sums
-        const totalPaid = paid.reduce((sum, entry) => sum + entry.sum, 0);
-        const totalOwed = owed.reduce((sum, entry) => sum + entry.sum, 0);
+        // Calculate the total paid and owed sums in cents
+        const totalPaid = paid.reduce((sum, entry) => sum + Math.round(entry.sum * 100), 0);
+        const totalOwed = owed.reduce((sum, entry) => sum + Math.round(entry.sum * 100), 0);
+        const amountInCents = Math.round(amount * 100);
 
         if (totalPaid !== totalOwed) {
             throw new Error('Total paid amount does not match total owed amount');
         }
 
         // Check if the total amount matches the sum of paid and owed amounts
-        if (totalPaid !== amount) {
+        if (totalPaid !== amountInCents) {
             throw new Error('Total paid/owed amount does not match the specified amount');
         }
 
@@ -78,14 +79,23 @@ exports.create = async (paidExpenseData) => {
             const paidEntry = paid.find((p) => p.user === userId);
             const owedEntry = owed.find((o) => o.user === userId);
 
-            const paidSum = paidEntry ? paidEntry.sum : 0;
-            const owedSum = owedEntry ? owedEntry.sum : 0;
-            const balanceSum = Math.abs(paidSum - owedSum);
-            const balanceType = paidSum >= owedSum ? "+" : "-";
+            const paidSumInCents = paidEntry ? Math.round(paidEntry.sum * 100) : 0;
+            const owedSumInCents = owedEntry ? Math.round(owedEntry.sum * 100) : 0;
+            const balanceSumInCents = Math.abs(paidSumInCents - owedSumInCents);
+            const balanceType = paidSumInCents >= owedSumInCents ? "+" : "-";
+
+            let balanceNum = balanceSumInCents / 100;
+            let balanceNumFixed = (balanceSumInCents / 100).toFixed(2);
+            console.log(balanceNum);
+            console.log(typeof balanceNum);
+            console.log(balanceNumFixed);
+            console.log(typeof balanceNumFixed);
+            console.log(Number(balanceNumFixed));
+            console.log(typeof Number(balanceNumFixed));
 
             return {
                 user: userId,
-                sum: balanceSum,
+                sum: Number((balanceSumInCents / 100).toFixed(2)),
                 type: balanceType,
             };
         });
@@ -119,17 +129,23 @@ exports.create = async (paidExpenseData) => {
             const existingEntry = expenseHousehold.balance.find(entry => entry.user.equals(newEntry.user));
         
             // Determine the current sum considering the current type
-            let currentSum = existingEntry.type === '+' ? existingEntry.sum : -existingEntry.sum;
+            let currentSumInCents = existingEntry.type === '+' 
+                ? Math.round(existingEntry.sum * 100) 
+                : -Math.round(existingEntry.sum * 100);
 
             // Update the sum based on the type of operation
-            newEntry.type === '+' ? currentSum += newEntry.sum : currentSum -= newEntry.sum;
+            if (newEntry.type === '+') {
+                currentSumInCents += Math.round(newEntry.sum * 100);
+            } else {
+                currentSumInCents -= Math.round(newEntry.sum * 100);
+            }
         
             // Update the type based on the sum and ensure the sum is always positive
-            if (currentSum >= 0) {
-                existingEntry.sum = currentSum;
+            if (currentSumInCents >= 0) {
+                existingEntry.sum = Number((currentSumInCents / 100).toFixed(2));
                 existingEntry.type = '+';
             } else {
-                existingEntry.sum = Math.abs(currentSum);
+                existingEntry.sum = Number((Math.abs(currentSumInCents) / 100).toFixed(2));
                 existingEntry.type = '-';
             }
         });
