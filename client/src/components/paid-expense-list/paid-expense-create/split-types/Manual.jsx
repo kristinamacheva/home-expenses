@@ -121,6 +121,7 @@ export default function Manual({
             >
                 {splitManualMembers.map((member) => (
                     <Stack
+                        key={member._id}
                         width={{ base: "100%", lg: "48%" }}
                         spacing="0.5"
                         mt={2}
