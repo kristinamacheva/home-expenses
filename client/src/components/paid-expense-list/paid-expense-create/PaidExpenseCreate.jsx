@@ -34,6 +34,7 @@ import * as paidExpenseService from "../../../services/paidExpenseService";
 import { useParams } from "react-router-dom";
 import Equally from "./split-types/Equally";
 import Manual from "./split-types/Manual";
+import Percent from "./split-types/Percent";
 
 const initialValues = {
     title: "",
@@ -156,6 +157,12 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
 
     const handleOwedEquallyUpdate = (owedEquallyMembers) => {
         setOwed(owedEquallyMembers);
+    };
+
+    const handleOwedPercentUpdate = (owedPercentMembers, message) => {
+        if (message === "Сборът от сумите е равен на сумата на разхода.") {
+            setOwed(owedPercentMembers);
+        }
     };
 
     const handleOwedManualUpdate = (owedManualMembers, message) => {
@@ -297,7 +304,13 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                         alignItems="center"
                                         direction="row"
                                     >
-                                        <Text mr="1">{((values.amount * 100) / 100).toFixed(2)} лв.</Text>
+                                        <Text mr="1">
+                                            {(
+                                                (values.amount * 100) /
+                                                100
+                                            ).toFixed(2)}{" "}
+                                            лв.
+                                        </Text>
                                     </Stack>
                                 </Card>
                             )}
@@ -370,7 +383,12 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                             )}
 
                             {values.splittingOption === "percent" && (
-                                <Text>Процент</Text>
+                                <Percent
+                                    amount={values.amount}
+                                    members={householdMembers}
+                                    onUpdate={handleOwedPercentUpdate}
+                                    showCreatorDeleteButton={true}
+                                />
                             )}
 
                             {values.splittingOption === "manual" && (
