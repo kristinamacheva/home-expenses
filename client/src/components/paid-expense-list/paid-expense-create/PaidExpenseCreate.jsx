@@ -90,7 +90,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                 return;
             }
 
-            value = parseFloat(value) || 0;
+            value = Number(value) || 0;
         }
 
         setValues((state) => ({
@@ -149,7 +149,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     };
 
     const handlePaidManualUpdate = (paidManualMembers, message) => {
-        if (message === "Сборът от сумите е равен на сумата на разхода") {
+        if (message === "Сборът от сумите е равен на сумата на разхода.") {
             setPaid(paidManualMembers);
         }
     };
