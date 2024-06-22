@@ -55,25 +55,26 @@ export default function Manual({
 
         const totalAmountInCents = amount * 100;
 
+        let message = "";
+
         if (totalEnteredInCents > totalAmountInCents) {
+            message = `Сборът от сумите надвишава сумата на разхода с ${(
+                (totalEnteredInCents - totalAmountInCents) /
+                100
+            ).toFixed(2)} лв.`;
             setMessageColor("red.400");
-            setMessage(
-                `Сборът от сумите надвишава сумата на разхода с ${(
-                    (totalEnteredInCents - totalAmountInCents) /
-                    100
-                ).toFixed(2)} лв.`
-            );
+            setMessage(message);
         } else if (totalEnteredInCents < totalAmountInCents) {
+            message = `Трябва да доплатите още ${(
+                (totalAmountInCents - totalEnteredInCents) /
+                100
+            ).toFixed(2)} лв.`;
             setMessageColor("red.400");
-            setMessage(
-                `Трябва да доплатите още ${(
-                    (totalAmountInCents - totalEnteredInCents) /
-                    100
-                ).toFixed(2)} лв.`
-            );
+            setMessage(message);
         } else {
+            message = "Сборът от сумите е равен на сумата на разхода."
             setMessageColor("green.400");
-            setMessage("Сборът от сумите е равен на сумата на разхода.");
+            setMessage(message);
         }
 
         onUpdate(newAmounts, message);

@@ -65,24 +65,24 @@ export default function Percent({
             0
         );
 
+        let message = "";
         const difference = totalEnteredPercentage - 100;
 
         if (totalEnteredPercentage !== 100) {
             setMessageColor("red.400");
             if (difference > 0) {
-                setMessage(
-                    `Въведохте с ${difference}% повече от общия процент (100%).`
-                );
+                message = `Въведохте с ${difference}% повече от общия процент (100%).`;
+                setMessage(message);
             } else {
-                setMessage(
-                    `Трябва да въведете още ${Math.abs(
-                        difference
-                    )}%, за да достигнете 100%.`
-                );
+                message = `Трябва да въведете още ${Math.abs(
+                    difference
+                )}%, за да достигнете 100%.`;
+                setMessage(message);
             }
         } else {
+            message = "Общият процент е 100%.";
             setMessageColor("green.400");
-            setMessage("Общият процент е 100%.");
+            setMessage(message);
         }
 
         onUpdate(percentAmounts, message);

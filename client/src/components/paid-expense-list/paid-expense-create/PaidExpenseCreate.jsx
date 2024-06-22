@@ -48,19 +48,6 @@ const initialValues = {
 };
 
 export default function PaidExpenseCreate({ isOpen, onClose }) {
-    // const newPaidExpense = await paidExpenseManager.create({
-    //     title,
-    //     category,
-    //     // creator: req.user._id,
-    //     creator: '664f630fb14becfeb98d2e1f',
-    //     amount,
-    //     date,
-    //     paidSplitType,
-    //     paid,
-    //     owedSplitType,
-    //     owed,
-    //     household: req.householdId,
-    // });
     const { userId, name } = useContext(AuthContext);
     const { householdId } = useParams();
 
@@ -112,6 +99,10 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     const handlePaidManualUpdate = (paidManualMembers, message) => {
         if (message === "Сборът от сумите е равен на сумата на разхода.") {
             setPaid(paidManualMembers);
+        } else {
+            setPaid([]);
+            // TODO: put message in array of errors
+            console.log(message);
         }
     };
 
@@ -122,12 +113,20 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     const handleOwedPercentUpdate = (owedPercentMembers, message) => {
         if (message === "Общият процент е 100%.") {
             setOwed(owedPercentMembers);
+        } else {
+            setOwed([]);
+            // TODO: put message in array of errors
+            console.log(message);
         }
     };
 
     const handleOwedManualUpdate = (owedManualMembers, message) => {
         if (message === "Сборът от сумите е равен на сумата на разхода.") {
             setOwed(owedManualMembers);
+        } else {
+            setOwed([]);
+            // TODO: put message in array of errors
+            console.log(message);
         }
     };
 
@@ -155,6 +154,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
 
         const newPaidExpense = {
             title: values.title,
+            // category,
             amount: values.amount,
             date: values.date,
             paidSplitType: paidSplitType,
