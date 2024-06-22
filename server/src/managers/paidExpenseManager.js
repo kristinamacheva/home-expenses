@@ -24,6 +24,8 @@ exports.create = async (paidExpenseData) => {
             household,
         } = paidExpenseData;
 
+        // TODO: if there is only 1 user in the group, he cant create expenses
+
         // Fetch the admin user by ID
         const expenseCreator = await User.findById(creator);
         const expenseHousehold = await Household.findById(household);
@@ -35,10 +37,15 @@ exports.create = async (paidExpenseData) => {
 
         // Collect all unique user IDs from paid and owed arrays
         const uniqueUserIds = new Set([
-            ...paid.map((p) => p.user.toString()),
-            ...owed.map((o) => o.user.toString()),
+            ...paid.map((p) => p.user),
+            ...owed.map((o) => o.user),
         ]);
 
+        console.log(paid);
+        console.log(owed);
+        console.log(uniqueUserIds);
+
+        // TODO: Test
         // Check if all users are members of the household
         for (const userId of uniqueUserIds) {
             if (!householdMemberIds.includes(userId)) {
@@ -64,10 +71,12 @@ exports.create = async (paidExpenseData) => {
             throw new Error('Total paid/owed amount does not match the specified amount');
         }
 
+        // TODO: calculate only to 2nd symbol
+        // TODO: Calculate in cents
         // Calculate the balance array
         const balance = Array.from(uniqueUserIds).map((userId) => {
-            const paidEntry = paid.find((p) => p.user.toString() === userId);
-            const owedEntry = owed.find((o) => o.user.toString() === userId);
+            const paidEntry = paid.find((p) => p.user === userId);
+            const owedEntry = owed.find((o) => o.user === userId);
 
             const paidSum = paidEntry ? paidEntry.sum : 0;
             const owedSum = owedEntry ? owedEntry.sum : 0;
@@ -96,6 +105,9 @@ exports.create = async (paidExpenseData) => {
             userApprovals,
             balance,
         });
+
+        console.log(`title : ${title}`);
+        console.log(newPaidExpense);
 
         // Save the household to the database
         await newPaidExpense.save();
