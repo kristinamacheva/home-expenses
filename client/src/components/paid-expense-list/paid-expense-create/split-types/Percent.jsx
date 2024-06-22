@@ -91,12 +91,27 @@ export default function Percent({
     const handleAmountChange = (newPercentages) => {
         const totalAmountInCents = amount * 100;
 
-        const updatedAmounts = newPercentages.map((member) => ({
-            _id: member._id,
-            sum: Number(((member.percentage / 100) * totalAmountInCents) / 100),
-        }));
-        console.log("updatedAmounts");
-        console.log(updatedAmounts);
+        let totalSum = 0;
+        const updatedAmounts = newPercentages.map((member, index, arr) => {
+            const sum = ((member.percentage / 100) * totalAmountInCents) / 100;
+            const roundedSum = Number(sum.toFixed(2));
+            totalSum += roundedSum;
+
+            // Adjust the last sum if the total exceeds amount
+            if ((index === arr.length - 1) && (totalSum > amount)) {
+                const adjustment = totalSum - amount;
+
+                return {
+                    _id: member._id,
+                    sum: Number((roundedSum - adjustment).toFixed(2)),
+                };
+            }
+
+            return {
+                _id: member._id,
+                sum: roundedSum,
+            };
+        });
 
         setPercentAmounts(updatedAmounts);
     };
