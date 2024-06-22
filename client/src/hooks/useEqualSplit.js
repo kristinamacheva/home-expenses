@@ -19,10 +19,10 @@ export default function useEqualSplit(totalAmount, members, onUpdate) {
 
         const updatedMembers = members.map((member) => ({
             ...member,
-            sum: (
+            sum: Number((
                 (amountPerPersonInCents + (remainderInCents-- > 0 ? 1 : 0)) /
                 100
-            ).toFixed(2),
+            ).toFixed(2)),
         }));
 
         // Create an array of objects with only `id` and `sum` properties

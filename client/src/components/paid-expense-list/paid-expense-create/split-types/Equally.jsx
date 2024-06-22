@@ -82,7 +82,7 @@ export default function Equally({
                         <Text>{member.name}</Text>
                     </Stack>
                     <Stack display="flex" alignItems="center" direction="row">
-                        <Text mr="1">{member.sum} лв.</Text>
+                        <Text mr="1">{((member.sum * 100) / 100).toFixed(2)} лв.</Text>
                         {splitEquallyMembers.length > 2 &&
                             ((member._id !== userId && (
                                 <IconButton

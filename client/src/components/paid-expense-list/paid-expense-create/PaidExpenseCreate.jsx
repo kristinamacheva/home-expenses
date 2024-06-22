@@ -158,6 +158,12 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
         setOwed(owedEquallyMembers);
     };
 
+    const handleOwedManualUpdate = (owedManualMembers, message) => {
+        if (message === "Сборът от сумите е равен на сумата на разхода.") {
+            setOwed(owedManualMembers);
+        }
+    };
+
     // TODO: Други потребители, единично опция
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>
@@ -291,7 +297,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                         alignItems="center"
                                         direction="row"
                                     >
-                                        <Text mr="1">{values.amount} лв.</Text>
+                                        <Text mr="1">{((values.amount * 100) / 100).toFixed(2)} лв.</Text>
                                     </Stack>
                                 </Card>
                             )}
@@ -371,7 +377,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
                                 <Manual
                                     amount={values.amount}
                                     members={householdMembers}
-                                    onUpdate={handlePaidManualUpdate}
+                                    onUpdate={handleOwedManualUpdate}
                                     showCreatorDeleteButton={true}
                                 />
                             )}
