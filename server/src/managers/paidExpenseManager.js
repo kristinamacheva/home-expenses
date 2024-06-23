@@ -51,15 +51,13 @@ exports.create = async (paidExpenseData) => {
             ...owed.map((o) => o.user),
         ]);
 
-        console.log(paid);
-        console.log(owed);
-        console.log(uniqueUserIds);
-
         // TODO: Test
         // Check if all users are members of the household
         for (const userId of uniqueUserIds) {
             if (!householdMemberIds.includes(userId)) {
-                throw new Error(`User with ID ${userId} is not a member of the household`);
+                throw new Error(
+                    `User with ID ${userId} is not a member of the household`
+                );
             }
         }
 
@@ -69,17 +67,27 @@ exports.create = async (paidExpenseData) => {
         }));
 
         // Calculate the total paid and owed sums in cents
-        const totalPaid = paid.reduce((sum, entry) => sum + Math.round(entry.sum * 100), 0);
-        const totalOwed = owed.reduce((sum, entry) => sum + Math.round(entry.sum * 100), 0);
+        const totalPaid = paid.reduce(
+            (sum, entry) => sum + Math.round(entry.sum * 100),
+            0
+        );
+        const totalOwed = owed.reduce(
+            (sum, entry) => sum + Math.round(entry.sum * 100),
+            0
+        );
         const amountInCents = Math.round(amount * 100);
 
         if (totalPaid !== totalOwed) {
-            throw new Error('Total paid amount does not match total owed amount');
+            throw new Error(
+                "Total paid amount does not match total owed amount"
+            );
         }
 
         // Check if the total amount matches the sum of paid and owed amounts
         if (totalPaid !== amountInCents) {
-            throw new Error('Total paid/owed amount does not match the specified amount');
+            throw new Error(
+                "Total paid/owed amount does not match the specified amount"
+            );
         }
 
         // TODO: calculate only to 2nd symbol
@@ -89,19 +97,14 @@ exports.create = async (paidExpenseData) => {
             const paidEntry = paid.find((p) => p.user === userId);
             const owedEntry = owed.find((o) => o.user === userId);
 
-            const paidSumInCents = paidEntry ? Math.round(paidEntry.sum * 100) : 0;
-            const owedSumInCents = owedEntry ? Math.round(owedEntry.sum * 100) : 0;
+            const paidSumInCents = paidEntry
+                ? Math.round(paidEntry.sum * 100)
+                : 0;
+            const owedSumInCents = owedEntry
+                ? Math.round(owedEntry.sum * 100)
+                : 0;
             const balanceSumInCents = Math.abs(paidSumInCents - owedSumInCents);
             const balanceType = paidSumInCents >= owedSumInCents ? "+" : "-";
-
-            let balanceNum = balanceSumInCents / 100;
-            let balanceNumFixed = (balanceSumInCents / 100).toFixed(2);
-            console.log(balanceNum);
-            console.log(typeof balanceNum);
-            console.log(balanceNumFixed);
-            console.log(typeof balanceNumFixed);
-            console.log(Number(balanceNumFixed));
-            console.log(typeof Number(balanceNumFixed));
 
             return {
                 user: userId,
@@ -126,42 +129,65 @@ exports.create = async (paidExpenseData) => {
             balance,
         });
 
-        console.log(`title : ${title}`);
         console.log(newPaidExpense);
 
         // Save the household to the database
         await newPaidExpense.save();
         console.log("Paid Expense created:", newPaidExpense);
 
+        return newPaidExpense;
+    } catch (error) {
+        console.error("Error creating paid expense:", error);
+        throw error;
+    }
+};
+
+const updateBalance = async (houesholdId, expenseId) => {
+    try {
+        const expenseHousehold = await Household.findById(houesholdId);
+        const expense = await PaidExpense.findById(expenseId);
+
         // TODO: do this only when all users have approved
         // Update the household balance based on the new balance of the expense
-        balance.forEach(newEntry => {
-            const existingEntry = expenseHousehold.balance.find(entry => entry.user.equals(newEntry.user));
-        
+        expense.balance.forEach((newEntry) => {
+            const existingEntry = expenseHousehold.balance.find((entry) =>
+                entry.user.equals(newEntry.user)
+            );
+
             // Determine the current sum considering the current type
-            let currentSumInCents = existingEntry.type === '+' 
-                ? Math.round(existingEntry.sum * 100) 
-                : -Math.round(existingEntry.sum * 100);
+            let currentSumInCents =
+                existingEntry.type === "+"
+                    ? Math.round(existingEntry.sum * 100)
+                    : -Math.round(existingEntry.sum * 100);
 
             // Update the sum based on the type of operation
-            if (newEntry.type === '+') {
+            if (newEntry.type === "+") {
                 currentSumInCents += Math.round(newEntry.sum * 100);
             } else {
                 currentSumInCents -= Math.round(newEntry.sum * 100);
             }
-        
+
             // Update the type based on the sum and ensure the sum is always positive
             if (currentSumInCents >= 0) {
-                existingEntry.sum = Number((currentSumInCents / 100).toFixed(2));
-                existingEntry.type = '+';
+                existingEntry.sum = Number(
+                    (currentSumInCents / 100).toFixed(2)
+                );
+                existingEntry.type = "+";
             } else {
-                existingEntry.sum = Number((Math.abs(currentSumInCents) / 100).toFixed(2));
-                existingEntry.type = '-';
+                existingEntry.sum = Number(
+                    (Math.abs(currentSumInCents) / 100).toFixed(2)
+                );
+                existingEntry.type = "-";
             }
         });
 
         await expenseHousehold.save();
         console.log("Household balance updated:", expenseHousehold);
+    } catch (error) {
+        console.error("Error updating household balance:", error);
+        throw error;
+    }
+};
 
         return newPaidExpense;
     } catch (error) {
