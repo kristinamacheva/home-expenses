@@ -214,9 +214,96 @@ const updateBalance = async (houesholdId, expenseId) => {
     }
 };
 
-        return newPaidExpense;
+exports.accept = async (userId, paidExpenseId) => {
+    try {
+        const paidExpense = await PaidExpense.findById(paidExpenseId);
+
+        // Check if the overall expense status is "За одобрение"
+        if (paidExpense.expenseStatus !== "За одобрение") {
+            throw new Error(
+                `The expense status must be "За одобрение" to approve user statuses`
+            );
+        }
+
+        const userApproval = paidExpense.userApprovals.find((entry) =>
+            entry.user.equals(userId)
+        );
+
+        if (!userApproval) {
+            throw new Error(`User not found in approvals`);
+        }
+
+        // Check if the current user approval status is "За одобрение"
+        if (userApproval.status !== "За одобрение") {
+            throw new Error(`User cannot approve/reject more than once`);
+        }
+
+        // Update status to "Одобрен"
+        userApproval.status = "Одобрен";
+
+        // Check if all user approvals are now "Одобрен"
+        const allApproved = paidExpense.userApprovals.every(
+            (entry) => entry.status === "Одобрен"
+        );
+
+        if (allApproved) {
+            paidExpense.expenseStatus = "Одобрен";
+
+            // Try updating the balance and handle potential errors
+            try {
+                await updateBalance(paidExpense.household, paidExpenseId);
+            } catch (balanceError) {
+                console.error("Error updating balance:", balanceError);
+                throw new Error("Failed to update balance");
+            }
+        }
+
+        // Save the updated paid expense to the database
+        await paidExpense.save();
+        console.log("Paid Expense accepted:", paidExpense);
+
+        return paidExpense;
     } catch (error) {
-        console.error("Error creating paid expense:", error);
+        console.error("Error accepting paid expense:", error);
+        throw error;
+    }
+};
+
+exports.reject = async (userId, paidExpenseId) => {
+    try {
+        const paidExpense = await PaidExpense.findById(paidExpenseId);
+
+        // Check if the overall expense status is "За одобрение"
+        if (paidExpense.expenseStatus !== "За одобрение") {
+            throw new Error(
+                `The expense status must be "За одобрение" to reject user statuses`
+            );
+        }
+
+        const userApproval = paidExpense.userApprovals.find((entry) =>
+            entry.user.equals(userId)
+        );
+
+        if (!userApproval) {
+            throw new Error(`User not found in approvals`);
+        }
+
+        // Check if the current user approval status is "За одобрение"
+        if (userApproval.status !== "За одобрение") {
+            throw new Error(`User cannot approve/reject more than once`);
+        }
+
+        // Update status to "Отхвърлен"
+        userApproval.status = "Отхвърлен";
+        paidExpense.expenseStatus = "Отхвърлен";
+
+        // Save the updated paid expense to the database
+        await paidExpense.save();
+        console.log("Paid Expense rejected:", paidExpense);
+
+        return paidExpense;
+    } catch (error) {
+        console.error("Error rejecting paid expense:", error);
         throw error;
     }
 };

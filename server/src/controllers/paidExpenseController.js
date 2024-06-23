@@ -92,6 +92,34 @@ router.get("/:paidExpenseId", async (req, res) => {
         res.status(500).json({ message: "Error fetching paid expense details" });
     }
 });
+
+router.put("/:paidExpenseId/accept", async (req, res) => {
+    try {
+        const paidExpenseId = req.paidExpenseId;
+        const userId = req.userId;
+
+        const paidExpense = await paidExpenseManager.accept(userId, paidExpenseId);
+        res.status(200).json(paidExpense);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error accepting paid expenses" });
+    }
+});
+
+router.put("/:paidExpenseId/reject", async (req, res) => {
+    try {
+        const paidExpenseId = req.paidExpenseId;
+        const userId = req.userId;
+
+        const paidExpense = await paidExpenseManager.reject(userId, paidExpenseId);
+        res.status(200).json(paidExpense);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error rejecting paid expenses" });
+    }
+});
+
+
 // router.get('/:paidExpenseId', async (req, res) => {
 //     // TODO: lean?
 //     const paidExpense = await paidExpenseManager.getOne(req.params.paidExpenseId).lean();
