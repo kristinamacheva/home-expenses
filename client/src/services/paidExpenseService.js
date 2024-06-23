@@ -1,6 +1,7 @@
 import * as request from "../lib/request";
 
-const baseUrl = (householdId) => `http://localhost:5000/households/${householdId}/paidExpenses`;
+const baseUrl = (householdId) =>
+    `http://localhost:5000/households/${householdId}/paidExpenses`;
 
 export const getAll = async (householdId) => {
     const url = baseUrl(householdId);
@@ -13,8 +14,20 @@ export const create = async (householdId, paidExpenseData) => {
     // console.log(paidExpenseData);
     const url = baseUrl(householdId);
     const result = await request.post(url, paidExpenseData);
-    
+
     return result;
+};
+
+export const getOneDistributionDetails = async (householdId, paidExpenseId) => {
+    try {
+        const url = baseUrl(householdId);
+        const result = await request.get(`${url}/${paidExpenseId}?details=distribution`);
+
+        return result;
+    } catch (error) {
+        console.error("Error fetching paid expense data:", error);
+        return null;
+    }
 };
 
 // export const getOne = async (householdId) => {
@@ -23,7 +36,7 @@ export const create = async (householdId, paidExpenseData) => {
 //         return result;
 //     } catch (error) {
 //         console.error('Error fetching household data:', error);
-//         return null; 
+//         return null;
 //     }
 // }
 
@@ -33,13 +46,13 @@ export const create = async (householdId, paidExpenseData) => {
 //         return result;
 //     } catch (error) {
 //         console.error('Error fetching household data:', error);
-//         return null; 
+//         return null;
 //     }
 // }
 
 // export const create = async (householdData) => {
 //     const result = await request.post(baseUrl, householdData);
-    
+
 //     return result;
 // };
 
@@ -50,4 +63,3 @@ export const create = async (householdId, paidExpenseData) => {
 // };
 
 // export const remove = async (householdId) => request.remove(`${baseUrl}/${householdId}`);
-
