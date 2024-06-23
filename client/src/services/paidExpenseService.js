@@ -30,6 +30,30 @@ export const getOneDistributionDetails = async (householdId, paidExpenseId) => {
     }
 };
 
+export const accept = async (householdId, paidExpenseId) => {
+    try {
+        const url = baseUrl(householdId);
+        const result = await request.put(`${url}/${paidExpenseId}/accept`);
+
+        return result;
+    } catch (error) {
+        console.error("Error accepting paid expense", error);
+        return null;
+    }
+};
+
+export const reject = async (householdId, paidExpenseId) => {
+    try {
+        const url = baseUrl(householdId);
+        const result = await request.put(`${url}/${paidExpenseId}/reject`);
+
+        return result;
+    } catch (error) {
+        console.error("Error rejecting paid expense", error);
+        return null;
+    }
+};
+
 // export const getOne = async (householdId) => {
 //     try {
 //         const result = await request.get(`${baseUrl}/${householdId}`);
