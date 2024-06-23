@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import {
-    Avatar,
-    Box,
     Button,
-    ButtonGroup,
-    Card,
     Divider,
     FormControl,
     FormLabel,
-    HStack,
-    IconButton,
     Input,
     InputGroup,
     InputRightAddon,
@@ -28,7 +22,6 @@ import categoriesOptions from "../../../data/categoriesOptions ";
 import moment from "moment";
 import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
-import { FaRegTrashCan } from "react-icons/fa6";
 import * as householdService from "../../../services/householdService";
 import * as paidExpenseService from "../../../services/paidExpenseService";
 import { useParams } from "react-router-dom";
@@ -148,6 +141,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
     const onSubmit = (e) => {
         e.preventDefault();
 
+        // TODO: Validate date
         // TODO: Check if the options are selected first
         // ["Единично", "Поравно", "Ръчно"],
         let paidSplitType = "";
