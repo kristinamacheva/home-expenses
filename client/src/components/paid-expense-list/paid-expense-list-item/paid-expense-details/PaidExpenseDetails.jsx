@@ -39,12 +39,11 @@ export default function PaidExpenseDetails({
     category,
     amount,
     date,
-    balance,
     expenseStatus,
     balanceText,
     badgeColor,
     statusColor,
-    fetchPaidExpenses
+    fetchPaidExpenses,
 }) {
     const [isLoading, setIsLoading] = useState(true);
     const [paidExpenseDetails, setPaidExpenseDetails] = useState({});
@@ -129,7 +128,6 @@ export default function PaidExpenseDetails({
             });
     };
 
-
     const onCloseForm = () => {
         onClose();
     };
@@ -157,8 +155,12 @@ export default function PaidExpenseDetails({
         };
     });
 
-    // Extract the single approval status
-    const approvalStatus = paidExpenseDetails.userApprovals[0].status;
+    // Extract the single approval status if it exists
+    const approvalStatus =
+        paidExpenseDetails.userApprovals &&
+        paidExpenseDetails.userApprovals.length > 0
+            ? paidExpenseDetails.userApprovals[0].status
+            : null;
 
     // Determine if buttons should be shown
     const showButtons =
