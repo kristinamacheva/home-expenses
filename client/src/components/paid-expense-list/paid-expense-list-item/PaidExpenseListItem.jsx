@@ -9,11 +9,13 @@ import {
     Card,
     HStack,
     IconButton,
+    useDisclosure,
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import { FaEye, FaPen, FaRegTrashCan } from "react-icons/fa6";
 import { Link, useParams } from "react-router-dom";
 import AuthContext from "../../../contexts/authContext";
+import PaidExpenseDetails from "./paid-expense-details/PaidExpenseDetails";
 
 // TODO: send only necessary data here
 export default function PaidExpenseListItem({
@@ -30,6 +32,11 @@ export default function PaidExpenseListItem({
 
     const { userId } = useContext(AuthContext);
 
+    const {
+        isOpen: isDetailsModalOpen,
+        onOpen: onOpenDetailsModal,
+        onClose: onCloseDetailsModal,
+    } = useDisclosure();
 
     let balanceText = "";
     let badgeColor = "";
@@ -170,5 +177,23 @@ export default function PaidExpenseListItem({
                     </HStack>
                 </Stack>
             </Card>
+            {isDetailsModalOpen && (
+                <PaidExpenseDetails
+                    isOpen={isDetailsModalOpen}
+                    onClose={onCloseDetailsModal}
+                    paidExpenseId={_id}
+                    householdId={householdId}
+                    title={title}
+                    category={category}
+                    amount={amount}
+                    date={date}
+                    balance={balance}
+                    expenseStatus={expenseStatus}
+                    balanceText={balanceText}
+                    badgeColor={badgeColor}
+                    statusColor={statusColor}
+                />
+            )}
+        </>
     );
 }
