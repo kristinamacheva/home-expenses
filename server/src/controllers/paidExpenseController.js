@@ -6,7 +6,8 @@ const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
 router.get("/", async (req, res) => {
     try {
         const householdId = req.householdId;
-        const paidExpneses = await paidExpenseManager.getAll(householdId);
+        const userId = req.userId;
+        const paidExpneses = await paidExpenseManager.getAll(userId, householdId);
         res.json(paidExpneses);
     } catch (error) {
         console.error(error);

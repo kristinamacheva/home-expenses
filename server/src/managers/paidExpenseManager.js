@@ -2,9 +2,19 @@ const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
 
-exports.getAll = (householdId) => {
-    return PaidExpense.find({ household: householdId })
-        .select('_id title category creator amount date balance expenseStatus');
+exports.getAll = async (userId, householdId) => {
+    const paidExpenses = await PaidExpense.find({ household: householdId })
+        .select("_id title category creator amount date expenseStatus balance")
+        .lean();
+
+    // Filter balance array for the current user
+    paidExpenses.forEach((expense) => {
+        expense.balance = expense.balance.filter(
+            (entry) => entry.user.toString() === userId
+        );
+    });
+
+    return paidExpenses;
 };
 
 exports.getOne = (paidExpenseId) => PaidExpense.findById(paidExpenseId);
