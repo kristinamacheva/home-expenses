@@ -27,6 +27,7 @@ export default function PaidExpenseListItem({
     date,
     balance,
     expenseStatus,
+    fetchPaidExpenses,
 }) {
     const { householdId } = useParams();
 
@@ -192,6 +193,7 @@ export default function PaidExpenseListItem({
                     balanceText={balanceText}
                     badgeColor={badgeColor}
                     statusColor={statusColor}
+                    fetchPaidExpenses={fetchPaidExpenses}
                 />
             )}
         </>

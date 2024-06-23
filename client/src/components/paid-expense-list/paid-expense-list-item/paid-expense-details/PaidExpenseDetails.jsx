@@ -25,6 +25,7 @@ import {
     Td,
     Avatar,
     VStack,
+    useToast,
 } from "@chakra-ui/react";
 
 import * as paidExpenseService from "../../../../services/paidExpenseService";
@@ -43,9 +44,11 @@ export default function PaidExpenseDetails({
     balanceText,
     badgeColor,
     statusColor,
+    fetchPaidExpenses
 }) {
     const [isLoading, setIsLoading] = useState(true);
     const [paidExpenseDetails, setPaidExpenseDetails] = useState({});
+    const toast = useToast();
 
     useEffect(() => {
         setIsLoading(true);
@@ -71,9 +74,61 @@ export default function PaidExpenseDetails({
     //     e.preventDefault();
     // };
 
-    const onApproveClickHandler = (e) => {};
+    const onApproveClickHandler = () => {
+        paidExpenseService
+            .accept(householdId, paidExpenseId)
+            .then((result) => {
+                // Handle the success response
+                console.log("Accepted:", result);
+                toast({
+                    title: "Разходът е одобрен.",
+                    description: "Разходът беше одобрен успешно.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                fetchPaidExpenses();
+                onCloseForm();
+            })
+            .catch((error) => {
+                console.error("Error accepting the paid expense:", error);
+                toast({
+                    title: "Грешка.",
+                    description: "Възникна грешка при одобрението на разхода",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            });
+    };
 
-    const onRejectClickHandler = (e) => {};
+    const onRejectClickHandler = () => {
+        paidExpenseService
+            .reject(householdId, paidExpenseId)
+            .then((result) => {
+                console.log("Rejected:", result);
+                toast({
+                    title: "Разходът е отхвърлен.",
+                    description: "Разходът беше отхвърлен успешно.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                fetchPaidExpenses();
+                onCloseForm();
+            })
+            .catch((error) => {
+                console.error("Error rejecting the paid expense:", error);
+                toast({
+                    title: "Грешка.",
+                    description: "Възникна грешка при отхвърлянето на разхода",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            });
+    };
+
 
     const onCloseForm = () => {
         onClose();
@@ -107,8 +162,7 @@ export default function PaidExpenseDetails({
 
     // Determine if buttons should be shown
     const showButtons =
-        paidExpenseDetails.expenseStatus === "За одобрение" &&
-        approvalStatus === "За одобрение";
+        expenseStatus === "За одобрение" && approvalStatus === "За одобрение";
 
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>

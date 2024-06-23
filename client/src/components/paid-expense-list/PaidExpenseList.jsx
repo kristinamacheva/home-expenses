@@ -21,15 +21,25 @@ export default function PaidExpenseList() {
     const [paidExpenses, setPaidExpenses] = useState([]);
     const { householdId } = useParams();
     
-    useEffect(() => {
+    const fetchPaidExpenses = () => {
         paidExpenseService
-        .getAll(householdId)
-        .then((result) => setPaidExpenses(result))
-        .catch((err) => {
-            console.log(err);
-        });
+            .getAll(householdId)
+            .then((result) => setPaidExpenses(result))
+            .catch((err) => {
+                console.log(err);
+                toast({
+                    title: "Грешка.",
+                    description: "Неуспешно зареждане на платените разходи.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            });
+    };
+
+    useEffect(() => {
+        fetchPaidExpenses();
     }, []);
-    
 
     const [searchValues, setSearchValues] = useState({
         title: "",
@@ -146,13 +156,14 @@ export default function PaidExpenseList() {
 
             <Stack>
                 {paidExpenses.map((paidExpense) => (
-                    <PaidExpenseListItem key={paidExpense._id} {...paidExpense} />
+                    <PaidExpenseListItem key={paidExpense._id} {...paidExpense} fetchPaidExpenses={fetchPaidExpenses} />
                 ))}
             </Stack>
             {isCreateModalOpen && (
                 <PaidExpenseCreate
                     isOpen={isCreateModalOpen}
                     onClose={onCloseCreateModal}
+                    fetchPaidExpenses={fetchPaidExpenses}
                 />
             )}
         </>

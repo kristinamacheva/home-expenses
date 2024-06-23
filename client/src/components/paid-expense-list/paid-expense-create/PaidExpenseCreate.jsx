@@ -40,7 +40,7 @@ const initialValues = {
     owedSplitTypeField: "",
 };
 
-export default function PaidExpenseCreate({ isOpen, onClose }) {
+export default function PaidExpenseCreate({ isOpen, onClose, fetchPaidExpenses }) {
     const { userId, name } = useContext(AuthContext);
     const { householdId } = useParams();
 
@@ -182,6 +182,7 @@ export default function PaidExpenseCreate({ isOpen, onClose }) {
 
     const onCloseForm = () => {
         // clearFormHandler();
+        fetchPaidExpenses();
         onClose();
     };
 
