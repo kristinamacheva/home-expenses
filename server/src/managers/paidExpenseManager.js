@@ -19,6 +19,31 @@ exports.getAll = async (userId, householdId) => {
 
 exports.getOne = (paidExpenseId) => PaidExpense.findById(paidExpenseId);
 
+exports.getOneDistributionDetails = async (paidExpenseId, userId) => {
+    try {
+        const paidExpense = await PaidExpense.findById(paidExpenseId)
+            .populate("creator", "_id name avatar avatarColor")
+            .populate("balance.user", "_id name avatar avatarColor")
+            .select("_id creator balance paid owed expenseStatus userApprovals");
+
+        // Filter userApprovals to only include the current user's status
+        const currentUserApproval = paidExpense.userApprovals.find(entry => entry.user.equals(userId));
+
+        if (currentUserApproval) {
+            // Modify paidExpense object to only include currentUserApproval
+            paidExpense.userApprovals = [currentUserApproval];
+        } else {
+            // If current user has no approval entry
+            paidExpense.userApprovals = [];
+        }
+
+        return paidExpense;
+    } catch (error) {
+        console.error("Error fetching paid expense details:", error);
+        throw error;
+    }
+};
+
 exports.create = async (paidExpenseData) => {
     try {
         const {

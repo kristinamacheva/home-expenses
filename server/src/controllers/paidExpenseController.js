@@ -70,6 +70,28 @@ router.post("/", async (req, res) => {
 
 router.use("/:paidExpenseId", getPaidExpense);
 
+router.get("/:paidExpenseId", async (req, res) => {
+    try {
+        const paidExpenseId = req.paidExpenseId;
+        const userId = req.userId;
+        const { details } = req.query;
+
+        let paidExpense;
+        if (details === 'distribution') {
+            paidExpense = await paidExpenseManager.getOneDistributionDetails(paidExpenseId, userId);
+        } else {
+            // Handle default case 
+            // TODO: retirn only part of expense
+            paidExpense = await paidExpenseManager.getOne(paidExpenseId);
+        }
+
+        res.status(200).json(paidExpense);
+    } catch (error) {
+        console.error(error);
+        // TODO: status
+        res.status(500).json({ message: "Error fetching paid expense details" });
+    }
+});
 // router.get('/:paidExpenseId', async (req, res) => {
 //     // TODO: lean?
 //     const paidExpense = await paidExpenseManager.getOne(req.params.paidExpenseId).lean();
