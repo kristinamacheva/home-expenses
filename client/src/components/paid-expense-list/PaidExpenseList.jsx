@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import PaidExpenseListItem from "./paid-expense-list-item/PaidExpenseListItem";
 import {
     Button,
@@ -7,24 +7,48 @@ import {
     FormControl,
     FormLabel,
     Input,
-    Spacer,
+    Spinner,
     Stack,
     Text,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import PaidExpenseCreate from "./paid-expense-create/PaidExpenseCreate";
-import AuthContext from "../../contexts/authContext";
 import * as paidExpenseService from "../../services/paidExpenseService";
+import AuthContext from "../../contexts/authContext";
 import { useParams } from "react-router-dom";
 
 export default function PaidExpenseList() {
     const [paidExpenses, setPaidExpenses] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [index, setIndex] = useState(2); // Page index starts at 2
+    const [hasMore, setHasMore] = useState(false); // Track if there are more items
+    const [searchValues, setSearchValues] = useState({
+        title: "",
+        category: "",
+        startDate: "",
+        endDate: "",
+    });
+    const loaderRef = useRef(null);
     const { householdId } = useParams();
-    
-    const fetchPaidExpenses = () => {
+    const { userId } = useContext(AuthContext);
+    const {
+        isOpen: isCreateModalOpen,
+        onOpen: onOpenCreateModal,
+        onClose: onCloseCreateModal,
+    } = useDisclosure();
+    const toast = useToast();
+
+    useEffect(() => {
+        setIsLoading(true);
+
         paidExpenseService
-            .getAll(householdId)
-            .then((result) => setPaidExpenses(result))
+            .getAll(householdId, 1)
+            .then(({ data, hasMore: newHasMore }) => {
+                // setisLoading(false);
+                setPaidExpenses(data);
+                setHasMore(newHasMore);
+            })
             .catch((err) => {
                 console.log(err);
                 toast({
@@ -35,24 +59,84 @@ export default function PaidExpenseList() {
                     isClosable: true,
                 });
             });
+
+        setIsLoading(false);
+        fetchMorePaidExpenses();
+    }, []);
+
+    const fetchMorePaidExpenses = async () => {
+        if (isLoading || !hasMore) return; // Exit if already loading or no more items
+
+        setIsLoading(true);
+
+        try {
+            const { data, hasMore: newHasMore } =
+                await paidExpenseService.getAll(householdId, index);
+            console.log(data);
+            setPaidExpenses((state) => [...state, ...data]);
+            setHasMore(newHasMore);
+        } catch (err) {
+            console.log(err);
+            toast({
+                title: "Грешка.",
+                description: "Неуспешно зареждане на платените разходи.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+        // console.log(paidExpenses);
+
+        setIndex((prevIndex) => prevIndex + 1);
+        setIsLoading(false);
     };
 
     useEffect(() => {
-        fetchPaidExpenses();
-    }, []);
+        const observer = new IntersectionObserver((entries) => {
+            const target = entries[0];
+            if (target.isIntersecting) {
+                fetchMorePaidExpenses();
+            }
+        });
 
-    const [searchValues, setSearchValues] = useState({
-        title: "",
-        category: "",
-        startDate: "",
-        endDate: "",
-    });
+        if (loaderRef.current) {
+            observer.observe(loaderRef.current);
+        }
 
-    const {
-        isOpen: isCreateModalOpen,
-        onOpen: onOpenCreateModal,
-        onClose: onCloseCreateModal,
-    } = useDisclosure();
+        return () => {
+            if (loaderRef.current) {
+                observer.unobserve(loaderRef.current);
+            }
+        };
+    }, [fetchMorePaidExpenses]); // Only track dependencies necessary for effect
+
+    const fetchPaidExpenses = () => {
+        setHasMore(false);
+        setIndex(2);
+
+        setIsLoading(true);
+
+        paidExpenseService
+            .getAll(householdId, 1)
+            .then(({ data, hasMore: newHasMore }) => {
+                // setisLoading(false);
+                setPaidExpenses(data);
+                setHasMore(newHasMore);
+            })
+            .catch((err) => {
+                console.log(err);
+                toast({
+                    title: "Грешка.",
+                    description: "Неуспешно зареждане на платените разходи.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            });
+
+        setIsLoading(false);
+        fetchMorePaidExpenses();
+    };
 
     const onChange = (e) => {
         setSearchValues((state) => ({
@@ -63,20 +147,18 @@ export default function PaidExpenseList() {
 
     const onSubmit = (e) => {
         e.preventDefault();
-
         console.log(searchValues);
+        // Handle search logic
     };
 
     const clearSearchFormHandler = () => {
-        setValues({
+        setSearchValues({
             title: "",
             category: "",
             startDate: "",
             endDate: "",
         });
     };
-
-    const { userId } = useContext(AuthContext);
 
     return (
         <>
@@ -148,7 +230,7 @@ export default function PaidExpenseList() {
                     </Checkbox>
                 </Stack>
                 <Flex justify="flex-end" my="3" mx="1">
-                    <Button variant="primary" onClick={onSubmit}>
+                    <Button variant="primary" type="submit">
                         Търсене
                     </Button>
                 </Flex>
@@ -156,9 +238,15 @@ export default function PaidExpenseList() {
 
             <Stack>
                 {paidExpenses.map((paidExpense) => (
-                    <PaidExpenseListItem key={paidExpense._id} {...paidExpense} fetchPaidExpenses={fetchPaidExpenses} />
+                    <PaidExpenseListItem
+                        key={paidExpense._id}
+                        {...paidExpense}
+                        fetchPaidExpenses={fetchPaidExpenses}
+                    />
                 ))}
             </Stack>
+
+            <Stack ref={loaderRef}>{isLoading && <Spinner />}</Stack>
             {isCreateModalOpen && (
                 <PaidExpenseCreate
                     isOpen={isCreateModalOpen}
