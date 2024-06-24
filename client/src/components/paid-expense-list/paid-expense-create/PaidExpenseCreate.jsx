@@ -17,6 +17,7 @@ import {
     Select,
     Stack,
     Text,
+    useToast,
 } from "@chakra-ui/react";
 import categoriesOptions from "../../../data/categoriesOptions ";
 import moment from "moment";
@@ -40,7 +41,11 @@ const initialValues = {
     owedSplitTypeField: "",
 };
 
-export default function PaidExpenseCreate({ isOpen, onClose, fetchPaidExpenses }) {
+export default function PaidExpenseCreate({
+    isOpen,
+    onClose,
+    fetchPaidExpenses,
+}) {
     const { userId, name } = useContext(AuthContext);
     const { householdId } = useParams();
 
@@ -49,6 +54,7 @@ export default function PaidExpenseCreate({ isOpen, onClose, fetchPaidExpenses }
     const [owed, setOwed] = useState([]);
 
     const [values, setValues] = useState(initialValues);
+    const toast = useToast();
 
     useEffect(() => {
         householdService
@@ -138,7 +144,7 @@ export default function PaidExpenseCreate({ isOpen, onClose, fetchPaidExpenses }
         }
     };
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
 
         // TODO: Validate date
@@ -173,7 +179,25 @@ export default function PaidExpenseCreate({ isOpen, onClose, fetchPaidExpenses }
         };
 
         console.log(newPaidExpense);
-        paidExpenseService.create(householdId, newPaidExpense);
+        try {
+            const result = await paidExpenseService.create(
+                householdId,
+                newPaidExpense
+            );
+            fetchPaidExpenses();
+
+        } catch (error) {
+            console.log(error);
+            toast({
+                title: "Грешка.",
+                description: "Възникна грешка при създаването на разхода",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+
+        onCloseForm();
     };
 
     // const clearFormHandler = () => {
@@ -182,7 +206,6 @@ export default function PaidExpenseCreate({ isOpen, onClose, fetchPaidExpenses }
 
     const onCloseForm = () => {
         // clearFormHandler();
-        fetchPaidExpenses();
         onClose();
     };
 
