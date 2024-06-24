@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState, useRef, useCallback } from "react";
 import PaidExpenseListItem from "./paid-expense-list-item/PaidExpenseListItem";
 import {
     Button,
@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import PaidExpenseCreate from "./paid-expense-create/PaidExpenseCreate";
 import * as paidExpenseService from "../../services/paidExpenseService";
-import AuthContext from "../../contexts/authContext";
 import { useParams } from "react-router-dom";
 
 export default function PaidExpenseList() {
@@ -31,7 +30,6 @@ export default function PaidExpenseList() {
     });
     const loaderRef = useRef(null);
     const { householdId } = useParams();
-    const { userId } = useContext(AuthContext);
     const {
         isOpen: isCreateModalOpen,
         onOpen: onOpenCreateModal,
@@ -45,7 +43,6 @@ export default function PaidExpenseList() {
         paidExpenseService
             .getAll(householdId, 1)
             .then(({ data, hasMore: newHasMore }) => {
-                // setisLoading(false);
                 setPaidExpenses(data);
                 setHasMore(newHasMore);
             })
@@ -61,18 +58,16 @@ export default function PaidExpenseList() {
             });
 
         setIsLoading(false);
-        fetchMorePaidExpenses();
     }, []);
 
-    const fetchMorePaidExpenses = async () => {
-        if (isLoading || !hasMore) return; // Exit if already loading or no more items
+    const fetchMorePaidExpenses = useCallback(async () => {
+        if (isLoading || !hasMore) return;
 
         setIsLoading(true);
 
         try {
             const { data, hasMore: newHasMore } =
                 await paidExpenseService.getAll(householdId, index);
-            console.log(data);
             setPaidExpenses((state) => [...state, ...data]);
             setHasMore(newHasMore);
         } catch (err) {
@@ -85,11 +80,11 @@ export default function PaidExpenseList() {
                 isClosable: true,
             });
         }
-        // console.log(paidExpenses);
 
         setIndex((prevIndex) => prevIndex + 1);
+        
         setIsLoading(false);
-    };
+    }, [isLoading, hasMore, index]);
 
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -119,7 +114,6 @@ export default function PaidExpenseList() {
         paidExpenseService
             .getAll(householdId, 1)
             .then(({ data, hasMore: newHasMore }) => {
-                // setisLoading(false);
                 setPaidExpenses(data);
                 setHasMore(newHasMore);
             })
@@ -135,7 +129,6 @@ export default function PaidExpenseList() {
             });
 
         setIsLoading(false);
-        fetchMorePaidExpenses();
     };
 
     const onChange = (e) => {
@@ -246,7 +239,7 @@ export default function PaidExpenseList() {
                 ))}
             </Stack>
 
-            <Stack ref={loaderRef}>{isLoading && <Spinner />}</Stack>
+            <Stack ref={loaderRef} p="2">{isLoading && <Spinner />}</Stack>
             {isCreateModalOpen && (
                 <PaidExpenseCreate
                     isOpen={isCreateModalOpen}
