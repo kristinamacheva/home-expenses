@@ -2,10 +2,18 @@ const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
 
-exports.getAll = async (userId, householdId) => {
-    const paidExpenses = await PaidExpense.find({ household: householdId })
+exports.getAll = async (userId, householdId, page, limit) => {
+    const skip = (page - 1) * limit;
+
+    const paidExpensesPromise = PaidExpense.find({ household: householdId })
         .select("_id title category creator amount date expenseStatus balance")
+        .skip(skip) 
+        .limit(limit) 
         .lean();
+
+    const countPromise = PaidExpense.countDocuments({ household: householdId });
+
+    const [paidExpenses, totalCount] = await Promise.all([paidExpensesPromise, countPromise]);
 
     // Filter balance array for the current user
     paidExpenses.forEach((expense) => {
@@ -14,7 +22,9 @@ exports.getAll = async (userId, householdId) => {
         );
     });
 
-    return paidExpenses;
+    console.log(paidExpenses);
+    console.log(totalCount);
+    return { paidExpenses, totalCount };
 };
 
 exports.getOne = (paidExpenseId) =>

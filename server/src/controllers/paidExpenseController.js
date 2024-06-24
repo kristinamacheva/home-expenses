@@ -7,14 +7,17 @@ router.get("/", async (req, res) => {
     try {
         const householdId = req.householdId;
         const userId = req.userId;
-        const paidExpneses = await paidExpenseManager.getAll(
-            userId,
-            householdId
-        );
-        res.json(paidExpneses);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const { paidExpenses, totalCount } = await paidExpenseManager.getAll(userId, householdId, page, limit);
+
+        const totalPages = Math.ceil(totalCount / limit); 
+        const hasMore = page < totalPages;
+
+        res.status(200).json({ data: paidExpenses, hasMore });
     } catch (error) {
         console.error(error);
-        // TODO: status
         res.status(500).json({ message: "Error fetching paid expenses" });
     }
 });
