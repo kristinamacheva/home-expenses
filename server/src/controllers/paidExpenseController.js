@@ -7,7 +7,10 @@ router.get("/", async (req, res) => {
     try {
         const householdId = req.householdId;
         const userId = req.userId;
-        const paidExpneses = await paidExpenseManager.getAll(userId, householdId);
+        const paidExpneses = await paidExpenseManager.getAll(
+            userId,
+            householdId
+        );
         res.json(paidExpneses);
     } catch (error) {
         console.error(error);
@@ -77,10 +80,13 @@ router.get("/:paidExpenseId", async (req, res) => {
         const { details } = req.query;
 
         let paidExpense;
-        if (details === 'distribution') {
-            paidExpense = await paidExpenseManager.getOneDistributionDetails(paidExpenseId, userId);
+        if (details === "all") {
+            paidExpense = await paidExpenseManager.getOneDetails(
+                paidExpenseId,
+                userId
+            );
         } else {
-            // Handle default case 
+            // Handle default case
             // TODO: retirn only part of expense
             paidExpense = await paidExpenseManager.getOne(paidExpenseId);
         }
@@ -89,7 +95,9 @@ router.get("/:paidExpenseId", async (req, res) => {
     } catch (error) {
         console.error(error);
         // TODO: status
-        res.status(500).json({ message: "Error fetching paid expense details" });
+        res.status(500).json({
+            message: "Error fetching paid expense details",
+        });
     }
 });
 
@@ -98,7 +106,10 @@ router.put("/:paidExpenseId/accept", async (req, res) => {
         const paidExpenseId = req.paidExpenseId;
         const userId = req.userId;
 
-        const paidExpense = await paidExpenseManager.accept(userId, paidExpenseId);
+        const paidExpense = await paidExpenseManager.accept(
+            userId,
+            paidExpenseId
+        );
         res.status(200).json(paidExpense);
     } catch (error) {
         console.error(error);
@@ -111,7 +122,10 @@ router.put("/:paidExpenseId/reject", async (req, res) => {
         const paidExpenseId = req.paidExpenseId;
         const userId = req.userId;
 
-        const paidExpense = await paidExpenseManager.reject(userId, paidExpenseId);
+        const paidExpense = await paidExpenseManager.reject(
+            userId,
+            paidExpenseId
+        );
         res.status(200).json(paidExpense);
     } catch (error) {
         console.error(error);

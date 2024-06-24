@@ -10,7 +10,7 @@ exports.getAllWithUsers = async (userId) => {
     const result = await Household.find({ "members.user": userId })
         .populate("members.user", "_id name email phone")
         // .populate("admins", "name")
-        .populate("balance.user", "_id name");
+        .populate("balance.user", "_id name").lean();
 
     return result;
 };
@@ -75,6 +75,7 @@ exports.getAllNonChildMembers = async (householdId) => {
         // .populate("members.user", "_id name");
 
         // nonChildMembers = nonChildMembers.members.filter(member => member.role !== 'Дете');
+        console.log(nonChildMembers);
 
         return nonChildMembers;
     } catch (error) {
