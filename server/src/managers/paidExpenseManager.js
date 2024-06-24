@@ -7,6 +7,7 @@ exports.getAll = async (userId, householdId, page, limit) => {
 
     const paidExpensesPromise = PaidExpense.find({ household: householdId })
         .select("_id title category creator amount date expenseStatus balance")
+        .sort({ date: -1 })  // Sort by date in descending order
         .skip(skip) 
         .limit(limit) 
         .lean();
