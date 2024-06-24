@@ -315,6 +315,29 @@ exports.reject = async (userId, paidExpenseId) => {
     }
 };
 
+exports.addComment = async (userId, paidExpenseId, text) => {
+    try {
+        const paidExpense = await PaidExpense.findById(paidExpenseId);
+
+        const comment = {
+            user: userId,
+            text: text,
+            createdAt: new Date(),
+        };
+
+        // Push the comment to the comments array in PaidExpense
+        paidExpense.comments.push(comment);
+
+        // Save the PaidExpense document with the new comment
+        await paidExpense.save();
+
+        return paidExpense;
+    } catch (error) {
+        console.error("Error adding comment:", error);
+        throw error;
+    }
+};
+
 exports.update = (paidExpenseId, paidExpenseData) =>
     PaidExpense.findByIdAndUpdate(paidExpenseId, paidExpenseData);
 

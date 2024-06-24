@@ -122,6 +122,20 @@ const paidExpenseSchema = new mongoose.Schema(
                 },
             },
         ],
+        comments: [
+            {
+                user: {
+                    type: mongoose.Types.ObjectId,
+                    ref: "User",
+                    required: true,
+                },
+                text: {
+                    type: String,
+                    required: [true, "Полето 'Текст' е задължително"],
+                },
+                createdAt: { type: Date, default: Date.now },
+            },
+        ],
         household: {
             type: mongoose.Types.ObjectId,
             ref: "Household",

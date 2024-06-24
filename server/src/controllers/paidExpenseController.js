@@ -133,6 +133,26 @@ router.put("/:paidExpenseId/reject", async (req, res) => {
     }
 });
 
+router.post("/:paidExpenseId/comments", async (req, res) => {
+    try {
+        const { text } = req.body;
+        const paidExpenseId = req.paidExpenseId;
+        const userId = req.userId;
+
+        const paidExpense = await paidExpenseManager.addComment(
+            userId,
+            paidExpenseId,
+            text
+        );
+        
+        res.status(200).json(paidExpense);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error adding comment to the paid expense",
+        });
+    }
+});
 
 // router.get('/:paidExpenseId', async (req, res) => {
 //     // TODO: lean?
