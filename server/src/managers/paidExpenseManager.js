@@ -2,30 +2,57 @@ const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
 
+const { ObjectId } = require('mongoose').Types;
+
 exports.getAll = async (userId, householdId, page, limit) => {
-    const skip = (page - 1) * limit;
+    try {
+        const skip = (page - 1) * limit;
 
-    const paidExpensesPromise = PaidExpense.find({ household: householdId })
-        .select("_id title category creator amount date expenseStatus balance")
-        .sort({ date: -1 })  // Sort by date in descending order
-        .skip(skip) 
-        .limit(limit) 
-        .lean();
+        // Aggregation pipeline to fetch paid expenses and filter balance array
+        const pipeline = [
+            { $match: { household: new ObjectId(householdId) } }, // Match documents for the specified householdId
+            { $sort: { date: -1, _id: -1 } }, // Sort by date and _id in descending order
+            { $skip: skip }, // Pagination: Skip records
+            { $limit: limit }, // Pagination: Limit records
+            {
+                $addFields: {
+                    balance: {
+                        $filter: {
+                            input: '$balance',
+                            as: 'entry',
+                            cond: { $eq: ['$$entry.user', new ObjectId(userId)] } // Filter by userId
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    title: 1,
+                    category: 1,
+                    creator: 1,
+                    amount: 1,
+                    date: 1,
+                    expenseStatus: 1,
+                    balance: 1
+                }
+            }
+        ];
 
-    const countPromise = PaidExpense.countDocuments({ household: householdId });
+        // Execute aggregation pipeline
+        const paidExpenses = await PaidExpense.aggregate(pipeline);
 
-    const [paidExpenses, totalCount] = await Promise.all([paidExpensesPromise, countPromise]);
+        // Count total number of documents
+        const totalCount = await PaidExpense.countDocuments({ household: new ObjectId(householdId) });
 
-    // Filter balance array for the current user
-    paidExpenses.forEach((expense) => {
-        expense.balance = expense.balance.filter(
-            (entry) => entry.user.toString() === userId
-        );
-    });
+        console.log(paidExpenses);
+        console.log(totalCount);
 
-    console.log(paidExpenses);
-    console.log(totalCount);
-    return { paidExpenses, totalCount };
+        return { paidExpenses, totalCount };
+    } catch (error) {
+        console.error("Error fetching paid expenses:", error);
+        throw error; // Propagate the error to the caller
+    }
 };
 
 exports.getOne = (paidExpenseId) =>
