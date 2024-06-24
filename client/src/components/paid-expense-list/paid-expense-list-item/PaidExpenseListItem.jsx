@@ -184,15 +184,6 @@ export default function PaidExpenseListItem({
                     onClose={onCloseDetailsModal}
                     paidExpenseId={_id}
                     householdId={householdId}
-                    title={title}
-                    category={category}
-                    amount={amount}
-                    date={date}
-                    balance={balance}
-                    expenseStatus={expenseStatus}
-                    balanceText={balanceText}
-                    badgeColor={badgeColor}
-                    statusColor={statusColor}
                     fetchPaidExpenses={fetchPaidExpenses}
                 />
             )}

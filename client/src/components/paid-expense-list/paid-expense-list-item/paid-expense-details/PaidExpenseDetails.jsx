@@ -35,24 +35,17 @@ export default function PaidExpenseDetails({
     onClose,
     paidExpenseId,
     householdId,
-    title,
-    category,
-    amount,
-    date,
-    expenseStatus,
-    balanceText,
-    badgeColor,
-    statusColor,
     fetchPaidExpenses,
 }) {
     const [isLoading, setIsLoading] = useState(true);
     const [paidExpenseDetails, setPaidExpenseDetails] = useState({});
     const toast = useToast();
+    const { userId } = useContext(AuthContext);
 
     useEffect(() => {
         setIsLoading(true);
         paidExpenseService
-            .getOneDistributionDetails(householdId, paidExpenseId)
+            .getOneDetails(householdId, paidExpenseId)
             .then((result) => {
                 // setisLoading(false);
                 setPaidExpenseDetails(result);
@@ -72,6 +65,35 @@ export default function PaidExpenseDetails({
     // const onCommentSubmit = (e) => {
     //     e.preventDefault();
     // };
+
+    const currentUserBalance = paidExpenseDetails.balance?.filter(
+        (balanceItem) => balanceItem.user._id === userId
+    );
+
+    let balanceText = "";
+    let badgeColor = "";
+
+    if (currentUserBalance?.length === 1) {
+        if (currentUserBalance[0].type === "+") {
+            balanceText = `Дължат Ви ${currentUserBalance[0].sum} лв.`;
+            badgeColor = "green";
+        } else {
+            balanceText = `Дължите ${currentUserBalance[0].sum} лв.`;
+            badgeColor = "red";
+        }
+    } else {
+        balanceText = "Не участвате в разхода";
+        badgeColor = "gray";
+    }
+
+    let statusColor = "";
+    if (paidExpenseDetails.expenseStatus === "Одобрен") {
+        statusColor = "green";
+    } else if (paidExpenseDetails.expenseStatus === "За одобрение") {
+        statusColor = "gray";
+    } else if (paidExpenseDetails.expenseStatus === "Отхвърлен") {
+        statusColor = "red";
+    }
 
     const onApproveClickHandler = () => {
         paidExpenseService
@@ -164,7 +186,8 @@ export default function PaidExpenseDetails({
 
     // Determine if buttons should be shown
     const showButtons =
-        expenseStatus === "За одобрение" && approvalStatus === "За одобрение";
+        paidExpenseDetails.expenseStatus === "За одобрение" &&
+        approvalStatus === "За одобрение";
 
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>
@@ -204,7 +227,7 @@ export default function PaidExpenseDetails({
                                         }}
                                     >
                                         <Heading as="h3" size="md">
-                                            {title}
+                                            {paidExpenseDetails.title}
                                         </Heading>
                                         <Box display="inline-block">
                                             <Badge
@@ -215,7 +238,9 @@ export default function PaidExpenseDetails({
                                                 py="0.2"
                                                 textTransform="none"
                                             >
-                                                {expenseStatus}
+                                                {
+                                                    paidExpenseDetails.expenseStatus
+                                                }
                                             </Badge>
                                         </Box>
                                     </Stack>
@@ -226,13 +251,13 @@ export default function PaidExpenseDetails({
                                             background={"themePurple.200"}
                                             color={"themePurple.800"}
                                         >
-                                            {category}
+                                            {paidExpenseDetails.category}
                                         </Badge>
                                     </Box>
                                     <Text color={"gray.500"} fontSize="sm">
-                                        {new Date(date).toLocaleDateString(
-                                            "bg-BG"
-                                        )}
+                                        {new Date(
+                                            paidExpenseDetails.date
+                                        ).toLocaleDateString("bg-BG")}
                                     </Text>
                                 </Stack>
                                 <Stack
@@ -250,7 +275,7 @@ export default function PaidExpenseDetails({
                                             color="themePurple.800"
                                             mb="-1"
                                         >
-                                            {amount} лв.
+                                            {paidExpenseDetails.amount} лв.
                                         </Text>
                                         <Box display="inline-block">
                                             <Badge

@@ -1,5 +1,6 @@
 import * as request from "../lib/request";
 
+// TODO: throw errors
 const baseUrl = (householdId) =>
     `http://localhost:5000/households/${householdId}/paidExpenses`;
 
@@ -18,10 +19,10 @@ export const create = async (householdId, paidExpenseData) => {
     return result;
 };
 
-export const getOneDistributionDetails = async (householdId, paidExpenseId) => {
+export const getOneDetails = async (householdId, paidExpenseId) => {
     try {
         const url = baseUrl(householdId);
-        const result = await request.get(`${url}/${paidExpenseId}?details=distribution`);
+        const result = await request.get(`${url}/${paidExpenseId}?details=all`);
 
         return result;
     } catch (error) {
