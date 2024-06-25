@@ -2,8 +2,23 @@ const router = require("express").Router();
 const paidExpenseManager = require("../managers/paidExpenseManager");
 const { isAuth } = require("../middlewares/authMiddleware");
 const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
+const { validationResult } = require('express-validator');
+const { getValidator } = require("../validators/paidExpenseValidator");
 
-router.get("/", async (req, res) => {
+router.get("/", getValidator, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({
+            message: "Данните са некоректни",
+            errors: errors.array().map((err) => ({
+                field: err.path,
+                message: err.msg,
+            })),
+        });
+    }
+
     try {
         const householdId = req.householdId;
         const userId = req.userId;
