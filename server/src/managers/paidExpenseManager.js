@@ -2,15 +2,62 @@ const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
 
-const { ObjectId } = require('mongoose').Types;
+const { ObjectId } = require("mongoose").Types;
 
-exports.getAll = async (userId, householdId, page, limit) => {
+exports.getAll = async (userId, householdId, page, limit, searchParams) => {
     try {
         const skip = (page - 1) * limit;
 
+        // Build dynamic match conditions based on search parameters
+        let matchConditions = { household: new ObjectId(householdId) };
+
+        if (searchParams.title) {
+            matchConditions.title = {
+                $regex: new RegExp(searchParams.title, "i"),
+            }; // Case-insensitive search
+        }
+
+        if (searchParams.category) {
+            matchConditions.category = {
+                $regex: new RegExp(searchParams.category, "i"),
+            }; // Case-insensitive search
+        }
+
+        // Date range filter
+        if (searchParams.startDate && searchParams.endDate) {
+            matchConditions.date = {
+                $gte: new Date(searchParams.startDate),
+                $lte: new Date(searchParams.endDate),
+            };
+        } else if (searchParams.startDate) {
+            matchConditions.date = { $gte: new Date(searchParams.startDate) };
+        } else if (searchParams.endDate) {
+            matchConditions.date = { $lte: new Date(searchParams.endDate) };
+        }
+
+        // Expense status conditions
+        let expenseStatusConditions = [];
+
+        // If approved is explicitly false, filter out "Одобрен"
+        if (searchParams.approved === false)
+            expenseStatusConditions.push("Одобрен");
+
+        // If forApproval is explicitly false, filter out "За одобрение"
+        if (searchParams.forApproval === false)
+            expenseStatusConditions.push("За одобрение");
+
+        // If rejected is explicitly false, filter out "Отхвърлен"
+        if (searchParams.rejected === false)
+            expenseStatusConditions.push("Отхвърлен");
+
+        // If there are any conditions to filter out, add them to the match
+        if (expenseStatusConditions.length > 0) {
+            matchConditions.expenseStatus = { $nin: expenseStatusConditions };
+        }
+
         // Aggregation pipeline to fetch paid expenses and filter balance array
         const pipeline = [
-            { $match: { household: new ObjectId(householdId) } }, // Match documents for the specified householdId
+            { $match: matchConditions }, // Match documents with dynamic conditions
             { $sort: { date: -1, _id: -1 } }, // Sort by date and _id in descending order
             { $skip: skip }, // Pagination: Skip records
             { $limit: limit }, // Pagination: Limit records
@@ -18,12 +65,14 @@ exports.getAll = async (userId, householdId, page, limit) => {
                 $addFields: {
                     balance: {
                         $filter: {
-                            input: '$balance',
-                            as: 'entry',
-                            cond: { $eq: ['$$entry.user', new ObjectId(userId)] } // Filter by userId
-                        }
-                    }
-                }
+                            input: "$balance",
+                            as: "entry",
+                            cond: {
+                                $eq: ["$$entry.user", new ObjectId(userId)],
+                            }, // Filter by userId
+                        },
+                    },
+                },
             },
             {
                 $project: {
@@ -33,20 +82,17 @@ exports.getAll = async (userId, householdId, page, limit) => {
                     creator: 1,
                     amount: 1,
                     date: 1,
-                    expenseStatus: 1,
-                    balance: 1
-                }
-            }
+                    expenseStatus: 1, // Ensure the status field is included
+                    balance: 1,
+                },
+            },
         ];
 
         // Execute aggregation pipeline
         const paidExpenses = await PaidExpense.aggregate(pipeline);
 
-        // Count total number of documents
-        const totalCount = await PaidExpense.countDocuments({ household: new ObjectId(householdId) });
-
-        console.log(paidExpenses);
-        console.log(totalCount);
+        // Count total number of documents matching the conditions
+        const totalCount = await PaidExpense.countDocuments(matchConditions);
 
         return { paidExpenses, totalCount };
     } catch (error) {
@@ -65,9 +111,9 @@ exports.getOneDetails = async (paidExpenseId, userId) => {
         const paidExpense = await PaidExpense.findById(paidExpenseId)
             .populate("creator", "_id name avatar avatarColor")
             .populate("balance.user", "_id name avatar avatarColor");
-            // .select(
-            //     "_id creator balance paid owed expenseStatus userApprovals"
-            // );
+        // .select(
+        //     "_id creator balance paid owed expenseStatus userApprovals"
+        // );
 
         // Filter userApprovals to only include the current user's status
         const currentUserApproval = paidExpense.userApprovals.find((entry) =>

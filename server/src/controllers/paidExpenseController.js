@@ -10,9 +10,25 @@ router.get("/", async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
 
-        const { paidExpenses, totalCount } = await paidExpenseManager.getAll(userId, householdId, page, limit);
+        const searchParams = {
+            title: req.query.title || "",
+            category: req.query.category || "",
+            startDate: req.query.startDate || "",
+            endDate: req.query.endDate || "",
+            approved: req.query.approved === "false" ? false : null,
+            forApproval: req.query.forApproval === "false" ? false : null,
+            rejected: req.query.rejected === "false" ? false : null,
+        };
 
-        const totalPages = Math.ceil(totalCount / limit); 
+        const { paidExpenses, totalCount } = await paidExpenseManager.getAll(
+            userId,
+            householdId,
+            page,
+            limit,
+            searchParams
+        );
+
+        const totalPages = Math.ceil(totalCount / limit);
         const hasMore = page < totalPages;
 
         res.status(200).json({ data: paidExpenses, hasMore });
@@ -147,7 +163,7 @@ router.post("/:paidExpenseId/comments", async (req, res) => {
             paidExpenseId,
             text
         );
-        
+
         res.status(200).json(paidExpense);
     } catch (error) {
         console.error(error);
