@@ -184,7 +184,7 @@ export default function PaidExpenseCreate({
                 householdId,
                 newPaidExpense
             );
-            fetchPaidExpenses();
+            fetchPaidExpenses(true);
 
         } catch (error) {
             console.log(error);
