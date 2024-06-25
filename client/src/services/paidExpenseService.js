@@ -4,15 +4,31 @@ import * as request from "../lib/request";
 const baseUrl = (householdId) =>
     `http://localhost:5000/households/${householdId}/paidExpenses`;
 
-export const getAll = async (householdId, page) => {
-    const url = `${baseUrl(householdId)}?page=${page}`;
-    const result = await request.get(url);
-    
-    console.log(page);
-    return {
-        data: result.data,
-        hasMore: result.hasMore,
-    };
+// params = {} -> handle optional parameters and prevent errors when accessing properties of params
+export const getAll = async (householdId, page, params = {}) => {
+    // Remove empty string parameters
+    Object.keys(params).forEach(key => params[key] === "" && delete params[key]);
+
+    const queryParams = new URLSearchParams({
+        page,
+        ...params,
+    });
+
+    const url = `${baseUrl(householdId)}?${queryParams.toString()}`;
+    console.log(url);
+
+    try {
+        const result = await request.get(url);
+        console.log(result);
+
+        return {
+            data: result.data,
+            hasMore: result.hasMore,
+        };
+    } catch (error) {
+        console.error('Error fetching paid expenses:', error);
+        throw error; 
+    }
 };
 
 export const create = async (householdId, paidExpenseData) => {
