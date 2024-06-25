@@ -27,6 +27,9 @@ export default function PaidExpenseList() {
         category: "",
         startDate: "",
         endDate: "",
+        approved: true,
+        forApproval: true,
+        rejected: true,
     });
     const loaderRef = useRef(null);
     const { householdId } = useParams();
@@ -38,15 +41,39 @@ export default function PaidExpenseList() {
     const toast = useToast();
 
     useEffect(() => {
-        setIsLoading(true);
+        fetchPaidExpenses();
+    }, []);
 
-        paidExpenseService
-            .getAll(householdId, 1)
-            .then(({ data, hasMore: newHasMore }) => {
+    const fetchPaidExpenses = useCallback(
+        async (reset = false) => {
+            setIsLoading(true);
+
+            try {
+                let updatedSearchValues = searchValues;
+                if (reset) {
+                    updatedSearchValues = {
+                        title: "",
+                        category: "",
+                        startDate: "",
+                        endDate: "",
+                        approved: true,
+                        forApproval: true,
+                        rejected: true,
+                    };
+                    setSearchValues(updatedSearchValues);
+                }
+
+                const { data, hasMore: newHasMore } =
+                    await paidExpenseService.getAll(
+                        householdId,
+                        1,
+                        updatedSearchValues
+                    );
+
                 setPaidExpenses(data);
                 setHasMore(newHasMore);
-            })
-            .catch((err) => {
+                setIndex(2);
+            } catch (err) {
                 console.log(err);
                 toast({
                     title: "Грешка.",
@@ -55,10 +82,12 @@ export default function PaidExpenseList() {
                     duration: 5000,
                     isClosable: true,
                 });
-            });
+            }
 
-        setIsLoading(false);
-    }, []);
+            setIsLoading(false);
+        },
+        [householdId, searchValues]
+    );
 
     const fetchMorePaidExpenses = useCallback(async () => {
         if (isLoading || !hasMore) return;
@@ -67,7 +96,11 @@ export default function PaidExpenseList() {
 
         try {
             const { data, hasMore: newHasMore } =
-                await paidExpenseService.getAll(householdId, index);
+                await paidExpenseService.getAll(
+                    householdId,
+                    index,
+                    searchValues
+                );
             setPaidExpenses((state) => [...state, ...data]);
             setHasMore(newHasMore);
         } catch (err) {
@@ -82,9 +115,9 @@ export default function PaidExpenseList() {
         }
 
         setIndex((prevIndex) => prevIndex + 1);
-        
+
         setIsLoading(false);
-    }, [isLoading, hasMore, index]);
+    }, [isLoading, hasMore, index, searchValues]);
 
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -103,33 +136,7 @@ export default function PaidExpenseList() {
                 observer.unobserve(loaderRef.current);
             }
         };
-    }, [fetchMorePaidExpenses]); // Only track dependencies necessary for effect
-
-    const fetchPaidExpenses = () => {
-        setHasMore(false);
-        setIndex(2);
-
-        setIsLoading(true);
-
-        paidExpenseService
-            .getAll(householdId, 1)
-            .then(({ data, hasMore: newHasMore }) => {
-                setPaidExpenses(data);
-                setHasMore(newHasMore);
-            })
-            .catch((err) => {
-                console.log(err);
-                toast({
-                    title: "Грешка.",
-                    description: "Неуспешно зареждане на платените разходи.",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
-            });
-
-        setIsLoading(false);
-    };
+    }, [fetchMorePaidExpenses]);
 
     const onChange = (e) => {
         setSearchValues((state) => ({
@@ -140,8 +147,7 @@ export default function PaidExpenseList() {
 
     const onSubmit = (e) => {
         e.preventDefault();
-        console.log(searchValues);
-        // Handle search logic
+        fetchPaidExpenses();
     };
 
     const clearSearchFormHandler = () => {
@@ -150,7 +156,11 @@ export default function PaidExpenseList() {
             category: "",
             startDate: "",
             endDate: "",
+            approved: true,
+            forApproval: true,
+            rejected: true,
         });
+        fetchPaidExpenses(true); // Reset and fetch all results
     };
 
     return (
@@ -212,13 +222,43 @@ export default function PaidExpenseList() {
                     </FormControl>
                 </Stack>
                 <Stack spacing="4" direction="row" mt="4">
-                    <Checkbox colorScheme="themePurple.400" defaultChecked>
+                    <Checkbox
+                        colorScheme="themePurple.400"
+                        name="approved"
+                        isChecked={searchValues.approved}
+                        onChange={() =>
+                            setSearchValues((state) => ({
+                                ...state,
+                                approved: !state.approved,
+                            }))
+                        }
+                    >
                         Одобрен
                     </Checkbox>
-                    <Checkbox colorScheme="themePurple.400" defaultChecked>
+                    <Checkbox
+                        colorScheme="themePurple.400"
+                        name="forApproval"
+                        isChecked={searchValues.forApproval}
+                        onChange={() =>
+                            setSearchValues((state) => ({
+                                ...state,
+                                forApproval: !state.forApproval,
+                            }))
+                        }
+                    >
                         За одобрение
                     </Checkbox>
-                    <Checkbox colorScheme="themePurple.400" defaultChecked>
+                    <Checkbox
+                        colorScheme="themePurple.400"
+                        name="rejected"
+                        isChecked={searchValues.rejected}
+                        onChange={() =>
+                            setSearchValues((state) => ({
+                                ...state,
+                                rejected: !state.rejected,
+                            }))
+                        }
+                    >
                         Отхвърлен
                     </Checkbox>
                 </Stack>
@@ -239,7 +279,9 @@ export default function PaidExpenseList() {
                 ))}
             </Stack>
 
-            <Stack ref={loaderRef} p="2">{isLoading && <Spinner />}</Stack>
+            <Stack ref={loaderRef} p="2">
+                {isLoading && <Spinner />}
+            </Stack>
             {isCreateModalOpen && (
                 <PaidExpenseCreate
                     isOpen={isCreateModalOpen}
