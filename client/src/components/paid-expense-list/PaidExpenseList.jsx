@@ -17,20 +17,23 @@ import PaidExpenseCreate from "./paid-expense-create/PaidExpenseCreate";
 import * as paidExpenseService from "../../services/paidExpenseService";
 import { useParams } from "react-router-dom";
 
+const initialSearchValues = {
+    title: "",
+    category: "",
+    startDate: "",
+    endDate: "",
+    approved: true,
+    forApproval: true,
+    rejected: true,
+};
+
 export default function PaidExpenseList() {
     const [paidExpenses, setPaidExpenses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [index, setIndex] = useState(2); // Page index starts at 2
     const [hasMore, setHasMore] = useState(false); // Track if there are more items
-    const [searchValues, setSearchValues] = useState({
-        title: "",
-        category: "",
-        startDate: "",
-        endDate: "",
-        approved: true,
-        forApproval: true,
-        rejected: true,
-    });
+    const [searchValues, setSearchValues] = useState(initialSearchValues);
+
     const loaderRef = useRef(null);
     const { householdId } = useParams();
     const {
@@ -44,6 +47,7 @@ export default function PaidExpenseList() {
         fetchPaidExpenses();
     }, []);
 
+    // TODO: Display search errors
     const fetchPaidExpenses = useCallback(
         async (reset = false) => {
             setIsLoading(true);
@@ -51,16 +55,8 @@ export default function PaidExpenseList() {
             try {
                 let updatedSearchValues = searchValues;
                 if (reset) {
-                    updatedSearchValues = {
-                        title: "",
-                        category: "",
-                        startDate: "",
-                        endDate: "",
-                        approved: true,
-                        forApproval: true,
-                        rejected: true,
-                    };
-                    setSearchValues(updatedSearchValues);
+                    updatedSearchValues = initialSearchValues;
+                    setSearchValues(initialSearchValues);
                 }
 
                 const { data, hasMore: newHasMore } =
@@ -151,15 +147,7 @@ export default function PaidExpenseList() {
     };
 
     const clearSearchFormHandler = () => {
-        setSearchValues({
-            title: "",
-            category: "",
-            startDate: "",
-            endDate: "",
-            approved: true,
-            forApproval: true,
-            rejected: true,
-        });
+        setSearchValues(initialSearchValues);
         fetchPaidExpenses(true); // Reset and fetch all results
     };
 
@@ -175,48 +163,48 @@ export default function PaidExpenseList() {
                     Търсене
                 </Text>
                 <Stack spacing="2" direction={{ base: "column", lg: "row" }}>
-                    <FormControl>
+                    <FormControl id="title">
                         <FormLabel>Заглавие на разход</FormLabel>
                         <Input
                             size="md"
                             type="search"
                             name="title"
-                            value={searchValues.title}
+                            value={searchValues.title || ''}
                             onChange={onChange}
                             placeholder="Въведете заглавие"
                         />
                     </FormControl>
 
-                    <FormControl>
+                    <FormControl id="category">
                         <FormLabel>Категория на разход</FormLabel>
                         <Input
                             size="md"
                             type="search"
                             name="category"
-                            value={searchValues.category}
+                            value={searchValues.category || ''}
                             onChange={onChange}
                             placeholder="Въведете категория"
                         />
                     </FormControl>
 
-                    <FormControl>
+                    <FormControl id="startDate">
                         <FormLabel>Начална дата</FormLabel>
                         <Input
                             size="md"
                             type="date"
                             name="startDate"
-                            value={searchValues.startDate}
+                            value={searchValues.startDate || ''}
                             onChange={onChange}
                         />
                     </FormControl>
 
-                    <FormControl>
+                    <FormControl id="endDate">
                         <FormLabel>Крайна дата</FormLabel>
                         <Input
                             size="md"
                             type="date"
                             name="endDate"
-                            value={searchValues.endDate}
+                            value={searchValues.endDate || ''}
                             onChange={onChange}
                         />
                     </FormControl>
