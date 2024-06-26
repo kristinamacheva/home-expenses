@@ -4,19 +4,18 @@ const { isAuth } = require("../middlewares/authMiddleware");
 const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
 const { validationResult } = require("express-validator");
 const { getValidator } = require("../validators/paidExpenseValidator");
+const { AppError } = require("../utils/AppError");
 
-router.get("/", getValidator, async (req, res) => {
+router.get("/", getValidator, async (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        console.log(errors);
-        return res.status(400).json({
-            message: "Данните са некоректни",
-            errors: errors.array().map((err) => ({
-                field: err.path,
-                message: err.msg,
-            })),
-        });
+        const formattedErrors = errors.array().map(err => ({
+            field: err.param,
+            message: err.msg
+        }));
+
+        return next(new AppError('Данните са некоректни', 400, formattedErrors));
     }
 
     const householdId = req.householdId;
@@ -48,8 +47,7 @@ router.get("/", getValidator, async (req, res) => {
 
         res.status(200).json({ data: paidExpenses, hasMore });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Възникна грешка при извличане на платените разходи." });
+        next(error);
     }
 });
 
