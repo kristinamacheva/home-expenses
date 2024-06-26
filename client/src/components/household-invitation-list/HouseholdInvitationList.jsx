@@ -7,6 +7,7 @@ import {
     VStack,
     Stack,
     Card,
+    useToast,
 } from "@chakra-ui/react";
 
 import * as householdInvitationService from "../../services/householdInvitationService";
@@ -15,13 +16,26 @@ import HouseholdInvitationListItem from "./household-invitation-list-item/Househ
 
 export default function HouseholdInvitationList() {
     const [invitations, setInvitations] = useState([]);
+    const toast = useToast();
+    const { logoutHandler } = useContext(AuthContext);
 
     useEffect(() => {
         householdInvitationService
             .getAll()
             .then((result) => setInvitations(result))
-            .catch((err) => {
-                console.log(err);
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title:
+                            error.message || "Неуспешно зареждане на поканите",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
             });
     }, []);
 

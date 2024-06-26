@@ -11,46 +11,82 @@ import {
     HStack,
     useDisclosure,
     Text,
+    useToast,
 } from "@chakra-ui/react";
 import { FaCircleCheck, FaCircleXmark, FaEye, FaPen } from "react-icons/fa6";
 import { FaSignOutAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import * as householdInvitationService from "../../../services/householdInvitationService";
-
+import { useContext } from "react";
+import AuthContext from "../../../contexts/authContext";
 
 export default function HouseholdInvitationListItem({
     _id,
     household,
     role,
     creator,
-    onRemove
+    onRemove,
 }) {
     const navigate = useNavigate();
+    const toast = useToast();
+    const { logoutHandler } = useContext(AuthContext);
 
     const invitationAcceptHandler = async (_id) => {
         try {
-            // Call your service function to accept the invitation
-            const householdId = await householdInvitationService.accept(_id);
-    
-            console.log(`Invitation accepted successfully.`);
-            navigate(`/households/${householdId}`);
+            const { householdId } = await householdInvitationService.accept(
+                _id
+            );
 
+            toast({
+                title: "Успешно приехте поканата",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
+            navigate(`/households/${householdId}`);
         } catch (error) {
-            console.error('Error accepting invitation:', error);
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message || "Неуспешно приемане на поканата",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
         }
     };
 
     const invitationRejectHandler = async (_id) => {
         try {
-            // Call your service function to accept the invitation
-            const householdId = await householdInvitationService.reject(_id);
-    
-            console.log(`Invitation rejected successfully.`);
+            await householdInvitationService.reject(_id);
+
+            toast({
+                title: "Успешно отхвърлихте поканата",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
 
             onRemove(_id);
         } catch (error) {
-            console.error('Error rejecting invitation:', error);
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message || "Неуспешно отхвърляне на поканата",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
         }
     };
 
