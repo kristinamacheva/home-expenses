@@ -1,47 +1,49 @@
-const router = require('express').Router();
-const householdInvitationManager = require('../managers/householdInvitationManager');
-const { isAuth } = require('../middlewares/authMiddleware');
-const getHouseholdInvitation = require('../middlewares/householdInvitationMiddleware');
+const router = require("express").Router();
+const householdInvitationManager = require("../managers/householdInvitationManager");
+const { isAuth } = require("../middlewares/authMiddleware");
+const getHouseholdInvitation = require("../middlewares/householdInvitationMiddleware");
+const { AppError } = require("../utils/AppError");
 
-router.get('/', async (req, res) => {
-    // TODO: lean?
+router.get("/", async (req, res, next) => {
+    const userId = req.userId;
+
     try {
-        const userId = req.userId;
         const invitations = await householdInvitationManager.getAll(userId);
-        res.json(invitations);
+
+        res.status(200).json(invitations);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error fetching invitations' });
+        next(error);
     }
 });
 
-router.use('/:invitationId', getHouseholdInvitation);
+router.use("/:invitationId", getHouseholdInvitation);
 
-router.delete('/:invitationId/accept', async (req, res) => {
-    // TODO: lean?
+router.delete("/:invitationId/accept", async (req, res, next) => {
+    const userId = req.userId;
+    const invitationId = req.invitationId;
+
     try {
-        const userId = req.userId;
-        const invitationId = req.invitationId;
-        const householdId = await householdInvitationManager.accept(userId, invitationId);
-        
-        res.json(householdId);
+        const householdId = await householdInvitationManager.accept(
+            userId,
+            invitationId
+        );
+
+        res.status(200).json({ householdId });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error accepting invitation' });
+        next(error);
     }
 });
 
-router.delete('/:invitationId/reject', async (req, res) => {
-    // TODO: lean?
+router.delete("/:invitationId/reject", async (req, res, next) => {
+    const userId = req.userId;
+    const invitationId = req.invitationId;
+
     try {
-        const userId = req.userId;
-        const invitationId = req.invitationId;
-        const result = await householdInvitationManager.reject(userId, invitationId);
-        
-        res.status(200).json(result);
+        await householdInvitationManager.reject(userId, invitationId);
+
+        res.status(204).end();
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error rejecting invitation' });
+        next(error);
     }
 });
 
