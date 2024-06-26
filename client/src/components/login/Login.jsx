@@ -4,7 +4,6 @@ import {
     FormControl,
     FormLabel,
     Input,
-    Checkbox,
     Stack,
     Button,
     Heading,
@@ -42,15 +41,14 @@ export default function Login() {
     const validateForm = (currentUser) => {
         const newErrors = {};
 
-        // TODO: better validation
-        // Validate email
+        // TODO: Email regex?
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!currentUser.email.trim()) {
             newErrors.email = "Имейлът не може да бъде празен";
-        } else if (!values.email.includes("@")) {
+        } else if (!emailRegex.test(currentUser.email)) {
             newErrors.email = "Имейлът трябва да бъде валиден";
         }
 
-        // Validate password
         if (!currentUser.password.trim()) {
             newErrors.password = "Паролата не може да бъде празна";
         }
@@ -68,8 +66,6 @@ export default function Login() {
             email: "",
             password: "",
         });
-
-        //validation
 
         const currentUser = {
             email: values.email,
@@ -92,8 +88,6 @@ export default function Login() {
                 position: "bottom",
             });
 
-            console.log(errors);
-
             handleErrors(error);
         }
     };
@@ -108,18 +102,6 @@ export default function Login() {
             });
             setErrors(newErrors);
         }
-    };
-    console.log(errors);
-
-    const clearFormHandler = () => {
-        setValues({
-            email: "",
-            password: "",
-        });
-        setErrors({
-            email: "",
-            password: "",
-        });
     };
 
     return (
