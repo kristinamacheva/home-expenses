@@ -82,8 +82,18 @@ export default function ProfileEdit() {
                     phone: result.phone,
                 });
             })
-            .catch((err) => {
-                console.log(err);
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title: error.message || "Неуспешно зареждане на данните на профила",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                };
             });
     }, []);
 
