@@ -13,9 +13,9 @@ import {
     Link as ChakraLink,
     useColorModeValue,
     Icon,
+    useToast,
 } from "@chakra-ui/react";
 
-import * as authService from '../../services/authService';
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { useState, useContext } from "react";
@@ -23,6 +23,8 @@ import AuthContext from "../../contexts/authContext";
 
 export default function Register() {
     const { registerSubmitHandler } = useContext(AuthContext);
+    const toast = useToast();
+
     const [values, setValues] = useState({
         name: "",
         email: "",
@@ -33,6 +35,13 @@ export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
 
+    const [errors, setErrors] = useState({
+        name: "",
+        email: "",
+        password: "",
+        repeatPassword: "",
+    });
+
     const onChange = (e) => {
         setValues((state) => ({
             ...state,
@@ -40,39 +49,95 @@ export default function Register() {
         }));
     };
 
+    const validateForm = (currentUser) => {
+        const newErrors = {};
+
+        if (!currentUser.name.trim()) {
+            newErrors.name = "Името не може да бъде празно";
+        }
+
+        // TODO: Email regex?
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!currentUser.email.trim()) {
+            newErrors.email = "Имейлът не може да бъде празен";
+        } else if (!emailRegex.test(currentUser.email)) {
+            newErrors.email = "Имейлът трябва да бъде валиден";
+        }
+
+        if (!currentUser.password.trim()) {
+            newErrors.password = "Паролата не може да бъде празна";
+        } else if (currentUser.password.length < 8) {
+            newErrors.password = "Паролата трябва да е поне 8 символа";
+        } else if (!/\d/.test(currentUser.password)) {
+            newErrors.password = "Паролата трябва да съдържа поне една цифра";
+        } else if (!/[a-zA-Z]/.test(currentUser.password)) {
+            newErrors.password = "Паролата трябва да съдържа поне една буква";
+        } else if (!/[!@#$%^&*(),.?":{}|<>\-_]/.test(currentUser.password)) {
+            newErrors.password =
+                "Паролата трябва да съдържа поне един специален символ";
+        }
+
+        if (!currentUser.repeatPassword.trim()) {
+            newErrors.repeatPassword =
+                "Повторната парола не може да бъде празна";
+        } else if (currentUser.repeatPassword !== currentUser.password) {
+            newErrors.repeatPassword = "Паролите трябва да съвпадат";
+        }
+
+        setErrors(newErrors);
+
+        // Return true if there are no errors
+        return Object.keys(newErrors).length === 0;
+    };
+
     const onSubmit = async (e) => {
         e.preventDefault();
 
-        const newUser = {
+        setErrors({
+            name: "",
+            email: "",
+            password: "",
+            repeatPassword: "",
+        });
+
+        const currentUser = {
             name: values.name,
             email: values.email,
             phone: values.phone,
             password: values.password,
             repeatPassword: values.repeatPassword,
         };
-        
-        registerSubmitHandler(newUser);
 
-        // try {
-        //     const result = await householdService.create(newHousehold);
-        //     console.log(result);
+        // Validate form fields based on currentUser
+        if (!validateForm(currentUser)) {
+            return;
+        }
 
-        //     addHouseholdToState(result);
-        //     onCloseForm();
-        // } catch (err) {
-        //     //TODO Error notification - toast
-        //     console.log(err);
-        // }
+        try {
+            await registerSubmitHandler(currentUser);
+        } catch (error) {
+            toast({
+                title: error.message || "Неуспешна регистрация",
+                status: "error",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
+            handleErrors(error);
+        }
     };
 
-    const clearFormHandler = () => {
-        setValues({
-            name: "",
-            email: "",
-            phone: "",
-            password: "",
-            repeatPassword: "",
-        });
+    const handleErrors = (error) => {
+        if (error.errors && Array.isArray(error.errors)) {
+            const newErrors = {};
+            error.errors.forEach((err) => {
+                if (err.field) {
+                    newErrors[err.field] = err.message;
+                }
+            });
+            setErrors(newErrors);
+        }
     };
 
     return (
@@ -113,6 +178,11 @@ export default function Register() {
                                     onChange={onChange}
                                     placeholder="Име"
                                 />
+                                {errors.name && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.name}
+                                    </Text>
+                                )}
                             </FormControl>
                             <FormControl id="email" isRequired>
                                 <FormLabel>Имейл</FormLabel>
@@ -123,6 +193,11 @@ export default function Register() {
                                     onChange={onChange}
                                     placeholder="Имейл"
                                 />
+                                {errors.email && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.email}
+                                    </Text>
+                                )}
                             </FormControl>
                             <FormControl id="phone">
                                 <FormLabel>Телефон</FormLabel>
@@ -168,6 +243,11 @@ export default function Register() {
                                         </Button>
                                     </InputRightElement>
                                 </InputGroup>
+                                {errors.password && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.password}
+                                    </Text>
+                                )}
                             </FormControl>
                             <FormControl id="repeatPassword" isRequired>
                                 <FormLabel>Повторете парола</FormLabel>
@@ -203,6 +283,11 @@ export default function Register() {
                                         </Button>
                                     </InputRightElement>
                                 </InputGroup>
+                                {errors.repeatPassword && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.repeatPassword}
+                                    </Text>
+                                )}
                             </FormControl>
                             <Stack spacing={10} pt={4}>
                                 <Button
@@ -216,7 +301,13 @@ export default function Register() {
                             <Stack pt={4}>
                                 <Text align={"center"}>
                                     Вече имате профил?{" "}
-                                    <ChakraLink as={Link} to={`/vhod`} color={"themePurple.700"}>Вход</ChakraLink>
+                                    <ChakraLink
+                                        as={Link}
+                                        to={`/vhod`}
+                                        color={"themePurple.700"}
+                                    >
+                                        Вход
+                                    </ChakraLink>
                                 </Text>
                             </Stack>
                         </Stack>
