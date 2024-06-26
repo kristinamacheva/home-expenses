@@ -33,7 +33,7 @@ const initialValues = {
 };
 
 export default function ProfileEdit() {
-    const { updateSubmitHandler } = useContext(AuthContext);
+    const { updateSubmitHandler, logoutHandler } = useContext(AuthContext);
     const toast = useToast();
 
     const [values, setValues] = useState(initialValues);
@@ -87,13 +87,15 @@ export default function ProfileEdit() {
                     logoutHandler();
                 } else {
                     toast({
-                        title: error.message || "Неуспешно зареждане на данните на профила",
+                        title:
+                            error.message ||
+                            "Неуспешно зареждане на данните на профила",
                         status: "error",
                         duration: 6000,
                         isClosable: true,
                         position: "bottom",
                     });
-                };
+                }
             });
     }, []);
 
@@ -202,21 +204,25 @@ export default function ProfileEdit() {
                 repeatPassword: "",
             }));
         } catch (error) {
-            toast({
-                title: error.message || "Неуспешна регистрация",
-                status: "error",
-                duration: 6000,
-                isClosable: true,
-                position: "bottom",
-            });
-            handleErrors(error);
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message || "Неуспешно редактиране на профила",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+                handleErrors(error);
 
-            setValues({
-                ...originalValues,
-                oldPassword: "",
-                password: "",
-                repeatPassword: "",
-            }); // Revert to original values on error
+                setValues({
+                    ...originalValues,
+                    oldPassword: "",
+                    password: "",
+                    repeatPassword: "",
+                }); // Revert to original values on error
+            }
         }
     };
 
