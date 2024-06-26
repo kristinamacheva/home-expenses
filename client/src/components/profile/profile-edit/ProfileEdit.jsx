@@ -20,20 +20,28 @@ import {
 import { useContext, useState, useEffect } from "react";
 import { RiCloseFill } from "react-icons/ri";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
-import * as authService from '../../../services/authService';
+import * as authService from "../../../services/authService";
 import AuthContext from "../../../contexts/authContext";
+
+const initialValues = {
+    avatar: "",
+    // currentAvatar: "",
+    name: "",
+    email: "",
+    phone: "",
+    oldPassword: "",
+    password: "",
+    repeatPassword: "",
+};
 
 export default function ProfileEdit() {
     const { updateSubmitHandler } = useContext(AuthContext);
-    const [values, setValues] = useState({
+    const [values, setValues] = useState(initialValues);
+    const [originalValues, setOriginalValues] = useState({
         avatar: "",
-        // currentAvatar: "",
         name: "",
         email: "",
         phone: "",
-        oldPassword: "",
-        password: "",
-        repeatPassword: "",
     });
 
     const [showOldPassword, setShowOldPassword] = useState(false);
@@ -47,17 +55,23 @@ export default function ProfileEdit() {
                 setValues((state) => ({
                     ...state,
                     avatar: result.avatar,
-                    // currentAvatar: result.avatar === '' ? 'https://static.vecteezy.com/system/resources/previews/005/720/408/original/crossed-image-icon-picture-not-available-delete-picture-symbol-free-vector.jpg' : result.avatar,
                     name: result.name,
                     email: result.email,
                     phone: result.phone,
                 }));
+
+                setOriginalValues({
+                    avatar: result.avatar,
+                    name: result.name,
+                    email: result.email,
+                    phone: result.phone,
+                });
             })
             .catch((err) => {
                 console.log(err);
             });
     }, []);
-    
+
     const onChange = (e) => {
         setValues((state) => ({
             ...state,
@@ -78,14 +92,31 @@ export default function ProfileEdit() {
             repeatPassword: values.repeatPassword,
         };
 
-        updateSubmitHandler(newUser);
+        try {
+            await updateSubmitHandler(newUser);
 
-        setValues((state) => ({
-            ...state,
-            oldPassword: '',
-            password: '',
-            repeatPassword: '',
-        }));
+            setOriginalValues({
+                avatar: values.avatar,
+                name: values.name,
+                email: values.email,
+                phone: values.phone,
+            }); // Update original values on successful update
+
+            setValues((state) => ({
+                ...state,
+                oldPassword: "",
+                password: "",
+                repeatPassword: "",
+            }));
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            setValues({
+                ...originalValues,
+                oldPassword: "",
+                password: "",
+                repeatPassword: "",
+            }); // Revert to original values on error
+        }
     };
 
     return (
@@ -110,10 +141,7 @@ export default function ProfileEdit() {
                         <FormLabel>Профилна снимка</FormLabel>
                         <Stack direction={["column", "row"]} spacing={6}>
                             <Center>
-                                <Avatar
-                                    size="xl"
-                                    src={values.avatar}
-                                >
+                                <Avatar size="xl" src={values.avatar}>
                                     {/* <AvatarBadge
                                         as={IconButton}
                                         size="sm"
@@ -183,7 +211,8 @@ export default function ProfileEdit() {
                                         variant={"ghost"}
                                         onClick={() =>
                                             setShowOldPassword(
-                                                (showOldPassword) => !showOldPassword
+                                                (showOldPassword) =>
+                                                    !showOldPassword
                                             )
                                         }
                                     >
