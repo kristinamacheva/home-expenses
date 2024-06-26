@@ -1,21 +1,19 @@
 import {
     Button,
-    Flex,
     FormControl,
     FormLabel,
     Heading,
     Input,
     Stack,
-    useColorModeValue,
     HStack,
     Avatar,
-    AvatarBadge,
-    IconButton,
     Center,
     Card,
     InputGroup,
     InputRightElement,
     Icon,
+    useToast,
+    Text,
 } from "@chakra-ui/react";
 import { useContext, useState, useEffect } from "react";
 import { RiCloseFill } from "react-icons/ri";
@@ -36,6 +34,8 @@ const initialValues = {
 
 export default function ProfileEdit() {
     const { updateSubmitHandler } = useContext(AuthContext);
+    const toast = useToast();
+
     const [values, setValues] = useState(initialValues);
     const [originalValues, setOriginalValues] = useState({
         avatar: "",
@@ -47,6 +47,21 @@ export default function ProfileEdit() {
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
+
+    const [errors, setErrors] = useState({
+        name: "",
+        email: "",
+        oldPassword: "",
+        password: "",
+        repeatPassword: "",
+    });
+
+    const onChange = (e) => {
+        setValues((state) => ({
+            ...state,
+            [e.target.name]: e.target.value,
+        }));
+    };
 
     useEffect(() => {
         authService
@@ -72,28 +87,96 @@ export default function ProfileEdit() {
             });
     }, []);
 
-    const onChange = (e) => {
-        setValues((state) => ({
-            ...state,
-            [e.target.name]: e.target.value,
-        }));
+    const validateForm = (currentUser) => {
+        const newErrors = {};
+
+        if (!currentUser.name.trim()) {
+            newErrors.name = "Името не може да бъде празно";
+        }
+
+        // TODO: Email regex?
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!currentUser.email.trim()) {
+            newErrors.email = "Имейлът не може да бъде празен";
+        } else if (!emailRegex.test(currentUser.email)) {
+            newErrors.email = "Имейлът трябва да бъде валиден";
+        }
+
+        if (!currentUser.oldPassword.trim()) {
+            newErrors.oldPassword = "Трябва да въведете старата си парола";
+        }
+
+        // Validate password if present
+        if (currentUser.password) {
+            if (currentUser.password.length < 8) {
+                newErrors.password = "Паролата трябва да е поне 8 символа";
+            } else if (!/\d/.test(currentUser.password)) {
+                newErrors.password =
+                    "Паролата трябва да съдържа поне една цифра";
+            } else if (!/[a-zA-Z]/.test(currentUser.password)) {
+                newErrors.password =
+                    "Паролата трябва да съдържа поне една буква";
+            } else if (
+                !/[!@#$%^&*(),.?":{}|<>\-_]/.test(currentUser.password)
+            ) {
+                newErrors.password =
+                    "Паролата трябва да съдържа поне един специален символ";
+            }
+        }
+
+        // Validate repeatPassword if present
+        if (currentUser.repeatPassword) {
+            if (!currentUser.password) {
+                newErrors.password = "Трябва да въведете парола";
+            } else if (currentUser.repeatPassword !== currentUser.password) {
+                newErrors.repeatPassword = "Паролите трябва да съвпадат";
+            }
+        }
+
+        setErrors(newErrors);
+
+        // Return true if there are no errors
+        return Object.keys(newErrors).length === 0;
     };
 
     const onSubmit = async (e) => {
         e.preventDefault();
 
-        const newUser = {
+        setErrors({
+            name: "",
+            email: "",
+            oldPassword: "",
+            password: "",
+            repeatPassword: "",
+        });
+
+        const currentUser = {
             avatar: values.avatar,
             name: values.name,
             email: values.email,
             phone: values.phone,
             oldPassword: values.oldPassword,
-            password: values.password,
-            repeatPassword: values.repeatPassword,
+            ...(values.password && { password: values.password }),
+            ...(values.repeatPassword && {
+                repeatPassword: values.repeatPassword,
+            }),
         };
 
+        // Validate form fields based on currentUser
+        if (!validateForm(currentUser)) {
+            return;
+        }
+
         try {
-            await updateSubmitHandler(newUser);
+            await updateSubmitHandler(currentUser);
+
+            toast({
+                title: "Успешно редактирахте профила си",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
 
             setOriginalValues({
                 avatar: values.avatar,
@@ -109,13 +192,33 @@ export default function ProfileEdit() {
                 repeatPassword: "",
             }));
         } catch (error) {
-            console.error("Error updating profile:", error);
+            toast({
+                title: error.message || "Неуспешна регистрация",
+                status: "error",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+            handleErrors(error);
+
             setValues({
                 ...originalValues,
                 oldPassword: "",
                 password: "",
                 repeatPassword: "",
             }); // Revert to original values on error
+        }
+    };
+
+    const handleErrors = (error) => {
+        if (error.errors && Array.isArray(error.errors)) {
+            const newErrors = {};
+            error.errors.forEach((err) => {
+                if (err.field) {
+                    newErrors[err.field] = err.message;
+                }
+            });
+            setErrors(newErrors);
         }
     };
 
@@ -169,6 +272,11 @@ export default function ProfileEdit() {
                                 onChange={onChange}
                                 placeholder="Име"
                             />
+                            {errors.name && (
+                                <Text color="red.500" fontSize="sm">
+                                    {errors.name}
+                                </Text>
+                            )}
                         </FormControl>
                         <FormControl id="email" isRequired>
                             <FormLabel>Имейл</FormLabel>
@@ -179,6 +287,11 @@ export default function ProfileEdit() {
                                 onChange={onChange}
                                 placeholder="Имейл"
                             />
+                            {errors.email && (
+                                <Text color="red.500" fontSize="sm">
+                                    {errors.email}
+                                </Text>
+                            )}
                         </FormControl>
                     </Stack>
                     <Stack
@@ -224,6 +337,11 @@ export default function ProfileEdit() {
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>
+                            {errors.oldPassword && (
+                                <Text color="red.500" fontSize="sm">
+                                    {errors.oldPassword}
+                                </Text>
+                            )}
                         </FormControl>
                     </Stack>
                     <Stack
@@ -258,6 +376,11 @@ export default function ProfileEdit() {
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>
+                            {errors.password && (
+                                <Text color="red.500" fontSize="sm">
+                                    {errors.password}
+                                </Text>
+                            )}
                         </FormControl>
                         <FormControl id="repeatPassword">
                             <FormLabel>Повторете парола</FormLabel>
@@ -288,6 +411,11 @@ export default function ProfileEdit() {
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>
+                            {errors.repeatPassword && (
+                                <Text color="red.500" fontSize="sm">
+                                    {errors.repeatPassword}
+                                </Text>
+                            )}
                         </FormControl>
                     </Stack>
                     <Stack alignItems="end" mt="2">
