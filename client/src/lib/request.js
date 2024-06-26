@@ -40,11 +40,11 @@ const request = async (method, url, data) => {
     // TODO: refactor?
     if (!response.ok) {
         const error = {
-            status: response.status,
-            message: result.message || 'Request failed',
+            status: response.status || 500,
+            message: result.message || 'Неуспешна заявка',
             errors: result.errors || []
         };
-        console.log(error);
+        // console.log(error);
         throw error;
     }
 

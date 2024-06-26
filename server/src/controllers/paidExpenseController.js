@@ -2,7 +2,7 @@ const router = require("express").Router();
 const paidExpenseManager = require("../managers/paidExpenseManager");
 const { isAuth } = require("../middlewares/authMiddleware");
 const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
-const { validationResult } = require('express-validator');
+const { validationResult } = require("express-validator");
 const { getValidator } = require("../validators/paidExpenseValidator");
 
 router.get("/", getValidator, async (req, res) => {
@@ -19,22 +19,22 @@ router.get("/", getValidator, async (req, res) => {
         });
     }
 
+    const householdId = req.householdId;
+    const userId = req.userId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const searchParams = {
+        title: req.query.title || "",
+        category: req.query.category || "",
+        startDate: req.query.startDate || "",
+        endDate: req.query.endDate || "",
+        approved: req.query.approved === "false" ? false : null,
+        forApproval: req.query.forApproval === "false" ? false : null,
+        rejected: req.query.rejected === "false" ? false : null,
+    };
+
     try {
-        const householdId = req.householdId;
-        const userId = req.userId;
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-
-        const searchParams = {
-            title: req.query.title || "",
-            category: req.query.category || "",
-            startDate: req.query.startDate || "",
-            endDate: req.query.endDate || "",
-            approved: req.query.approved === "false" ? false : null,
-            forApproval: req.query.forApproval === "false" ? false : null,
-            rejected: req.query.rejected === "false" ? false : null,
-        };
-
         const { paidExpenses, totalCount } = await paidExpenseManager.getAll(
             userId,
             householdId,
@@ -49,7 +49,7 @@ router.get("/", getValidator, async (req, res) => {
         res.status(200).json({ data: paidExpenses, hasMore });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error fetching paid expenses" });
+        res.status(500).json({ message: "Възникна грешка при извличане на платените разходи." });
     }
 });
 

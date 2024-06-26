@@ -15,20 +15,10 @@ export const getAll = async (householdId, page, params = {}) => {
     });
 
     const url = `${baseUrl(householdId)}?${queryParams.toString()}`;
-    console.log(url);
+    // console.log(url);
 
-    try {
-        const result = await request.get(url);
-        console.log(result);
-
-        return {
-            data: result.data,
-            hasMore: result.hasMore,
-        };
-    } catch (error) {
-        console.error('Error fetching paid expenses:', error);
-        throw error; 
-    }
+    const result = await request.get(url);
+    return result;
 };
 
 export const create = async (householdId, paidExpenseData) => {

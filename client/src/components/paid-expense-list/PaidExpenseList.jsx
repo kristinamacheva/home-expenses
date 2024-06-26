@@ -69,11 +69,11 @@ export default function PaidExpenseList() {
                 setPaidExpenses(data);
                 setHasMore(newHasMore);
                 setIndex(2);
-            } catch (err) {
-                console.log(err);
+            } catch (error) {
+                // console.log(error);
                 toast({
                     title: "Грешка.",
-                    description: "Неуспешно зареждане на платените разходи.",
+                    description: error.message || "Неуспешно зареждане на платените разходи.",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
@@ -99,11 +99,11 @@ export default function PaidExpenseList() {
                 );
             setPaidExpenses((state) => [...state, ...data]);
             setHasMore(newHasMore);
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            // console.log(error);
             toast({
                 title: "Грешка.",
-                description: "Неуспешно зареждане на платените разходи.",
+                description: error.message || "Неуспешно зареждане на платените разходи.",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
