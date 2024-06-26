@@ -4,6 +4,7 @@ const dbConnect = require('./config/dbConfig');
 
 const expressConfig = require('./config/expressConfig');
 const routes = require('./routes');
+const errorHandler = require('./middlewares/ErrorHandlerMiddleware');
 
 const app = express();
 
@@ -16,4 +17,8 @@ dbConnect()
     .catch(err => console.log('DB error: ', err.message));
 
 app.use(routes);
+
+// Error handling middleware (Last middleware to use)
+app.use(errorHandler);
+
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}...`));
