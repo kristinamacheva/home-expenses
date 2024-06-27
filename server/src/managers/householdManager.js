@@ -8,16 +8,16 @@ exports.getOneWithMembers = async (householdId) => {
     const aggregationPipeline = [
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(householdId) // Match the household by its ObjectId
-            }
+                _id: new mongoose.Types.ObjectId(householdId), // Match the household by its ObjectId
+            },
         },
         {
             $lookup: {
                 from: "users", // Collection to join for members
                 localField: "members.user",
                 foreignField: "_id",
-                as: "members"
-            }
+                as: "members",
+            },
         },
         {
             $project: {
@@ -31,12 +31,12 @@ exports.getOneWithMembers = async (householdId) => {
                             _id: "$$member._id",
                             name: "$$member.name",
                             avatar: "$$member.avatar",
-                            avatarColor: "$$member.avatarColor"
-                        }
-                    }
-                }
-            }
-        }
+                            avatarColor: "$$member.avatarColor",
+                        },
+                    },
+                },
+            },
+        },
     ];
 
     const household = await Household.aggregate(aggregationPipeline);
@@ -289,6 +289,18 @@ exports.create = async (householdData) => {
     const adminUser = await User.findById(admin);
     if (!adminUser) {
         throw new AppError("Админът не е намерен", 401);
+    }
+
+    // Check if admin's email is in members array
+    const adminEmail = adminUser.email;
+    const adminInMembers = members.some(
+        (member) => member.email === adminEmail
+    );
+    if (adminInMembers) {
+        throw new AppError(
+            "Създателят не може да бъде добавен повторно като член на домакинството",
+            400
+        );
     }
 
     // Check for duplicate emails in members
