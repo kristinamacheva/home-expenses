@@ -3,6 +3,7 @@ const jwt = require("../lib/jwt");
 
 const User = require("../models/User");
 const { getRandomColor } = require("../utils/color/color");
+const mongoose = require("mongoose");
 const { AppError } = require("../utils/AppError");
 
 exports.register = async (userData) => {
@@ -35,6 +36,140 @@ exports.getProfile = async (userId) => {
 
     return user;
 };
+
+// Function to get households and balances for a specific user
+exports.getHouseholdsWithBalances = async (userId) => {
+    const result = await User.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(userId) } },
+        {
+            $lookup: {
+                from: "households",
+                localField: "households",
+                foreignField: "_id",
+                as: "householdDetails",
+            },
+        },
+        { $unwind: "$householdDetails" },
+        {
+            $lookup: {
+                from: "users",
+                localField: "householdDetails.members.user",
+                foreignField: "_id",
+                as: "membersDetails",
+            },
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "householdDetails.balance.user",
+                foreignField: "_id",
+                as: "balanceDetails",
+            },
+        },
+        {
+            $project: {
+                _id: "$householdDetails._id",
+                name: "$householdDetails.name",
+                members: {
+                    $map: {
+                        input: "$householdDetails.members",
+                        as: "member",
+                        in: {
+                            _id: "$$member.user",
+                            role: "$$member.role",
+                            name: {
+                                $let: {
+                                    vars: {
+                                        memberDetail: {
+                                            $arrayElemAt: [
+                                                {
+                                                    $filter: {
+                                                        input: "$membersDetails",
+                                                        as: "memberDetail",
+                                                        cond: {
+                                                            $eq: [
+                                                                "$$memberDetail._id",
+                                                                "$$member.user",
+                                                            ],
+                                                        },
+                                                    },
+                                                },
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: "$$memberDetail.name",
+                                },
+                            },
+                            avatar: {
+                                $let: {
+                                    vars: {
+                                        memberDetail: {
+                                            $arrayElemAt: [
+                                                {
+                                                    $filter: {
+                                                        input: "$membersDetails",
+                                                        as: "memberDetail",
+                                                        cond: {
+                                                            $eq: [
+                                                                "$$memberDetail._id",
+                                                                "$$member.user",
+                                                            ],
+                                                        },
+                                                    },
+                                                },
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: "$$memberDetail.avatar",
+                                },
+                            },
+                            avatarColor: {
+                                $let: {
+                                    vars: {
+                                        memberDetail: {
+                                            $arrayElemAt: [
+                                                {
+                                                    $filter: {
+                                                        input: "$membersDetails",
+                                                        as: "memberDetail",
+                                                        cond: {
+                                                            $eq: [
+                                                                "$$memberDetail._id",
+                                                                "$$member.user",
+                                                            ],
+                                                        },
+                                                    },
+                                                },
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: "$$memberDetail.avatarColor",
+                                },
+                            },
+                        },
+                    },
+                },
+                admins: "$householdDetails.admins",
+                balance: {
+                    $map: {
+                        input: "$householdDetails.balance",
+                        as: "bal",
+                        in: {
+                            _id: "$$bal._id",
+                            sum: "$$bal.sum",
+                            type: "$$bal.type",
+                        },
+                    },
+                },
+            },
+        },
+    ]);
+    return result;
+ 
+}
 
 exports.update = async ({
     userId,

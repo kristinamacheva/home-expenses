@@ -21,12 +21,9 @@ import AuthContext from "../../../contexts/authContext";
 import * as householdService from "../../../services/householdService";
 
 export default function HouseholdListItem({
-    _id,
-    name,
-    members,
-    balance,
-    admins,
-    removeHouseholdFromState
+    household,
+    fetchHouseholds
+    // removeHouseholdFromState
 }) {
     const {
         isOpen: isEditModalOpen,
@@ -41,7 +38,8 @@ export default function HouseholdListItem({
         try {
             const result = await householdService.leave(householdId);
             console.log(result.message);
-            removeHouseholdFromState(householdId); 
+            // removeHouseholdFromState(householdId); 
+            fetchHouseholds();
         } catch (error) {
             if (error.status === 401) {
                 logoutHandler();
@@ -57,10 +55,9 @@ export default function HouseholdListItem({
         }
     };
 
-    const isAdmin = admins.includes(userId);
+    const isAdmin = household.admins.includes(userId);
 
-    const userBalance = balance.find((balanceEntry) => balanceEntry.user._id === userId);
-    //TODO: fix the number type if necessary
+    const userBalance = household.balance[0];
     const userBalanceSum = userBalance ? userBalance.sum : 0;
     // TODO: color
     const badgeColorScheme = userBalance ? (userBalance.type === "-" ? "red" : "green") : "gray";
@@ -104,7 +101,7 @@ export default function HouseholdListItem({
                 >
                     <Stack direction="column" spacing={{ base: "1", md: "0" }}>
                         <Heading as="h3" size="md">
-                            {name}
+                            {household.name}
                         </Heading>
                         <Box display="inline-block">
                             <Badge
@@ -116,12 +113,12 @@ export default function HouseholdListItem({
                         </Box>
                     </Stack>
                     <AvatarGroup size="md" max={2}>
-                        {members.map((member) => (
+                        {household.members.map((member) => (
                             <Avatar
-                                key={member.user._id}
-                                name={member.user.name}
-                                src={member.user.avatar}
-                                background={member.user.avatarColor}
+                                key={member._id}
+                                name={member.name}
+                                src={member.avatar}
+                                background={member.avatarColor}
                             />
                         ))}
                     </AvatarGroup>
@@ -133,7 +130,7 @@ export default function HouseholdListItem({
                 >
                     <IconButton
                         as={Link}
-                        to={`/households/${_id}`}
+                        to={`/households/${household._id}`}
                         aria-label="Детайли"
                         title="Детайли"
                         icon={<FaEye fontSize="20px" />}
@@ -166,7 +163,7 @@ export default function HouseholdListItem({
                         icon={<FaSignOutAlt fontSize="20px" />}
                         variant="ghost"
                         color="themePurple.800"
-                        onClick={() => leaveHouseholdHandler(_id)}
+                        onClick={() => leaveHouseholdHandler(household._id)}
                     />
                 </HStack>
             </Card>
@@ -174,7 +171,7 @@ export default function HouseholdListItem({
                 <HouseholdEdit
                     isOpen={isEditModalOpen}
                     onClose={onCloseEditModal}
-                    householdId={_id}
+                    householdId={household._id}
                 />
             )}
         </>
