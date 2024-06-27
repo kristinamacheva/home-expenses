@@ -10,12 +10,14 @@ router.get("/", getValidator, async (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        const formattedErrors = errors.array().map(err => ({
+        const formattedErrors = errors.array().map((err) => ({
             field: err.path,
-            message: err.msg
+            message: err.msg,
         }));
 
-        return next(new AppError('Данните са некоректни', 400, formattedErrors));
+        return next(
+            new AppError("Данните са некоректни", 400, formattedErrors)
+        );
     }
 
     const householdId = req.householdId;
@@ -51,7 +53,7 @@ router.get("/", getValidator, async (req, res, next) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
     const {
         title,
         category,
@@ -84,7 +86,6 @@ router.post("/", async (req, res) => {
             title,
             category,
             creator: req.userId,
-            // creator: '664f630fb14becfeb98d2e1f',
             amount: parsedAmount,
             date,
             paidSplitType,
@@ -95,22 +96,19 @@ router.post("/", async (req, res) => {
         });
 
         res.status(201).json(newPaidExpense);
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({
-            message: "Cannot create paid expense",
-        });
+    } catch (error) {
+        next(error);
     }
 });
 
 router.use("/:paidExpenseId", getPaidExpense);
 
-router.get("/:paidExpenseId", async (req, res) => {
-    try {
-        const paidExpenseId = req.paidExpenseId;
-        const userId = req.userId;
-        const { details } = req.query;
+router.get("/:paidExpenseId", async (req, res, next) => {
+    const paidExpenseId = req.paidExpenseId;
+    const userId = req.userId;
+    const { details } = req.query;
 
+    try {
         let paidExpense;
         if (details === "all") {
             paidExpense = await paidExpenseManager.getOneDetails(
@@ -125,43 +123,31 @@ router.get("/:paidExpenseId", async (req, res) => {
 
         res.status(200).json(paidExpense);
     } catch (error) {
-        console.error(error);
-        // TODO: status
-        res.status(500).json({
-            message: "Error fetching paid expense details",
-        });
+        next(error);
     }
 });
 
-router.put("/:paidExpenseId/accept", async (req, res) => {
-    try {
-        const paidExpenseId = req.paidExpenseId;
-        const userId = req.userId;
+router.put("/:paidExpenseId/accept", async (req, res, next) => {
+    const paidExpenseId = req.paidExpenseId;
+    const userId = req.userId;
 
-        const paidExpense = await paidExpenseManager.accept(
-            userId,
-            paidExpenseId
-        );
-        res.status(200).json(paidExpense);
+    try {
+        await paidExpenseManager.accept(userId, paidExpenseId);
+        res.status(204).end();
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error accepting paid expenses" });
+        next(error);
     }
 });
 
-router.put("/:paidExpenseId/reject", async (req, res) => {
-    try {
-        const paidExpenseId = req.paidExpenseId;
-        const userId = req.userId;
+router.put("/:paidExpenseId/reject", async (req, res, next) => {
+    const paidExpenseId = req.paidExpenseId;
+    const userId = req.userId;
 
-        const paidExpense = await paidExpenseManager.reject(
-            userId,
-            paidExpenseId
-        );
-        res.status(200).json(paidExpense);
+    try {
+        await paidExpenseManager.reject(userId, paidExpenseId);
+        res.status(204).end();
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error rejecting paid expenses" });
+        next(error);
     }
 });
 
