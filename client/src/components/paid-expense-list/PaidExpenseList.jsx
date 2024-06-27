@@ -70,7 +70,6 @@ export default function PaidExpenseList() {
                 setHasMore(newHasMore);
                 setIndex(2);
             } catch (error) {
-                // console.log(error);
                 toast({
                     title: "Грешка.",
                     description: error.message || "Неуспешно зареждане на платените разходи.",
