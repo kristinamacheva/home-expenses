@@ -25,13 +25,30 @@ exports.getOneWithUsersAndBalance = (householdId) =>
         // .populate("admins", "name")
         .populate("balance.user", "_id name");
 // .populate('balance.user', '-_id name');
+exports.getOneMembers = async (householdId) => {
+    const pipeline = [
+        { $match: { _id: new mongoose.Types.ObjectId(householdId) } },
+        { $unwind: "$members" },
+        {
+            $lookup: {
+                from: "users",
+                localField: "members.user",
+                foreignField: "_id",
+                as: "userDetails",
+            },
+        },
+        { $unwind: "$userDetails" },
+        {
+            $project: {
+                _id: "$userDetails._id",
+                name: "$userDetails.name",
+            },
+        },
+    ];
 
-exports.getAllMembers = async (householdId) => {
-    const allMembers = await Household.findById(householdId)
-        .populate("members.user", "_id name")
-        .select("members");
+    const result = await Household.aggregate(pipeline);
 
-    return allMembers.members;
+    return result;
 };
 
 exports.getOneMembersDetails = async (householdId) => {

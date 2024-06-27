@@ -51,7 +51,6 @@ router.get('/:householdId', async (req, res) => {
     res.json(household);
 });
 
-// TODO: better approach
 router.get('/:householdId/members', async (req, res, next) => {
     const { role, details } = req.query;
     let users;
@@ -65,7 +64,7 @@ router.get('/:householdId/members', async (req, res, next) => {
         } else if (role === 'not-child') {
             users = await householdManager.getOneNonChildMembers(householdId);
         } else {
-            users = await householdManager.getAllMembers(householdId);
+            users = await householdManager.getOneMembers(householdId);
         }
 
         res.status(200).json(users);
