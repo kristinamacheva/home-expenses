@@ -16,6 +16,7 @@ import {
 import PaidExpenseCreate from "./paid-expense-create/PaidExpenseCreate";
 import * as paidExpenseService from "../../services/paidExpenseService";
 import { useParams } from "react-router-dom";
+import AuthContext from "../../contexts/authContext";
 
 const initialSearchValues = {
     title: "",
@@ -33,6 +34,8 @@ export default function PaidExpenseList() {
     const [index, setIndex] = useState(2); // Page index starts at 2
     const [hasMore, setHasMore] = useState(false); // Track if there are more items
     const [searchValues, setSearchValues] = useState(initialSearchValues);
+    const { logoutHandler } = useContext(AuthContext);
+    const toast = useToast();
 
     const loaderRef = useRef(null);
     const { householdId } = useParams();
@@ -41,7 +44,6 @@ export default function PaidExpenseList() {
         onOpen: onOpenCreateModal,
         onClose: onCloseCreateModal,
     } = useDisclosure();
-    const toast = useToast();
 
     useEffect(() => {
         fetchPaidExpenses();
@@ -70,13 +72,19 @@ export default function PaidExpenseList() {
                 setHasMore(newHasMore);
                 setIndex(2);
             } catch (error) {
-                toast({
-                    title: "Грешка.",
-                    description: error.message || "Неуспешно зареждане на платените разходи.",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title: "Грешка.",
+                        description:
+                            error.message ||
+                            "Неуспешно зареждане на платените разходи.",
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                }
             }
 
             setIsLoading(false);
@@ -99,14 +107,19 @@ export default function PaidExpenseList() {
             setPaidExpenses((state) => [...state, ...data]);
             setHasMore(newHasMore);
         } catch (error) {
-            // console.log(error);
-            toast({
-                title: "Грешка.",
-                description: error.message || "Неуспешно зареждане на платените разходи.",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: "Грешка.",
+                    description:
+                        error.message ||
+                        "Неуспешно зареждане на платените разходи.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
         }
 
         setIndex((prevIndex) => prevIndex + 1);
@@ -168,7 +181,7 @@ export default function PaidExpenseList() {
                             size="md"
                             type="search"
                             name="title"
-                            value={searchValues.title || ''}
+                            value={searchValues.title || ""}
                             onChange={onChange}
                             placeholder="Въведете заглавие"
                         />
@@ -180,7 +193,7 @@ export default function PaidExpenseList() {
                             size="md"
                             type="search"
                             name="category"
-                            value={searchValues.category || ''}
+                            value={searchValues.category || ""}
                             onChange={onChange}
                             placeholder="Въведете категория"
                         />
@@ -192,7 +205,7 @@ export default function PaidExpenseList() {
                             size="md"
                             type="date"
                             name="startDate"
-                            value={searchValues.startDate || ''}
+                            value={searchValues.startDate || ""}
                             onChange={onChange}
                         />
                     </FormControl>
@@ -203,7 +216,7 @@ export default function PaidExpenseList() {
                             size="md"
                             type="date"
                             name="endDate"
-                            value={searchValues.endDate || ''}
+                            value={searchValues.endDate || ""}
                             onChange={onChange}
                         />
                     </FormControl>

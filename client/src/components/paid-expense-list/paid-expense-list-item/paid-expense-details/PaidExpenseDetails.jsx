@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -29,6 +29,7 @@ import {
 } from "@chakra-ui/react";
 
 import * as paidExpenseService from "../../../../services/paidExpenseService";
+import AuthContext from "../../../../contexts/authContext";
 
 export default function PaidExpenseDetails({
     isOpen,
@@ -40,7 +41,7 @@ export default function PaidExpenseDetails({
     const [isLoading, setIsLoading] = useState(true);
     const [paidExpenseDetails, setPaidExpenseDetails] = useState({});
     const toast = useToast();
-    const { userId } = useContext(AuthContext);
+    const { userId, logoutHandler } = useContext(AuthContext);
 
     useEffect(() => {
         setIsLoading(true);
@@ -51,16 +52,27 @@ export default function PaidExpenseDetails({
                 setPaidExpenseDetails(result);
                 setIsLoading(false);
             })
-            .catch((err) => {
-                console.log(err);
-                setIsLoading(false);
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title: "Грешка.",
+                        description:
+                            error.message ||
+                            "Неуспешно зареждане на детайлите за платените разходи.",
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                }
             });
     }, [paidExpenseId]);
 
     if (isLoading) {
         return <Spinner size="lg" />;
     }
-    console.log(paidExpenseDetails);
+    // console.log(paidExpenseDetails);
 
     // const onCommentSubmit = (e) => {
     //     e.preventDefault();
@@ -100,7 +112,7 @@ export default function PaidExpenseDetails({
             .accept(householdId, paidExpenseId)
             .then((result) => {
                 // Handle the success response
-                console.log("Accepted:", result);
+                // console.log("Accepted:", result);
                 toast({
                     title: "Разходът е одобрен.",
                     description: "Разходът беше одобрен успешно.",
@@ -112,14 +124,18 @@ export default function PaidExpenseDetails({
                 onCloseForm();
             })
             .catch((error) => {
-                console.error("Error accepting the paid expense:", error);
-                toast({
-                    title: "Грешка.",
-                    description: "Възникна грешка при одобрението на разхода",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title: "Грешка.",
+                        description:
+                            "Възникна грешка при одобрението на разхода",
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                }
             });
     };
 
@@ -127,7 +143,7 @@ export default function PaidExpenseDetails({
         paidExpenseService
             .reject(householdId, paidExpenseId)
             .then((result) => {
-                console.log("Rejected:", result);
+                // console.log("Rejected:", result);
                 toast({
                     title: "Разходът е отхвърлен.",
                     description: "Разходът беше отхвърлен успешно.",
@@ -139,14 +155,18 @@ export default function PaidExpenseDetails({
                 onCloseForm();
             })
             .catch((error) => {
-                console.error("Error rejecting the paid expense:", error);
-                toast({
-                    title: "Грешка.",
-                    description: "Възникна грешка при отхвърлянето на разхода",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title: "Грешка.",
+                        description:
+                            "Възникна грешка при отхвърлянето на разхода",
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                }
             });
     };
 
@@ -168,8 +188,8 @@ export default function PaidExpenseDetails({
         return {
             _id: userId,
             name: balanceItem.user.name,
-            avatar: balanceItem.user.avatar, // Add a default avatar URL if not available
-            avatarColor: balanceItem.user.avatarColor, // Add a default color if not available
+            avatar: balanceItem.user.avatar,
+            avatarColor: balanceItem.user.avatarColor,
             paidSum: paidItem.sum,
             owedSum: owedItem.sum,
             balanceSum: balanceItem.sum,
