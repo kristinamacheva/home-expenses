@@ -7,7 +7,9 @@ const baseUrl = (householdId) =>
 // params = {} -> handle optional parameters and prevent errors when accessing properties of params
 export const getAll = async (householdId, page, params = {}) => {
     // Remove empty string parameters
-    Object.keys(params).forEach(key => params[key] === "" && delete params[key]);
+    Object.keys(params).forEach(
+        (key) => params[key] === "" && delete params[key]
+    );
 
     const queryParams = new URLSearchParams({
         page,
@@ -15,15 +17,12 @@ export const getAll = async (householdId, page, params = {}) => {
     });
 
     const url = `${baseUrl(householdId)}?${queryParams.toString()}`;
-    // console.log(url);
 
     const result = await request.get(url);
     return result;
 };
 
 export const create = async (householdId, paidExpenseData) => {
-    // console.log("service");
-    // console.log(paidExpenseData);
     const url = baseUrl(householdId);
     const result = await request.post(url, paidExpenseData);
 
@@ -31,39 +30,33 @@ export const create = async (householdId, paidExpenseData) => {
 };
 
 export const getOneDetails = async (householdId, paidExpenseId) => {
-    try {
-        const url = baseUrl(householdId);
-        const result = await request.get(`${url}/${paidExpenseId}?details=all`);
+    const url = baseUrl(householdId);
+    const result = await request.get(`${url}/${paidExpenseId}?details=all`);
 
-        return result;
-    } catch (error) {
-        console.error("Error fetching paid expense data:", error);
-        return null;
-    }
+    return result;
 };
 
 export const accept = async (householdId, paidExpenseId) => {
-    try {
-        const url = baseUrl(householdId);
-        const result = await request.put(`${url}/${paidExpenseId}/accept`);
+    const url = baseUrl(householdId);
+    const result = await request.put(`${url}/${paidExpenseId}/accept`);
 
-        return result;
-    } catch (error) {
-        console.error("Error accepting paid expense", error);
-        return null;
-    }
+    return result;
 };
 
 export const reject = async (householdId, paidExpenseId) => {
-    try {
-        const url = baseUrl(householdId);
-        const result = await request.put(`${url}/${paidExpenseId}/reject`);
+    const url = baseUrl(householdId);
+    const result = await request.put(`${url}/${paidExpenseId}/reject`);
 
-        return result;
-    } catch (error) {
-        console.error("Error rejecting paid expense", error);
-        return null;
-    }
+    return result;
+};
+
+export const addComment = async (householdId, paidExpenseId, text) => {
+    const url = baseUrl(householdId);
+    const result = await request.post(`${url}/${paidExpenseId}/comments`, {
+        text,
+    });
+
+    return result;
 };
 
 // export const getOne = async (householdId) => {
