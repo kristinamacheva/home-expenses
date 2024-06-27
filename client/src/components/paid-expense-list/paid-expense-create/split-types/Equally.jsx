@@ -23,18 +23,10 @@ export default function Equally({
     const [splitEquallyMembers, setSplitEquallyMembers] = useState([]);
 
     useEffect(() => {
-        const updatedMembers = members.map((member) => ({
-            _id: member.user._id,
-            name: member.user.name,
-            // avatar: member.user.avatar,
-        }));
-
-        setSplitEquallyMembers(updatedMembers);
+        setSplitEquallyMembers(members);
     }, []);
 
     const equalSplit = useEqualSplit(amount, splitEquallyMembers, onUpdate);
-    // console.log(amount);
-    // console.log(splitEquallyMembers);
 
     const onMemberRemove = (id) => {
         // Prevent removal if there is only one member
@@ -46,6 +38,7 @@ export default function Equally({
         const updatedMembers = splitEquallyMembers.filter(
             (member) => member._id !== id
         );
+
         setSplitEquallyMembers(updatedMembers);
         // TODO: notify the parent component
     };
@@ -75,14 +68,16 @@ export default function Equally({
                     >
                         <Avatar
                             name={member.name}
-                            // src={avatar || ""}
-                            background={"themeYellow.900"}
+                            src={member.avatar}
+                            background={member.avatarColor}
                             mr="3"
                         />
                         <Text>{member.name}</Text>
                     </Stack>
                     <Stack display="flex" alignItems="center" direction="row">
-                        <Text mr="1">{((member.sum * 100) / 100).toFixed(2)} лв.</Text>
+                        <Text mr="1">
+                            {((member.sum * 100) / 100).toFixed(2)} лв.
+                        </Text>
                         {splitEquallyMembers.length > 2 &&
                             ((member._id !== userId && (
                                 <IconButton

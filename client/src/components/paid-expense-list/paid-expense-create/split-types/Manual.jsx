@@ -28,16 +28,11 @@ export default function Manual({
     const [messageColor, setMessageColor] = useState("");
 
     useEffect(() => {
-        const updatedMembers = members.map((member) => ({
-            _id: member.user._id,
-            name: member.user.name,
-            // avatar: member.user.avatar,
-        }));
+        setSplitManualMembers(members);
 
-        setSplitManualMembers(updatedMembers);
         if (manualAmounts.length === 0) {
             setManualAmounts(
-                updatedMembers.map((member) => ({ _id: member._id, sum: 0 }))
+                members.map((member) => ({ _id: member._id, sum: 0 }))
             );
         }
     }, []);
@@ -72,7 +67,7 @@ export default function Manual({
             setMessageColor("red.400");
             setMessage(message);
         } else {
-            message = "Сборът от сумите е равен на сумата на разхода."
+            message = "Сборът от сумите е равен на сумата на разхода.";
             setMessageColor("green.400");
             setMessage(message);
         }
@@ -142,8 +137,8 @@ export default function Manual({
                             >
                                 <Avatar
                                     name={member.name}
-                                    // src={avatar || ""}
-                                    background={"themeYellow.900"}
+                                    src={member.avatar}
+                                    background={member.avatarColor}
                                     mr="3"
                                 />
                                 <Text>{member.name}</Text>

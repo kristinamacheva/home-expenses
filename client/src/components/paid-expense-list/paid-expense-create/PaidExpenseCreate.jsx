@@ -46,8 +46,9 @@ export default function PaidExpenseCreate({
     onClose,
     fetchPaidExpenses,
 }) {
-    const { userId, name } = useContext(AuthContext);
+    const { userId } = useContext(AuthContext);
     const { householdId } = useParams();
+    const { logoutHandler } = useContext(AuthContext);
 
     const [householdMembers, setHouseholdMembers] = useState([]);
     const [paid, setPaid] = useState([]);
@@ -58,14 +59,24 @@ export default function PaidExpenseCreate({
 
     useEffect(() => {
         householdService
-            .getAllNonChildMembers(householdId)
+            .getOneNonChildMembers(householdId)
             .then((result) => setHouseholdMembers(result))
-            .catch((err) => {
-                console.log(err);
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title:
+                            error.message ||
+                            "Неуспешно зареждане на членовете на домакинството",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
             });
     }, []);
-
-    console.log(householdMembers);
 
     // TODO: error?
     const onChange = (e) => {
@@ -184,28 +195,33 @@ export default function PaidExpenseCreate({
                 householdId,
                 newPaidExpense
             );
-            fetchPaidExpenses(true);
 
-        } catch (error) {
-            console.log(error);
             toast({
-                title: "Грешка.",
-                description: "Възникна грешка при създаването на разхода",
-                status: "error",
+                title: "Разходът е създанен.",
+                description: "Успешно създадохте платен разход.",
+                status: "success",
                 duration: 5000,
                 isClosable: true,
             });
-        }
 
-        onCloseForm();
+            fetchPaidExpenses(true);
+            onCloseForm();
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: "Грешка.",
+                    description: "Възникна грешка при създаването на разхода",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        }
     };
 
-    // const clearFormHandler = () => {
-    //     setValues(initialValues);
-    // };
-
     const onCloseForm = () => {
-        // clearFormHandler();
         onClose();
     };
 

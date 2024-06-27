@@ -28,15 +28,9 @@ export const getOneReducedData = async (householdId) => {
     }
 }
 
-export const getAllNonChildMembers = async (householdId) => {
-    try {
-        const result = await request.get(`${baseUrl}/${householdId}/members?role=not-child`);
-        console.log(result);
-        return result;
-    } catch (error) {
-        console.error('Error fetching non-child members data:', error);
-        return null; 
-    }
+export const getOneNonChildMembers = async (householdId) => {
+    const result = await request.get(`${baseUrl}/${householdId}/members?role=not-child`);
+    return result;
 }
 
 export const getAllMembersDetails = async (householdId) => {

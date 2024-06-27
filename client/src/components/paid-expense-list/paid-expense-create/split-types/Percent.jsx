@@ -28,22 +28,17 @@ export default function Percent({
     const [messageColor, setMessageColor] = useState("");
 
     useEffect(() => {
-        const updatedMembers = members.map((member) => ({
-            _id: member.user._id,
-            name: member.user.name,
-        }));
-
-        setSplitPercentMembers(updatedMembers);
+        setSplitPercentMembers(members);
         if (percentAmounts.length === 0) {
             setPercentAmounts(
-                updatedMembers.map((member) => ({
+                members.map((member) => ({
                     _id: member._id,
                     sum: 0,
                 }))
             );
 
             setPercentages(
-                updatedMembers.map((member) => ({
+                members.map((member) => ({
                     _id: member._id,
                     percentage: 0,
                 }))
