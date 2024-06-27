@@ -33,6 +33,13 @@ const userSchema = new mongoose.Schema({
         required: [true, "Паролата е задължително поле"],
         minLength: [8, "Паролата трябва да е поне 8 символа"],
     },
+    households: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: "Household",
+            required: [true, "Полето 'Домакинство' е задължително"],
+        },
+    ],
 });
 
 userSchema.virtual("repeatPassword").set(function (value) {
@@ -58,6 +65,9 @@ userSchema.set("toJSON", {
         return ret;
     },
 });
+
+// Create an index on the households field for better query performance
+userSchema.index({ households: 1 });
 
 const User = mongoose.model("User", userSchema);
 
