@@ -1,6 +1,8 @@
 const Household = require("../models/Household");
 const HouseholdInvitation = require("../models/HouseholdInvitation");
 const User = require("../models/User");
+const mongoose = require("mongoose");
+const { AppError } = require("../utils/AppError");
 
 // TODO: send different response if the resourse doesnt exist or is not found
 // TODO: filter with search params in the db
@@ -9,17 +11,11 @@ exports.getAll = () => Household.find();
 exports.getAllWithUsers = async (userId) => {
     const result = await Household.find({ "members.user": userId })
         .populate("members.user", "_id name email phone")
-        // .populate("admins", "name")
-        .populate("balance.user", "_id name").lean();
+        .populate("balance.user", "_id name")
+        .lean();
 
     return result;
 };
-
-// exports.getAllWithUsers = () =>
-//     Household.find()
-//         .populate("members.user", "_id name email phone")
-//         .populate("admin", "name")
-//         .populate("balance.user", "_id name");
 
 exports.getOne = (householdId) => Household.findById(householdId);
 
@@ -38,12 +34,59 @@ exports.getAllMembers = async (householdId) => {
     return allMembers.members;
 };
 
-exports.getAllMembersDetails = async (householdId) => {
-    const allMembers = await Household.findById(householdId)
-        .populate("members.user", "_id name email phone")
-        .select("members");
+exports.getOneMembersDetails = async (householdId) => {
+    const allMembers = await Household.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(householdId) } }, // Match the household by ID
+        { $unwind: "$members" }, // Deconstruct the members array
+        {
+            $lookup: {
+                from: "users", // Perform a join with the users collection
+                localField: "members.user", // Match user field in members
+                foreignField: "_id", // with _id field in users collection
+                as: "userDetails", // Output to userDetails array
+            },
+        },
+        { $unwind: "$userDetails" }, // Deconstruct the userDetails array
+        {
+            $project: {
+                _id: 0, // Exclude the default _id field from the output
+                "members._id": "$userDetails._id", // Include user _id
+                "members.name": "$userDetails.name", // Include user name
+                "members.email": "$userDetails.email", // Include user email
+                "members.phone": "$userDetails.phone", // Include user phone
+                "members.avatar": "$userDetails.avatar", // Include user avatar
+                "members.avatarColor": "$userDetails.avatarColor", // Include user avatarColor
+                "members.role": 1, // Include member role
+            },
+        },
+        {
+            $group: {
+                _id: "$_id", // Group by household ID (can be null since we're only matching one household)
+                members: {
+                    $push: {
+                        _id: "$members._id",
+                        name: "$members.name",
+                        email: "$members.email",
+                        phone: "$members.phone",
+                        avatar: "$members.avatar",
+                        avatarColor: "$members.avatarColor",
+                        role: "$members.role",
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0, // Exclude the grouping key from the output
+                members: 1, // Include the members array
+            },
+        },
+    ]);
 
-    return allMembers.members;
+    if (allMembers.length > 0) {
+        return allMembers[0].members;
+    }
+    return [];
 };
 
 exports.getAllBalances = async (householdId) => {
@@ -62,40 +105,108 @@ exports.getAllBalancesDetails = async (householdId) => {
     return allMembersDetails;
 };
 
-exports.getAllNonChildMembers = async (householdId) => {
-    // TODO: try using direct mongoose query
-    try {
-        const allMembers = await this.getAllMembers(householdId);
-        const nonChildMembers = allMembers.filter(
-            (member) => member.role !== "Дете"
-        );
+exports.getOneNonChildMembers = async (householdId) => {
+    const household = await Household.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(householdId) } }, // Match the household by ID
+        { $unwind: "$members" }, // Deconstruct the members array
+        { $match: { "members.role": { $ne: "Дете" } } }, // Filter out child members
+        {
+            $lookup: {
+                from: "users", // Perform a join with the users collection
+                localField: "members.user", // Match user field in members
+                foreignField: "_id", // with _id field in users collection
+                as: "userDetails", // Output to userDetails array
+            },
+        },
+        { $unwind: "$userDetails" }, // Deconstruct the userDetails array
+        {
+            $project: {
+                _id: 0, // Exclude the default _id field from the output
+                "userDetails._id": 1, // Include user _id
+                "userDetails.name": 1, // Include user name
+                "userDetails.avatar": 1, // Include user avatar
+                "userDetails.avatarColor": 1, // Include user avatarColor
+                "members.role": 1, // Include member role
+            },
+        },
+        {
+            $group: {
+                _id: null, // Group by null to aggregate all documents into one array
+                nonChildMembers: {
+                    $push: {
+                        _id: "$userDetails._id",
+                        name: "$userDetails.name",
+                        avatar: "$userDetails.avatar",
+                        avatarColor: "$userDetails.avatarColor",
+                        role: "$members.role",
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0, // Exclude the grouping key from the output
+                nonChildMembers: 1, // Include the nonChildMembers array
+            },
+        },
+    ]);
 
-        // let nonChildMembers = await Household.findById(householdId)
-        // .select("members")
-        // .populate("members.user", "_id name");
-
-        // nonChildMembers = nonChildMembers.members.filter(member => member.role !== 'Дете');
-        console.log(nonChildMembers);
-
-        return nonChildMembers;
-    } catch (error) {
-        console.error("Error fetching non-child members:", error);
-        throw error;
+    if (household.length > 0) {
+        return household[0].nonChildMembers;
     }
+    return [];
 };
 
-exports.getAllChildMembers = async (householdId) => {
-    try {
-        const allMembers = await this.getAllMembers(householdId);
-        const childMembers = allMembers.filter(
-            (member) => member.role === "Дете"
-        );
+exports.getOneChildMembers = async (householdId) => {
+    const household = await Household.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(householdId) } }, // Match the household by ID
+        { $unwind: "$members" }, // Deconstruct the members array
+        { $match: { "members.role": "Дете" } }, // Filter to include only child members
+        {
+            $lookup: {
+                from: "users", // Perform a join with the users collection
+                localField: "members.user", // Match user field in members
+                foreignField: "_id", // with _id field in users collection
+                as: "userDetails", // Output to userDetails array
+            },
+        },
+        { $unwind: "$userDetails" }, // Deconstruct the userDetails array
+        {
+            $project: {
+                _id: 0, // Exclude the default _id field from the output
+                "userDetails._id": 1, // Include user _id
+                "userDetails.name": 1, // Include user name
+                "userDetails.avatar": 1, // Include user avatar
+                "userDetails.avatarColor": 1, // Include user avatarColor
+                "members.role": 1, // Include member role
+            },
+        },
+        {
+            $group: {
+                _id: null, // Group by null to aggregate all documents into one array
+                childMembers: {
+                    $push: {
+                        _id: "$userDetails._id",
+                        name: "$userDetails.name",
+                        avatar: "$userDetails.avatar",
+                        avatarColor: "$userDetails.avatarColor",
+                        role: "$members.role",
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0, // Exclude the grouping key from the output
+                childMembers: 1, // Include the childMembers array
+            },
+        },
+    ]);
 
-        return childMembers;
-    } catch (error) {
-        console.error("Error fetching child members:", error);
-        throw error;
+    if (household.length > 0) {
+        return household[0].childMembers;
     }
+    return [];
 };
 
 // TODO: Send email instead of id?
@@ -314,9 +425,3 @@ exports.update = (householdId, householdData) =>
     Household.findByIdAndUpdate(householdId, householdData);
 
 exports.delete = (householdId) => Household.findByIdAndDelete(householdId);
-
-// exports.create = (householdData) => {
-//     // TODO: implement logic for the users
-//     const household = new Household(householdData);
-//     return household.save();
-// };

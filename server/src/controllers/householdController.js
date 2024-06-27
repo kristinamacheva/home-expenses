@@ -4,16 +4,16 @@ const getHousehold = require('../middlewares/householdMiddleware');
 const paidExpenseController = require('./paidExpenseController');
 const { isAuth } = require('../middlewares/authMiddleware');
 const getPaidExpense = require('../middlewares/paidExpenseMiddleware');
+const { AppError } = require("../utils/AppError");
 
-router.get('/', async (req, res) => {
-    // TODO: lean?
+router.get('/', async (req, res, next) => {
+    const userId = req.userId
+    
     try {
-        const userId = req.userId
         const households = await householdManager.getAllWithUsers(userId);
-        res.json(households);
+        res.status(200).json(households);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error fetching households' });
+        next(error);
     }
 });
 
@@ -52,25 +52,25 @@ router.get('/:householdId', async (req, res) => {
 });
 
 // TODO: better approach
-router.get('/:householdId/members', async (req, res) => {
+router.get('/:householdId/members', async (req, res, next) => {
     const { role, details } = req.query;
     let users;
     const householdId = req.householdId;
 
     try {
         if (details === 'true') {
-            users = await householdManager.getAllMembersDetails(householdId);
+            users = await householdManager.getOneMembersDetails(householdId);
         } else if (role === 'child') {
-            users = await householdManager.getAllChildMembers(householdId);
+            users = await householdManager.getOneChildMembers(householdId);
         } else if (role === 'not-child') {
-            users = await householdManager.getAllNonChildMembers(householdId);
+            users = await householdManager.getOneNonChildMembers(householdId);
         } else {
             users = await householdManager.getAllMembers(householdId);
         }
 
-        res.json(users);
+        res.status(200).json(users);
     } catch (error) {
-        res.status(500).json({ error: 'An error occurred while fetching members' });
+        next(error);
     }
 });
 
