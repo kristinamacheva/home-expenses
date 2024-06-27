@@ -37,7 +37,7 @@ export const getOneMembersDetails = async (householdId) => {
     return result;
 };
 
-export const getAllBalancesDetails = async (householdId) => {
+export const getAllBalances = async (householdId) => {
     try {
         const result = await request.get(
             `${baseUrl}/${householdId}/balances?details=true`

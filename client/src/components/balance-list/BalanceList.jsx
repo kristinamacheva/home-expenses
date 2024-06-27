@@ -1,19 +1,23 @@
-import { Flex } from "@chakra-ui/react";
+import { Flex, useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import * as householdService from "../../services/householdService";
 import { useParams } from "react-router-dom";
 import BalanceListItem from "./balance-list-item/BalanceListItem";
+import { useContext } from "react";
+import AuthContext from "../../contexts/authContext";
 
 export default function BalanceList() {
     const [balances, setBalances] = useState([]);
+    const { logoutHandler } = useContext(AuthContext);
+    const toast = useToast();
 
     const { householdId } = useParams();
 
     useEffect(() => {
         householdService
-            .getAllBalancesDetails(householdId)
+            .getAllBalances(householdId)
             .then((result) => {
-                const sortedBalances = result.balance.sort((a, b) => {
+                const sortedBalances = result.sort((a, b) => {
                     // sort by type
                     if (a.type === "+" && b.type === "-") {
                         return -1;
@@ -32,8 +36,18 @@ export default function BalanceList() {
                 });
                 setBalances(sortedBalances);
             })
-            .catch((err) => {
-                console.log(err);
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title: error.message || 'Неуспешно зареждане на баланса на домакиннството',
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
             });
     }, [householdId]);
 
@@ -46,7 +60,7 @@ export default function BalanceList() {
             align={{ base: "center", lg: "initial" }}
         >
             {balances.map((balance) => (
-                <BalanceListItem key={balance._id} {...balance} />
+                <BalanceListItem key={balance._id} balance={balance} />
             ))}
         </Flex>
     );

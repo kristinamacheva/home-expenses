@@ -5,26 +5,24 @@ import {
     Badge,
     Box,
     Card,
-    HStack,
-    Text,
-    Icon,
     Button,
 } from "@chakra-ui/react";
 
-import { FaEnvelope, FaPhone } from "react-icons/fa6";
 
-export default function BalanceListItem({ user, sum, type, _id }) {
+export default function BalanceListItem({ balance }) {
     let badgeText = "";
     let badgeColor = "";
 
-    if (type === "-") {
-        badgeText = `Дължите ${sum} лв.`;
+    if (balance.type === "-") {
+        badgeText = `Дължите ${balance.sum} лв.`;
     } else {
         badgeText =
-            sum === 0 ? "Нямате задължения" : `Дължат Ви ${sum} лв.`;
+            balance.sum === 0
+                ? "Нямате задължения"
+                : `Дължат Ви ${balance.sum} лв.`;
     }
 
-    badgeColor = type === "-" ? "red" : "green";
+    badgeColor = balance.type === "-" ? "red" : "green";
 
     return (
         <Card
@@ -46,13 +44,13 @@ export default function BalanceListItem({ user, sum, type, _id }) {
                 spacing="3"
             >
                 <Avatar
-                    name={user.name}
-                    src={user.avatar}
-                    background={user.avatarColor}
+                    name={balance.name}
+                    src={balance.avatar}
+                    background={balance.avatarColor}
                 />
                 <Stack spacing="0.5" alignItems="center">
                     <Heading as="h4" size="sm">
-                        {user.name}
+                        {balance.name}
                     </Heading>
                     <Box display="inline-block">
                         <Badge variant="subtle" colorScheme={badgeColor}>
@@ -60,10 +58,10 @@ export default function BalanceListItem({ user, sum, type, _id }) {
                         </Badge>
                     </Box>
                 </Stack>
-                {type === "+" && sum !== 0 && (
+                {balance.type === "+" && balance.sum !== 0 && (
                     <Button type="primary">Изпратете напомняне</Button>
                 )}
-                {type === "-" && (
+                {balance.type === "-" && (
                     <Button type="primary">Погасете задължението</Button>
                 )}
             </Stack>
