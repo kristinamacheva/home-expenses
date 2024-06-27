@@ -12,7 +12,7 @@ import {
 
 import { FaEnvelope, FaPhone } from "react-icons/fa6";
 
-export default function MemberListItem({ user, role }) {
+export default function MemberListItem({ user }) {
     return (
         <Card
             px="5"
@@ -42,7 +42,7 @@ export default function MemberListItem({ user, role }) {
                         {user.name}
                     </Heading>
                     <Box display="inline-block">
-                        <Badge variant="subtle">{role}</Badge>
+                        <Badge variant="subtle">{user.role}</Badge>
                     </Box>
                 </Stack>
                 <Stack spacing={{ base: "1", md: "0" }}>
