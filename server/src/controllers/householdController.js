@@ -4,9 +4,24 @@ const getHousehold = require("../middlewares/householdMiddleware");
 const paidExpenseController = require("./paidExpenseController");
 const { isAuth } = require("../middlewares/authMiddleware");
 const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
+const { createValidator } = require("../validators/householdValidator");
 const { AppError } = require("../utils/AppError");
+const { validationResult } = require("express-validator");
 
-router.post("/", async (req, res, next) => {
+router.post("/", createValidator, async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => ({
+            field: err.path,
+            message: err.msg,
+        }));
+
+        return next(
+            new AppError("Данните са некоректни", 400, formattedErrors)
+        );
+    }
+
     const { name, members } = req.body;
 
     try {
