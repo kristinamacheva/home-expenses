@@ -51,6 +51,9 @@ const householdSchema = new mongoose.Schema({
     ],
 });
 
+// Create index for frequently queried array fields
+householdSchema.index({ 'members.user': 1 });
+
 const Household = mongoose.model("Household", householdSchema);
 
 module.exports = Household;
