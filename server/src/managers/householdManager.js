@@ -16,7 +16,31 @@ exports.getOneWithMembers = async (householdId) => {
                 from: "users", // Collection to join for members
                 localField: "members.user",
                 foreignField: "_id",
-                as: "members",
+                as: "userDetails",
+            },
+        },
+        {
+            $addFields: {
+                members: {
+                    $map: {
+                        input: "$members",
+                        as: "member",
+                        in: {
+                            user: {
+                                $arrayElemAt: [
+                                    "$userDetails",
+                                    {
+                                        $indexOfArray: [
+                                            "$userDetails._id",
+                                            "$$member.user",
+                                        ],
+                                    },
+                                ],
+                            },
+                            role: "$$member.role",
+                        },
+                    },
+                },
             },
         },
         {
@@ -28,10 +52,11 @@ exports.getOneWithMembers = async (householdId) => {
                         input: "$members",
                         as: "member",
                         in: {
-                            _id: "$$member._id",
-                            name: "$$member.name",
-                            avatar: "$$member.avatar",
-                            avatarColor: "$$member.avatarColor",
+                            _id: "$$member.user._id",
+                            name: "$$member.user.name",
+                            avatar: "$$member.user.avatar",
+                            avatarColor: "$$member.user.avatarColor",
+                            role: "$$member.role",
                         },
                     },
                 },
@@ -41,6 +66,46 @@ exports.getOneWithMembers = async (householdId) => {
 
     const household = await Household.aggregate(aggregationPipeline);
     return household[0]; // Return the first result (assuming householdId is unique)
+};
+
+exports.getOneWithMemberEmails = async (householdId) => {
+    const aggregationPipeline = [
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(householdId), // Match the household by its ObjectId
+            },
+        },
+        {
+            $unwind: "$members", // Unwind the members array
+        },
+        {
+            $lookup: {
+                from: "users", // Collection to join for members
+                localField: "members.user",
+                foreignField: "_id",
+                as: "memberDetails",
+            },
+        },
+        {
+            $unwind: "$memberDetails", // Unwind the memberDetails array
+        },
+        {
+            $group: {
+                _id: "$_id",
+                name: { $first: "$name" },
+                members: {
+                    $push: {
+                        _id: "$memberDetails._id",
+                        email: "$memberDetails.email",
+                        role: "$members.role",
+                    },
+                },
+            },
+        },
+    ];
+
+    const household = await Household.aggregate(aggregationPipeline);
+    return household[0]; // Return the first result
 };
 
 exports.getOneMembers = async (householdId) => {
@@ -287,9 +352,9 @@ exports.create = async (householdData) => {
 
     // Fetch the admin user by ID
     const adminUser = await User.findById(admin);
-    if (!adminUser) {
-        throw new AppError("Админът не е намерен", 401);
-    }
+    // if (!adminUser) {
+    //     throw new AppError("Админът не е намерен", 401);
+    // }
 
     // Check if admin's email is in members array
     const adminEmail = adminUser.email;
@@ -370,6 +435,185 @@ exports.create = async (householdData) => {
     return newHousehold;
 };
 
+exports.update = async (householdId, admin, name, members, newMembers) => {
+    // Fetch the admin user by ID
+    const adminUser = await User.findById(admin);
+
+    // Fetch the household by ID
+    const household = await Household.findById(householdId);
+
+    if (!household.admins.includes(adminUser._id)) {
+        throw new AppError(
+            "Потребителят не е администратор на това домакинство.",
+            403
+        );
+    }
+
+    // Update household name if it has changed
+    if (name !== household.name) {
+        household.name = name;
+    }
+
+    // Update roles for existing members and handle removal if needed
+    for (const existingMember of household.members) {
+        // Check if the existing member is in the updated members list
+        const updatedMember = members.find(
+            (member) => member._id === existingMember.user.toString()
+        );
+
+        if (updatedMember) {
+            // Update role if it has changed
+            if (updatedMember.role !== existingMember.role) {
+                // Prevent changing role to "Дете" if current role is "Админ" or "Член"
+                if (
+                    (existingMember.role === "Админ" ||
+                        existingMember.role === "Член") &&
+                    updatedMember.role === "Дете"
+                ) {
+                    throw new AppError(
+                        `Не може да промените ролята на потребителя от Админ или Член в 'Дете'.`,
+                        403
+                    );
+                }
+
+                // Check if user is becoming an admin
+                if (updatedMember.role === "Админ") {
+                    // Add to admins array if not already an admin
+                    if (!household.admins.includes(updatedMember._id)) {
+                        household.admins.push(updatedMember._id);
+                    }
+                } else if (
+                    existingMember.role === "Админ" &&
+                    updatedMember.role === "Член"
+                ) {
+                    // Remove from admins array if changing from admin to member
+                    household.admins = household.admins.filter(
+                        (adminId) => adminId.toString() !== updatedMember._id
+                    );
+                }
+
+                existingMember.role = updatedMember.role;
+            }
+        } else {
+            // Remove from balance array if balance is 0
+            const userBalance = household.balance.find(
+                (entry) =>
+                    entry.user.toString() === existingMember.user.toString()
+            );
+
+            if (userBalance) {
+                if (userBalance.sum !== 0) {
+                    throw new AppError(
+                        `Не може да премахвате член, чийто баланс е различен от 0.`,
+                        403
+                    );
+                }
+                household.balance = household.balance.filter(
+                    (entry) =>
+                        entry.user.toString() !== existingMember.user.toString()
+                );
+            }
+
+            // Member does not exist in the updated list, remove from household
+            household.members = household.members.filter(
+                (member) =>
+                    member.user.toString() !== existingMember.user.toString()
+            );
+
+            // Remove from admins array if applicable
+            if (existingMember.role === "Админ") {
+                household.admins = household.admins.filter(
+                    (adminId) =>
+                        adminId.toString() !== existingMember.user.toString()
+                );
+            }
+
+            // Remove householdId from user's households array
+            await User.findByIdAndUpdate(existingMember.user, {
+                $pull: { households: householdId },
+            });
+        }
+    }
+
+    // Create invitations for new members
+    if (newMembers.length > 0) {
+        // Check for duplicate emails in members
+        const uniqueEmails = new Set();
+        for (const member of newMembers) {
+            if (uniqueEmails.has(member.email)) {
+                throw new AppError(
+                    `Имейлът се среща повече от 1 път: ${member.email}`,
+                    400
+                );
+            }
+            uniqueEmails.add(member.email);
+        }
+        // Fetch new member users by their emails
+        const memberUsers = await User.find({
+            email: { $in: Array.from(uniqueEmails) },
+        }).select("_id email");
+
+        if (memberUsers.length !== uniqueEmails.size) {
+            throw new AppError("1 или повече имейла не бяха намерени", 400);
+        }
+
+        // Extract _id values from memberUsers
+        const memberUserIds = memberUsers.map((user) => user._id.toString());
+
+        // Check if any memberUserIds are already in household.members
+        const existingMemberIds = household.members.map((member) =>
+            member.user.toString()
+        );
+
+        // Check if any memberUserIds are already in existingMemberIds
+        const duplicates = memberUserIds.filter((userId) =>
+            existingMemberIds.includes(userId)
+        );
+
+        if (duplicates.length > 0) {
+            throw new AppError(
+                `Един или повече потребители вече са членове на домакинството.`,
+                400
+            );
+        }
+
+        // Save the household to the database
+        await household.save();
+
+        // Create invitations for each member
+        for (const member of newMembers) {
+            const currentUser = memberUsers.find(
+                (user) => user.email === member.email
+            );
+
+            // Check if an invitation already exists for this user and household
+            const existingInvitation = await HouseholdInvitation.findOne({
+                user: currentUser._id,
+                household: householdId,
+            });
+
+            if (existingInvitation) {
+                throw new AppError(
+                    `Един или повече потребители вече имат покана за присъединяване към домакинството.`,
+                    400
+                );
+            }
+
+            const invitation = new HouseholdInvitation({
+                user: currentUser._id,
+                household: householdId,
+                role: member.role,
+                creator: adminUser._id,
+            });
+
+            await invitation.save();
+        }
+    } else {
+        // Save the household to the database
+        await household.save();
+    }
+};
+
 exports.leave = async (userId, householdId) => {
     const household = await Household.findById(householdId);
 
@@ -402,16 +646,31 @@ exports.leave = async (userId, householdId) => {
         const userBalance = household.balance.find(
             (entry) => entry.user.toString() === userId
         );
-        if (userBalance && userBalance.sum !== 0) {
-            throw new AppError(
-                "Не може да напуснете домакинството, ако балансът ви не е 0.",
-                403
+
+        if (userBalance) {
+            if (userBalance.sum !== 0) {
+                throw new AppError(
+                    "Не може да напуснете домакинството, ако балансът ви не е 0.",
+                    403
+                );
+            }
+
+            // Remove the user's balance entry if it exists and is zero
+            household.balance = household.balance.filter(
+                (entry) => entry.user.toString() !== userId
             );
         }
     }
 
     // Remove the user from the members array
     household.members.splice(userIndex, 1);
+
+    // Remove the user from the admins array
+    if (isAdmin) {
+        household.admins = household.admins.filter(
+            (admin) => admin.toString() !== userId
+        );
+    }
 
     // Save the updated household
     await household.save();

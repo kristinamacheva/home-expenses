@@ -4,7 +4,10 @@ const getHousehold = require("../middlewares/householdMiddleware");
 const paidExpenseController = require("./paidExpenseController");
 const { isAuth } = require("../middlewares/authMiddleware");
 const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
-const { createValidator } = require("../validators/householdValidator");
+const {
+    createValidator,
+    updateValidator,
+} = require("../validators/householdValidator");
 const { AppError } = require("../utils/AppError");
 const { validationResult } = require("express-validator");
 
@@ -60,6 +63,8 @@ router.get("/:householdId/members", async (req, res, next) => {
     try {
         if (details === "true") {
             users = await householdManager.getOneMembersDetails(householdId);
+        } else if (details === "email") {
+            users = await householdManager.getOneWithMemberEmails(householdId);
         } else if (role === "child") {
             users = await householdManager.getOneChildMembers(householdId);
         } else if (role === "not-child") {
@@ -86,13 +91,38 @@ router.get("/:householdId/balances", async (req, res, next) => {
     }
 });
 
-// // TODO: update status
-// router.put("/:householdId", async (req, res) => {
-//     const householdId = req.householdId;
+router.put("/:householdId", updateValidator, async (req, res, next) => {
+    const errors = validationResult(req);
 
-//     const household = await householdManager.update(householdId, req.body);
-//     res.json(household);
-// });
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => ({
+            field: err.path,
+            message: err.msg,
+        }));
+
+        return next(
+            new AppError("Данните са некоректни", 400, formattedErrors)
+        );
+    }
+
+    const householdId = req.householdId;
+    const admin = req.userId;
+
+    const { name, members, newMembers = [] } = req.body;
+
+    try {
+        await householdManager.update(
+            householdId,
+            admin,
+            name,
+            members,
+            newMembers
+        );
+        res.status(204).end();
+    } catch (error) {
+        next(error);
+    }
+});
 
 router.put("/:householdId/leave", async (req, res, next) => {
     const userId = req.userId;
@@ -110,7 +140,6 @@ router.put("/:householdId/leave", async (req, res, next) => {
 router.use("/:householdId/paidExpenses", paidExpenseController);
 
 module.exports = router;
-
 
 // router.get('/', async (req, res, next) => {
 //     const userId = req.userId
