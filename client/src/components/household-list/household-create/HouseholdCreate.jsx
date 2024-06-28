@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
     Box,
     Button,
@@ -14,24 +14,36 @@ import {
     ModalOverlay,
     Select,
     Text,
+    useToast,
 } from "@chakra-ui/react";
 
-import * as householdService from '../../../services/householdService';
-import Path from "../../../paths";
+import * as householdService from "../../../services/householdService";
+import AuthContext from "../../../contexts/authContext";
 
 export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
     const [values, setValues] = useState({
         name: "",
         members: [{ email: "", role: "" }],
     });
-    const roles = ["Админ", "Член", "Дете"];
+    const [errors, setErrors] = useState({
+        name: "",
+        members: [{ email: "", role: "" }],
+    });
 
-    const userId = "6649f627d4819c1373f8b8e9";
+    const { logoutHandler } = useContext(AuthContext);
+    const toast = useToast();
+
+    const roles = ["Админ", "Член", "Дете"];
 
     const onMemberAddInput = () => {
         setValues({
             ...values,
             members: [...values.members, { email: "", role: "" }],
+        });
+
+        setErrors({
+            ...errors,
+            members: [...errors.members, { email: "", role: "" }],
         });
     };
 
@@ -45,6 +57,10 @@ export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
         const updatedMembers = [...values.members];
         updatedMembers.splice(index, 1);
         setValues({ ...values, members: updatedMembers });
+
+        const updatedErrors = [...errors.members];
+        updatedErrors.splice(index, 1);
+        setErrors({ ...errors, members: updatedErrors });
     };
 
     const onChange = (e) => {
@@ -54,38 +70,95 @@ export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
         }));
     };
 
+    const validateForm = (currentHousehold) => {
+        const newErrors = {
+            name: "",
+            members: currentHousehold.members.map(() => ({
+                email: "",
+                role: "",
+            })),
+        };
+
+        if (!currentHousehold.name.trim()) {
+            newErrors.name = "Името не може да бъде празно";
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        currentHousehold.members.forEach((member, index) => {
+            if (!member.email.trim()) {
+                newErrors.members[index].email =
+                    "Имейлът не може да бъде празен";
+            } else if (!emailRegex.test(member.email)) {
+                newErrors.members[index].email = "Невалиден имейл";
+            }
+
+            if (!member.role.trim()) {
+                newErrors.members[index].role = "Ролята не може да бъде празна";
+            } else if (!roles.includes(member.role)) {
+                newErrors.members[index].role =
+                    'Невалидна роля. Позволени стойности са "Админ", "Член" или "Дете".';
+            }
+        });
+
+        setErrors(newErrors);
+
+        // Return true if there are no errors
+        return (
+            !newErrors.name &&
+            newErrors.members.every((member) => !member.email && !member.role)
+        );
+    };
+
     const onSubmit = async (e) => {
         e.preventDefault();
+
+        setErrors({
+            name: "",
+            members: [{ email: "", role: "" }],
+        });
 
         const newHousehold = {
             name: values.name,
             members: values.members,
-            admin: userId,
         };
 
-        try {
-            const result = await householdService.create(newHousehold);
+        // Validate form fields
+        if (!validateForm(newHousehold)) {
+            return;
+        }
 
-            // addHouseholdToState(result);
+        try {
+            await householdService.create(newHousehold);
+
+            toast({
+                title: "Успешно създаване на домакинство",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
             fetchHouseholds();
-            onCloseForm(); 
-        } catch (err) {
-            //TODO Error notification - toast
-            console.log(err);
+            onCloseForm();
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title:
+                        error.message || "Неуспешно създаване на домакинство",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
         }
     };
 
-    // const clearFormHandler = () => {
-    //     setValues({ name: "", members: [{ email: "", role: "" }] });
-    // };
-
-    //TODO: find a better solution
-    // const reload = () => window.location.reload();
-
     const onCloseForm = () => {
-        // clearFormHandler();
         onClose();
-        // reload();
     };
 
     return (
@@ -105,6 +178,11 @@ export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
                                 onChange={onChange}
                                 placeholder="Име"
                             />
+                            {errors.name && (
+                                <Text color="red.500" fontSize="sm">
+                                    {errors.name}
+                                </Text>
+                            )}
                         </FormControl>
 
                         <Text fontWeight="bold" fontSize="lg">
@@ -124,6 +202,11 @@ export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
                                         }
                                         placeholder="Имейл"
                                     />
+                                    {errors.members[index]?.email && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.members[index].email}
+                                        </Text>
+                                    )}
                                 </FormControl>
 
                                 <FormControl mt={2}>
@@ -142,6 +225,11 @@ export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
                                             </option>
                                         ))}
                                     </Select>
+                                    {errors.members[index]?.role && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.members[index].role}
+                                        </Text>
+                                    )}
                                 </FormControl>
 
                                 {values.members.length > 1 && (

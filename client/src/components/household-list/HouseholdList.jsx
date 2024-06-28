@@ -9,10 +9,11 @@ import {
     Stack,
     useDisclosure,
     Card,
-    useToast
+    useToast,
 } from "@chakra-ui/react";
 
 import * as householdService from "../../services/householdService";
+import * as authService from "../../services/authService";
 import HouseholdCreate from "./household-create/HouseholdCreate";
 import AuthContext from "../../contexts/authContext";
 
@@ -20,26 +21,29 @@ export default function HouseholdList() {
     const [households, setHouseholds] = useState([]);
     const { userId, logoutHandler } = useContext(AuthContext);
     const toast = useToast();
-    
+
     useEffect(() => {
-        householdService
-        .getAll()
-        .then((result) => setHouseholds(result))
-        .catch((error) => {
-            if (error.status === 401) {
-                logoutHandler();
-            } else {
-                toast({
-                    title: error.message,
-                    status: 'error',
-                    duration: 6000,
-                    isClosable: true,
-                    position: 'bottom'
-                  })
-            }
-        });
+        fetchHouseholds();
     }, []);
-    
+
+    const fetchHouseholds = () => {
+        authService
+            .getHouseholds()
+            .then((result) => setHouseholds(result))
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title: error.message || 'Неуспешно зареждане на домакинствата',
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
+            });
+    };
 
     const {
         isOpen: isCreateModalOpen,
@@ -47,16 +51,16 @@ export default function HouseholdList() {
         onClose: onCloseCreateModal,
     } = useDisclosure();
 
-    // TODO: unique key error
-    const addHouseholdToState = (newHousehold) => {
-        setHouseholds((state) => ([...state, newHousehold]));
-    };
+    // // TODO: unique key error
+    // const addHouseholdToState = (newHousehold) => {
+    //     setHouseholds((state) => ([...state, newHousehold]));
+    // };
 
-    const removeHouseholdFromState = (householdId) => {
-        setHouseholds((prevHouseholds) => (
-            prevHouseholds.filter((household) => household._id !== householdId)
-        ));
-    };
+    // const removeHouseholdFromState = (householdId) => {
+    //     setHouseholds((prevHouseholds) => (
+    //         prevHouseholds.filter((household) => household._id !== householdId)
+    //     ));
+    // };
 
     return (
         <>
@@ -74,7 +78,11 @@ export default function HouseholdList() {
                 </Card>
                 <Stack mt="4">
                     {households.map((household) => (
-                        <HouseholdListItem key={household._id} {...household} removeHouseholdFromState={removeHouseholdFromState}/>
+                        <HouseholdListItem
+                            key={household._id}
+                            household={household}
+                            fetchHouseholds={fetchHouseholds}
+                        />
                     ))}
                 </Stack>
             </Stack>
@@ -82,7 +90,7 @@ export default function HouseholdList() {
                 <HouseholdCreate
                     isOpen={isCreateModalOpen}
                     onClose={onCloseCreateModal}
-                    addHouseholdToState={addHouseholdToState}
+                    fetchHouseholds={fetchHouseholds}
                 />
             )}
         </>
