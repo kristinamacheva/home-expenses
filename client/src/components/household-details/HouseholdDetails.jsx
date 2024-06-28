@@ -13,7 +13,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import * as householdService from "../../services/householdService";
 import PaidExpenseList from "../paid-expense-list/PaidExpenseList";
@@ -26,7 +26,7 @@ export default function HouseholdDetails() {
     // TODO: load all details here and pass as props or make seperate requests
     const [household, setHousehold] = useState({});
     const [isLoading, setIsLoading] = useState(true);
-    const { logoutHandler } = useContext(AuthContext);
+    const { logoutHandler, userId } = useContext(AuthContext);
     const toast = useToast();
 
     const { householdId } = useParams();
@@ -61,6 +61,12 @@ export default function HouseholdDetails() {
         return <Spinner size="lg" />;
     }
 
+    // Find the current user's role in the household
+    const currentUserMember = household.members.find(
+        (member) => member._id === userId
+    );
+    const currentUserRole = currentUserMember ? currentUserMember.role : null;
+
     return (
         <>
             <Card background="white" p="2" boxShadow="xs">
@@ -85,63 +91,71 @@ export default function HouseholdDetails() {
 
             <Tabs isLazy colorScheme="themePurple" mx="1" mt="4">
                 <TabList>
-                    <Tab>Баланс</Tab>
-                    <Tab>Разходи</Tab>
+                    {currentUserRole !== "Дете" && (
+                        <>
+                            <Tab>Баланс</Tab>
+                            <Tab>Разходи</Tab>
+                        </>
+                    )}
                     <Tab>Членове</Tab>
                 </TabList>
 
                 <TabPanels>
-                    <TabPanel>
-                        <BalanceList />
-                    </TabPanel>
-                    <TabPanel>
-                        <Tabs
-                            isLazy
-                            variant="soft-rounded"
-                            colorScheme="tabsPurple"
-                        >
-                            <TabList>
-                                <Tab
-                                    sx={{
-                                        padding: "0.4rem 0.6rem",
-                                        marginRight: "0.2rem",
-                                        fontSize: "1rem",
-                                    }}
-                                >
-                                    Платени
-                                </Tab>
-                                <Tab
-                                    sx={{
-                                        padding: "0.4rem 0.6rem",
-                                        marginRight: "0.2rem",
-                                        fontSize: "1rem",
-                                    }}
-                                >
-                                    Неплатени
-                                </Tab>
-                                <Tab
-                                    sx={{
-                                        padding: "0.4rem 0.6rem",
-                                        marginRight: "0.2rem",
-                                        fontSize: "1rem",
-                                    }}
-                                >
-                                    Периодични
-                                </Tab>
-                            </TabList>
-                            <TabPanels>
-                                <TabPanel px="2" pt="2">
-                                    <PaidExpenseList />
-                                </TabPanel>
-                                <TabPanel px="2">
-                                    <p>Неплатени</p>
-                                </TabPanel>
-                                <TabPanel px="2">
-                                    <p>Периодични</p>
-                                </TabPanel>
-                            </TabPanels>
-                        </Tabs>
-                    </TabPanel>
+                    {currentUserRole !== "Дете" && (
+                        <TabPanel>
+                            <BalanceList />
+                        </TabPanel>
+                    )}
+                    {currentUserRole !== "Дете" && (
+                        <TabPanel>
+                            <Tabs
+                                isLazy
+                                variant="soft-rounded"
+                                colorScheme="tabsPurple"
+                            >
+                                <TabList>
+                                    <Tab
+                                        sx={{
+                                            padding: "0.4rem 0.6rem",
+                                            marginRight: "0.2rem",
+                                            fontSize: "1rem",
+                                        }}
+                                    >
+                                        Платени
+                                    </Tab>
+                                    <Tab
+                                        sx={{
+                                            padding: "0.4rem 0.6rem",
+                                            marginRight: "0.2rem",
+                                            fontSize: "1rem",
+                                        }}
+                                    >
+                                        Неплатени
+                                    </Tab>
+                                    <Tab
+                                        sx={{
+                                            padding: "0.4rem 0.6rem",
+                                            marginRight: "0.2rem",
+                                            fontSize: "1rem",
+                                        }}
+                                    >
+                                        Периодични
+                                    </Tab>
+                                </TabList>
+                                <TabPanels>
+                                    <TabPanel px="2" pt="2">
+                                        <PaidExpenseList />
+                                    </TabPanel>
+                                    <TabPanel px="2">
+                                        <p>Неплатени</p>
+                                    </TabPanel>
+                                    <TabPanel px="2">
+                                        <p>Периодични</p>
+                                    </TabPanel>
+                                </TabPanels>
+                            </Tabs>
+                        </TabPanel>
+                    )}
                     <TabPanel>
                         <MemberList />
                     </TabPanel>
