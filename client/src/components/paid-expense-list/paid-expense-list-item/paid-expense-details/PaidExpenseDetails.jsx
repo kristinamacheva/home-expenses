@@ -130,7 +130,7 @@ export default function PaidExpenseDetails({
                     toast({
                         title: "Грешка.",
                         description:
-                            "Възникна грешка при одобрението на разхода",
+                            error.message || "Възникна грешка при одобрението на разхода",
                         status: "error",
                         duration: 5000,
                         isClosable: true,
@@ -161,7 +161,7 @@ export default function PaidExpenseDetails({
                     toast({
                         title: "Грешка.",
                         description:
-                            "Възникна грешка при отхвърлянето на разхода",
+                            error.message || "Възникна грешка при отхвърлянето на разхода",
                         status: "error",
                         duration: 5000,
                         isClosable: true,
