@@ -107,18 +107,6 @@ exports.getOneDetails = async (paidExpenseId, userId) => {
         .populate("creator", "_id name avatar avatarColor")
         .populate("balance.user", "_id name avatar avatarColor");
 
-    // Filter balance array to include only the current user's balance
-    const currentUserBalance = paidExpense.balance.find((entry) =>
-        entry.user.equals(userId)
-    );
-
-    // Modify paidExpense object to include only the filtered balance
-    if (currentUserBalance) {
-        paidExpense.balance = [currentUserBalance];
-    } else {
-        paidExpense.balance = []; // Return an empty array if user has no balance entry
-    }
-
     // Filter userApprovals to only include the current user's status
     const currentUserApproval = paidExpense.userApprovals.find((entry) =>
         entry.user.equals(userId)
