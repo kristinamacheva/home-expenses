@@ -10,7 +10,7 @@ import {
     IconButton,
     HStack,
     useDisclosure,
-    useToast  
+    useToast,
 } from "@chakra-ui/react";
 import { FaEye, FaPen } from "react-icons/fa6";
 import { FaSignOutAlt } from "react-icons/fa";
@@ -22,7 +22,7 @@ import * as householdService from "../../../services/householdService";
 
 export default function HouseholdListItem({
     household,
-    fetchHouseholds
+    fetchHouseholds,
     // removeHouseholdFromState
 }) {
     const {
@@ -36,9 +36,16 @@ export default function HouseholdListItem({
 
     const leaveHouseholdHandler = async (householdId) => {
         try {
-            const result = await householdService.leave(householdId);
-            console.log(result.message);
-            // removeHouseholdFromState(householdId); 
+            await householdService.leave(householdId);
+
+            toast({
+                title: "Успешно напуснахте домакинството",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
             fetchHouseholds();
         } catch (error) {
             if (error.status === 401) {
@@ -46,11 +53,11 @@ export default function HouseholdListItem({
             } else {
                 toast({
                     title: error.message,
-                    status: 'error',
+                    status: "error",
                     duration: 6000,
                     isClosable: true,
-                    position: 'bottom'
-                  })
+                    position: "bottom",
+                });
             }
         }
     };
@@ -60,7 +67,11 @@ export default function HouseholdListItem({
     const userBalance = household.balance[0];
     const userBalanceSum = userBalance ? userBalance.sum : 0;
     // TODO: color
-    const badgeColorScheme = userBalance ? (userBalance.type === "-" ? "red" : "green") : "gray";
+    const badgeColorScheme = userBalance
+        ? userBalance.type === "-"
+            ? "red"
+            : "green"
+        : "gray";
 
     let badgeText;
 
@@ -172,6 +183,7 @@ export default function HouseholdListItem({
                     isOpen={isEditModalOpen}
                     onClose={onCloseEditModal}
                     householdId={household._id}
+                    fetchHouseholds={fetchHouseholds}
                 />
             )}
         </>
