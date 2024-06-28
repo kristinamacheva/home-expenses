@@ -92,7 +92,7 @@ export default function PaidExpenseCreate({
     const onChange = (e) => {
         let value = e.target.value;
         setErrors((prevErrors) => ({ ...prevErrors, [e.target.name]: "" }));
-        
+
         if (e.target.name === "amount") {
             const regex = /^\d*([\,\.]?\d{0,2})?$/;
 
@@ -210,6 +210,12 @@ export default function PaidExpenseCreate({
             newErrors.paid = "Методът на разпределяне трябва да бъде избран";
         } else if (paid.length === 0) {
             newErrors.paid = "Платците трябва да бъдат определени";
+        } else if (
+            values.payersOptionField !== "currentUser" &&
+            paid.length < 2
+        ) {
+            newErrors.paid =
+                "Разходът трябва да се разпредели минимум между двама членове на домакинството";
         }
 
         if (!values.splittingOption) {
@@ -217,6 +223,9 @@ export default function PaidExpenseCreate({
                 "Методът на разпределяне трябва да бъде избран";
         } else if (owed.length === 0) {
             newErrors.owed = "Дължимите суми трябва да бъдат определени";
+        } else if (owed.length < 2) {
+            newErrors.owed =
+                "Разходът трябва да се разпредели минимум между двама членове на домакинството";
         }
 
         setErrors(newErrors);
@@ -258,11 +267,10 @@ export default function PaidExpenseCreate({
             owed,
         };
 
+        console.log(newPaidExpense);
+
         try {
-            await paidExpenseService.create(
-                householdId,
-                newPaidExpense
-            );
+            await paidExpenseService.create(householdId, newPaidExpense);
 
             toast({
                 title: "Разходът е създанен.",
