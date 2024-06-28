@@ -37,6 +37,13 @@ export const getOneMembersDetails = async (householdId) => {
     return result;
 };
 
+export const getOneWithMemberEmails = async (householdId) => {
+    const result = await request.get(
+        `${baseUrl}/${householdId}/members?details=email`
+    );
+    return result;
+};
+
 export const getAllBalances = async (householdId) => {
     try {
         const result = await request.get(
@@ -52,6 +59,13 @@ export const getAllBalances = async (householdId) => {
 
 export const create = async (householdData) => {
     const result = await request.post(baseUrl, householdData);
+
+    return result;
+};
+
+export const edit = async (householdId, householdData) => {
+    // console.log(householdData);
+    const result = await request.put(`${baseUrl}/${householdId}`, householdData);
 
     return result;
 };
