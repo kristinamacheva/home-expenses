@@ -20,12 +20,14 @@ import PaidExpenseList from "../paid-expense-list/PaidExpenseList";
 import MemberList from "../member/member-list/MemberList";
 import BalanceList from "../balance-list/BalanceList";
 import AuthContext from "../../contexts/authContext";
-// import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
+import Path from "../../paths";
+import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 
 export default function HouseholdDetails() {
     // TODO: load all details here and pass as props or make seperate requests
     const [household, setHousehold] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
     const { logoutHandler, userId } = useContext(AuthContext);
     const toast = useToast();
 
@@ -42,6 +44,9 @@ export default function HouseholdDetails() {
             .catch((error) => {
                 if (error.status === 401) {
                     logoutHandler();
+                } else if (error.status === 404) {
+                    setIsLoading(false);
+                    setNotFound(true);
                 } else {
                     toast({
                         title:
@@ -59,6 +64,10 @@ export default function HouseholdDetails() {
 
     if (isLoading) {
         return <Spinner size="lg" />;
+    }
+
+    if (notFound) {
+        return <HouseholdNotFound />;
     }
 
     // Find the current user's role in the household
