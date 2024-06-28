@@ -33,7 +33,7 @@ import CurrentUser from "./split-types/CurrentUser";
 
 const initialValues = {
     title: "",
-    amount: "0",
+    amount: "",
     category: "",
     date: moment().format("YYYY-MM-DD"),
     payersOptionField: "",
@@ -46,9 +46,8 @@ export default function PaidExpenseCreate({
     onClose,
     fetchPaidExpenses,
 }) {
-    const { userId } = useContext(AuthContext);
+    const { userId, logoutHandler } = useContext(AuthContext);
     const { householdId } = useParams();
-    const { logoutHandler } = useContext(AuthContext);
 
     const [householdMembers, setHouseholdMembers] = useState([]);
     const [paid, setPaid] = useState([]);
@@ -56,6 +55,17 @@ export default function PaidExpenseCreate({
 
     const [values, setValues] = useState(initialValues);
     const toast = useToast();
+
+    const [errors, setErrors] = useState({
+        title: "",
+        amount: "",
+        category: "",
+        date: "",
+        paidSplitType: "",
+        paid: "",
+        owedSplitType: "",
+        owed: "",
+    });
 
     useEffect(() => {
         householdService
@@ -76,11 +86,13 @@ export default function PaidExpenseCreate({
                     });
                 }
             });
-    }, []);
+    }, [householdId]);
 
     // TODO: error?
     const onChange = (e) => {
         let value = e.target.value;
+        setErrors((prevErrors) => ({ ...prevErrors, [e.target.name]: "" }));
+        
         if (e.target.name === "amount") {
             const regex = /^\d*([\,\.]?\d{0,2})?$/;
 
@@ -155,12 +167,69 @@ export default function PaidExpenseCreate({
         }
     };
 
+    const validateForm = (values, paid, owed) => {
+        const newErrors = {
+            title: "",
+            amount: "",
+            category: "",
+            date: "",
+            paidSplitType: "",
+            paid: "",
+            owedSplitType: "",
+            owed: "",
+        };
+
+        if (!values.title.trim()) {
+            newErrors.title = "Заглавието не може да бъде празно";
+        }
+
+        if (
+            !values.amount ||
+            isNaN(values.amount) ||
+            Number(values.amount) <= 0
+        ) {
+            newErrors.amount = "Сумата трябва да бъде число, по-голямо от 0";
+        }
+
+        if (!values.date.trim()) {
+            newErrors.date = "Датата не може да бъде празна";
+        }
+
+        // TODO: Category
+        // if (!values.category.trim()) {
+        //     newErrors.category = "Категорията не може да бъде празна";
+        // }
+
+        if (!values.payersOptionField) {
+            newErrors.paidSplitType =
+                "Методът на разпределяне трябва да бъде избран";
+        } else if (
+            values.payersOptionField !== "currentUser" &&
+            !values.paidSplitTypeField
+        ) {
+            newErrors.paid = "Методът на разпределяне трябва да бъде избран";
+        } else if (paid.length === 0) {
+            newErrors.paid = "Платците трябва да бъдат определени";
+        }
+
+        if (!values.splittingOption) {
+            newErrors.owedSplitType =
+                "Методът на разпределяне трябва да бъде избран";
+        } else if (owed.length === 0) {
+            newErrors.owed = "Дължимите суми трябва да бъдат определени";
+        }
+
+        setErrors(newErrors);
+
+        return !Object.values(newErrors).some((error) => error);
+    };
+
     const onSubmit = async (e) => {
         e.preventDefault();
 
-        // TODO: Validate date
-        // TODO: Check if the options are selected first
-        // ["Единично", "Поравно", "Ръчно"],
+        const isValid = validateForm(values, paid, owed);
+        if (!isValid) return;
+
         let paidSplitType = "";
         if (values.payersOptionField === "currentUser") {
             console.log(paid);
@@ -180,18 +249,17 @@ export default function PaidExpenseCreate({
 
         const newPaidExpense = {
             title: values.title,
-            // category,
+            // category: values.category,
             amount: values.amount,
             date: values.date,
-            paidSplitType: paidSplitType,
-            paid: paid,
-            owedSplitType: owedSplitType,
-            owed: owed,
+            paidSplitType,
+            paid,
+            owedSplitType,
+            owed,
         };
 
-        console.log(newPaidExpense);
         try {
-            const result = await paidExpenseService.create(
+            await paidExpenseService.create(
                 householdId,
                 newPaidExpense
             );
@@ -241,7 +309,7 @@ export default function PaidExpenseCreate({
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4}>
+                            <FormControl mb={4} isInvalid={errors.title}>
                                 <FormLabel>Заглавие*</FormLabel>
                                 <Input
                                     type="text"
@@ -250,9 +318,14 @@ export default function PaidExpenseCreate({
                                     onChange={onChange}
                                     placeholder="Въведете заглавие"
                                 />
+                                {errors.title && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.title}
+                                    </Text>
+                                )}
                             </FormControl>
 
-                            <FormControl mb={4}>
+                            <FormControl mb={4} isInvalid={errors.amount}>
                                 <FormLabel>Обща сума*</FormLabel>
                                 <InputGroup>
                                     <Input
@@ -264,13 +337,18 @@ export default function PaidExpenseCreate({
                                     />
                                     <InputRightAddon>лв.</InputRightAddon>
                                 </InputGroup>
+                                {errors.amount && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.amount}
+                                    </Text>
+                                )}
                             </FormControl>
                         </Stack>
                         <Stack
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4}>
+                            <FormControl mb={4} isInvalid={errors.date}>
                                 <FormLabel>Дата*</FormLabel>
                                 <Input
                                     type="date"
@@ -279,9 +357,14 @@ export default function PaidExpenseCreate({
                                     onChange={onChange}
                                     placeholder="Изберете дата"
                                 />
+                                {errors.date && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.date}
+                                    </Text>
+                                )}
                             </FormControl>
 
-                            <FormControl mb={4}>
+                            <FormControl mb={4} isInvalid={errors.category}>
                                 <FormLabel>Категория</FormLabel>
                                 <Select
                                     name="category"
@@ -309,11 +392,19 @@ export default function PaidExpenseCreate({
                                         )
                                     )}
                                 </Select>
+                                {errors.category && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.category}
+                                    </Text>
+                                )}
                             </FormControl>
                         </Stack>
                         <Divider />
                         <Stack mt="3" spacing="4">
-                            <FormControl mb={2}>
+                            <FormControl
+                                mb={2}
+                                isInvalid={errors.paidSplitType}
+                            >
                                 <FormLabel>Платец*</FormLabel>
                                 <Select
                                     name="payersOptionField"
@@ -328,6 +419,11 @@ export default function PaidExpenseCreate({
                                         Други потребители
                                     </option>
                                 </Select>
+                                {errors.paidSplitType && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.paidSplitType}
+                                    </Text>
+                                )}
                             </FormControl>
                             {values.payersOptionField === "currentUser" && (
                                 <CurrentUser
@@ -338,7 +434,10 @@ export default function PaidExpenseCreate({
                             {values.payersOptionField === "changedUser" && (
                                 <Stack>
                                     <Stack>
-                                        <FormControl mb={2}>
+                                        <FormControl
+                                            mb={2}
+                                            isInvalid={errors.paid}
+                                        >
                                             <FormLabel>
                                                 Метод на разпределяне*
                                             </FormLabel>
@@ -357,6 +456,14 @@ export default function PaidExpenseCreate({
                                                     Ръчно
                                                 </option>
                                             </Select>
+                                            {errors.paid && (
+                                                <Text
+                                                    color="red.500"
+                                                    fontSize="sm"
+                                                >
+                                                    {errors.paid}
+                                                </Text>
+                                            )}
                                         </FormControl>
                                     </Stack>
                                     {values.paidSplitTypeField ===
@@ -380,7 +487,10 @@ export default function PaidExpenseCreate({
                             )}
                         </Stack>
                         <Stack mt="3" spacing="4">
-                            <FormControl mb={4}>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.owedSplitType}
+                            >
                                 <FormLabel>Метод на разпределяне*</FormLabel>
                                 <Select
                                     name="splittingOption"
@@ -392,6 +502,16 @@ export default function PaidExpenseCreate({
                                     <option value="percent">Процентно</option>
                                     <option value="manual">Ръчно</option>
                                 </Select>
+                                {errors.owedSplitType && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.owedSplitType}
+                                    </Text>
+                                )}
+                                {errors.owed && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.owed}
+                                    </Text>
+                                )}
                             </FormControl>
                             {values.splittingOption === "equally" && (
                                 <Equally
