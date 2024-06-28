@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -16,32 +16,33 @@ import {
     Spinner,
     Stack,
     Text,
+    useToast,
 } from "@chakra-ui/react";
 
 import * as householdService from "../../../../services/householdService";
+import AuthContext from "../../../../contexts/authContext";
 
-export default function HouseholdEdit({ isOpen, onClose, householdId }) {
-    //request for email?
-    // TODO: return only the id or email directly, manage newMembers in a seperate state
+export default function HouseholdEdit({ isOpen, onClose, householdId, fetchHouseholds }) {
     const [isLoading, setIsLoading] = useState(true);
-    const [household, setHousehold] = useState({
-        name: "",
-        members: [{ user: { _id: "", email: "" }, role: "" }],
-    });
     const [values, setValues] = useState({
         name: "",
-        members: [{ user: { _id: "", email: "" }, role: "" }],
-        newMembers: [],
+        members: [],
+        newMembers: [{ email: "", role: "" }],
     });
+    const [errors, setErrors] = useState({
+        name: "",
+        members: [{ role: "" }],
+        newMembers: [{ email: "", role: "" }],
+    });
+
+    const { logoutHandler } = useContext(AuthContext);
+    const toast = useToast();
 
     useEffect(() => {
         setIsLoading(true);
         householdService
-            .getOne(householdId)
+            .getOneWithMemberEmails(householdId)
             .then((result) => {
-                // setisLoading(false);
-                setHousehold(result);
-                console.log(result);
                 setValues((state) => ({
                     ...state,
                     name: result.name,
@@ -49,37 +50,92 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                 }));
                 setIsLoading(false);
             })
-            .catch((err) => {
-                console.log(err);
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title:
+                            error.message || "Неуспешно зареждане на домакинство",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
+
                 setIsLoading(false);
             });
     }, [householdId]);
 
+    const roles = ["Админ", "Член", "Дете"];
+
     if (isLoading) {
         return <Spinner size="lg" />;
     }
-    console.log(values);
-    console.log(household);
 
-    const roles = ["Админ", "Член", "Дете"];
+    const onExistingMemberChange = (event, index) => {
+        const updatedMembers = [...values.members];
+        updatedMembers[index][event.target.name] = event.target.value;
+        setValues({ ...values, members: updatedMembers });
+    };
+
+    const onNewMemberChange = (event, index) => {
+        const updatedMembers = [...values.newMembers];
+        updatedMembers[index][event.target.name] = event.target.value;
+        setValues({ ...values, newMembers: updatedMembers });
+    };
 
     const onMemberAddInput = () => {
         setValues({
             ...values,
             newMembers: [...values.newMembers, { email: "", role: "" }],
         });
+        setErrors({
+            ...errors,
+            newMembers: [...errors.newMembers, { email: "", role: "" }],
+        });
     };
 
-    const onMemberChange = (event, index) => {
-        const updatedMembers = [...values.newMembers];
-        updatedMembers[index][event.target.name] = event.target.value;
-        setValues({ ...values, newMembers: updatedMembers });
-    };
+    const onMemberDeleteInput = (index, isExistingMember) => {
+        if (isExistingMember) {
+            // Check if the member is an admin
+            const isAdmin = values.members[index].role === "Админ";
 
-    const onMemberDeleteInput = (index) => {
-        const updatedMembers = [...values.newMembers];
-        updatedMembers.splice(index, 1);
-        setValues({ ...values, newMembers: updatedMembers });
+            // Check if there are other admins
+            const otherAdminsExist = values.members.some(
+                (member, i) => i !== index && member.role === "Админ"
+            );
+
+            // Prevent deleting the last admin if there are no other admins
+            if (isAdmin && !otherAdminsExist) {
+                // Show a toast message
+                toast({
+                    title: "Не може да премахнете последния администратор",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+                return;
+            }
+
+            const updatedMembers = [...values.members];
+            updatedMembers.splice(index, 1);
+            setValues({ ...values, members: updatedMembers });
+
+            const updatedErrors = [...errors.members];
+            updatedErrors.splice(index, 1);
+            setErrors({ ...errors, members: updatedErrors });
+        } else {
+            const updatedMembers = [...values.newMembers];
+            updatedMembers.splice(index, 1);
+            setValues({ ...values, newMembers: updatedMembers });
+
+            const updatedErrors = [...errors.newMembers];
+            updatedErrors.splice(index, 1);
+            setErrors({ ...errors, newMembers: updatedErrors });
+        }
     };
 
     const onChange = (e) => {
@@ -89,18 +145,111 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
         }));
     };
 
-    const onSubmit = (e) => {
-        e.preventDefault();
+    const validateForm = (updatedHousehold) => {
+        let valid = true;
+        let newErrors = { name: "", members: [], newMembers: [] };
 
-        console.log(values);
+        if (!updatedHousehold.name) {
+            newErrors.name = "Полето име е задължително";
+            valid = false;
+        }
+
+        let isAdminExists = false; // Flag to check if at least one admin exists
+
+        updatedHousehold.members.forEach((member, index) => {
+            if (!member.role) {
+                newErrors.members[index] = {
+                    role: "Полето роля е задължително",
+                };
+                valid = false;
+            } else {
+                newErrors.members[index] = { role: "" };
+                if (member.role === "Админ") {
+                    isAdminExists = true; // Set flag if admin role is found
+                }
+            }
+        });
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        updatedHousehold.newMembers.forEach((member, index) => {
+            let memberErrors = { email: "", role: "" };
+            if (!member.email) {
+                memberErrors.email = "Полето имейл е задължително";
+                valid = false;
+            } else if (!emailRegex.test(member.email)) {
+                memberErrors.email = "Невалиден имейл адрес";
+                valid = false;
+            }
+            if (!member.role) {
+                memberErrors.role = "Полето роля е задължително";
+                valid = false;
+            } else if (member.role === "Админ") {
+                isAdminExists = true; // Set flag if admin role is found
+            }
+            newErrors.newMembers[index] = memberErrors;
+        });
+
+        // Check if at least one admin exists in members
+        if (!isAdminExists) {
+            toast({
+                title: "Поне един член трябва да бъде администратор",
+                status: "error",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+            valid = false;
+        }
+
+        setErrors(newErrors);
+        return valid;
     };
 
-    const clearFormHandler = () => {
-        setValues({ name: "", newMembers: [{ email: "", role: "" }] });
+    const onSubmit = async (e) => {
+        e.preventDefault();
+
+        const updatedHousehold = {
+            name: values.name,
+            members: values.members.map(member => ({ _id: member._id, role: member.role })),
+            newMembers: values.newMembers,
+        };
+
+        // Validate form fields
+        if (!validateForm(updatedHousehold)) {
+            return;
+        }
+
+        try {
+            await householdService.edit(householdId, updatedHousehold);
+
+            toast({
+                title: "Успешно редактиране на домакинството",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
+            fetchHouseholds();
+            onCloseForm();
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title:
+                        error.message || "Неуспешно редактиране на домакинството",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
+        }
     };
 
     const onCloseForm = () => {
-        clearFormHandler();
         onClose();
     };
 
@@ -124,7 +273,7 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                     Текущо домакинство
                                 </Text>
 
-                                <FormControl mt={2}>
+                                <FormControl mt={2} isInvalid={errors.name}>
                                     <FormLabel>Име</FormLabel>
                                     <Input
                                         type="text"
@@ -133,6 +282,11 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                         onChange={onChange}
                                         placeholder="Име"
                                     />
+                                    {errors.name && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.name}
+                                        </Text>
+                                    )}
                                 </FormControl>
                                 <Text fontWeight="bold" fontSize="lg">
                                     Членове
@@ -142,15 +296,23 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                         <Text fontWeight="bold">
                                             Потребител
                                         </Text>
-                                        <Text mt={2}>{member.user.email}</Text>
+                                        <Text mt={2}>{member.email}</Text>
 
-                                        <FormControl mt={2}>
+                                        <FormControl
+                                            mt={2}
+                                            isInvalid={
+                                                errors.members[index]?.role
+                                            }
+                                        >
                                             <FormLabel>Роля</FormLabel>
                                             <Select
                                                 name="role"
                                                 value={member.role}
                                                 onChange={(e) =>
-                                                    onMemberChange(e, index)
+                                                    onExistingMemberChange(
+                                                        e,
+                                                        index
+                                                    )
                                                 }
                                                 placeholder="Изберете роля"
                                             >
@@ -163,16 +325,29 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                                     </option>
                                                 ))}
                                             </Select>
+                                            {errors.members[index]?.role && (
+                                                <Text
+                                                    color="red.500"
+                                                    fontSize="sm"
+                                                >
+                                                    {errors.members[index].role}
+                                                </Text>
+                                            )}
                                         </FormControl>
-                                        <Button
-                                            mt={3}
-                                            colorScheme="red"
-                                            onClick={() =>
-                                                onMemberDeleteInput(index)
-                                            }
-                                        >
-                                            Премахнете
-                                        </Button>
+                                        {values.members.length > 1 && (
+                                            <Button
+                                                mt={3}
+                                                colorScheme="red"
+                                                onClick={() =>
+                                                    onMemberDeleteInput(
+                                                        index,
+                                                        true
+                                                    )
+                                                }
+                                            >
+                                                Премахнете
+                                            </Button>
+                                        )}
                                     </Box>
                                 ))}
                             </Stack>
@@ -184,26 +359,57 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                 {values.newMembers.length > 0 &&
                                     values.newMembers.map((member, index) => (
                                         <Box key={index}>
-                                            <FormControl mt={2}>
+                                            <FormControl
+                                                mt={2}
+                                                isInvalid={
+                                                    errors.newMembers[index]
+                                                        ?.email
+                                                }
+                                            >
                                                 <FormLabel>Имейл</FormLabel>
                                                 <Input
                                                     type="email"
                                                     name="email"
                                                     value={member.email}
                                                     onChange={(e) =>
-                                                        onMemberChange(e, index)
+                                                        onNewMemberChange(
+                                                            e,
+                                                            index
+                                                        )
                                                     }
                                                     placeholder="Имейл"
                                                 />
+                                                {errors.newMembers[index]
+                                                    ?.email && (
+                                                    <Text
+                                                        color="red.500"
+                                                        fontSize="sm"
+                                                    >
+                                                        {
+                                                            errors.newMembers[
+                                                                index
+                                                            ]?.email
+                                                        }
+                                                    </Text>
+                                                )}
                                             </FormControl>
 
-                                            <FormControl mt={2}>
+                                            <FormControl
+                                                mt={2}
+                                                isInvalid={
+                                                    errors.newMembers[index]
+                                                        ?.role
+                                                }
+                                            >
                                                 <FormLabel>Роля</FormLabel>
                                                 <Select
                                                     name="role"
                                                     value={member.role}
                                                     onChange={(e) =>
-                                                        onMemberChange(e, index)
+                                                        onNewMemberChange(
+                                                            e,
+                                                            index
+                                                        )
                                                     }
                                                     placeholder="Изберете роля"
                                                 >
@@ -216,13 +422,29 @@ export default function HouseholdEdit({ isOpen, onClose, householdId }) {
                                                         </option>
                                                     ))}
                                                 </Select>
+                                                {errors.newMembers[index]
+                                                    ?.role && (
+                                                    <Text
+                                                        color="red.500"
+                                                        fontSize="sm"
+                                                    >
+                                                        {
+                                                            errors.newMembers[
+                                                                index
+                                                            ]?.role
+                                                        }
+                                                    </Text>
+                                                )}
                                             </FormControl>
 
                                             <Button
                                                 mt={3}
                                                 colorScheme="red"
                                                 onClick={() =>
-                                                    onMemberDeleteInput(index)
+                                                    onMemberDeleteInput(
+                                                        index,
+                                                        false
+                                                    )
                                                 }
                                             >
                                                 Премахнете
