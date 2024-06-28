@@ -5,7 +5,7 @@ const getPaidExpense = async (req, res, next) => {
     const paidExpenseId = req.params.paidExpenseId;
 
     if (!mongoose.Types.ObjectId.isValid(paidExpenseId)) {
-        return res.status(400).json({ message: 'Invalid paid expense ID format' });
+        return res.status(404).json({ message: 'Invalid paid expense ID format' });
     }
 
     try {

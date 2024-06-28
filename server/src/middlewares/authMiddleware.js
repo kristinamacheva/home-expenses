@@ -15,7 +15,7 @@ exports.auth = async (req, res, next) => {
             const decodedToken = await jwt.verify(token, ACCESS_TOKEN.secret);
 
             if (!mongoose.Types.ObjectId.isValid(decodedToken._id)) {
-                return res.status(400).json({ message: 'Invalid user ID format' });
+                return res.status(401).json({ message: 'Invalid user ID format' });
             }
 
             // TODO: req.user = decodedToken or user?

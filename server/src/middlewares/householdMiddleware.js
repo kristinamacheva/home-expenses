@@ -5,7 +5,7 @@ const getHousehold = async (req, res, next) => {
     const householdId = req.params.householdId;
 
     if (!mongoose.Types.ObjectId.isValid(householdId)) {
-        return res.status(400).json({ message: 'Invalid household ID format' });
+        return res.status(404).json({ message: 'Invalid household ID format' });
     }
 
     try {

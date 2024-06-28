@@ -5,7 +5,7 @@ const getHouseholdInvitation = async (req, res, next) => {
     const invitationId = req.params.invitationId;
 
     if (!mongoose.Types.ObjectId.isValid(invitationId)) {
-        return res.status(400).json({ message: 'Invalid household invitation ID format' });
+        return res.status(404).json({ message: 'Invalid household invitation ID format' });
     }
 
     try {
