@@ -22,6 +22,16 @@ export const getAll = async (householdId, page, params = {}) => {
     return result;
 };
 
+export const getTotalAmountStats = async (householdId, searchValues) => {
+    const url = `${baseUrl(householdId)}`;
+
+    console.log(url);
+    const result = await request.get(
+        `${url}/statistics?type=totalAmount&startDate=${searchValues.startDate}&endDate=${searchValues.endDate}`
+    );
+    return result;
+};
+
 export const create = async (householdId, paidExpenseData) => {
     const url = baseUrl(householdId);
     const result = await request.post(url, paidExpenseData);

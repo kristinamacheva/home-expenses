@@ -22,6 +22,7 @@ import BalanceList from "../balance-list/BalanceList";
 import AuthContext from "../../contexts/authContext";
 import Path from "../../paths";
 import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
+import Statistics from "../statistics/Statistics";
 
 export default function HouseholdDetails() {
     // TODO: load all details here and pass as props or make seperate requests
@@ -104,6 +105,7 @@ export default function HouseholdDetails() {
                         <>
                             <Tab>Баланс</Tab>
                             <Tab>Разходи</Tab>
+                            <Tab>Анализ</Tab>
                         </>
                     )}
                     <Tab>Членове</Tab>
@@ -163,6 +165,11 @@ export default function HouseholdDetails() {
                                     </TabPanel>
                                 </TabPanels>
                             </Tabs>
+                        </TabPanel>
+                    )}
+                    {currentUserRole !== "Дете" && (
+                        <TabPanel>
+                            <Statistics />
                         </TabPanel>
                     )}
                     <TabPanel>
