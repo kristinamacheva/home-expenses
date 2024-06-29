@@ -39,8 +39,8 @@ export default function ExpenseChart({ data }) {
             {
                 label: "Обща сума (лв.)",
                 data: data.map((item) => item.amount),
-                borderColor: "rgba(75, 192, 192, 1)",
-                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                borderColor: "#2D3250",
+                backgroundColor: "#676F9D",
                 fill: true,
             },
         ],
