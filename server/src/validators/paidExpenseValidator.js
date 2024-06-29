@@ -31,7 +31,9 @@ module.exports.getValidator = [
             if (req.query.startDate && value) {
                 const startDate = req.query.startDate;
                 if (value < startDate) {
-                    throw new Error("Крайната дата трябва да бъде след началната дата");
+                    throw new Error(
+                        "Крайната дата трябва да бъде след началната дата"
+                    );
                 }
             }
             return true;
@@ -48,4 +50,31 @@ module.exports.getValidator = [
         .optional({ checkFalsy: true })
         .isBoolean()
         .withMessage("Rejected трябва да бъде булева стойност"),
+];
+module.exports.statisticsValidator = [
+    query("startDate")
+        .isISO8601()
+        .withMessage(
+            "Невалиден формат на началната дата (форматът трябва да бъде YYYY-MM-DD)"
+        )
+        .bail()
+        .toDate(),
+    query("endDate")
+        .isISO8601()
+        .withMessage(
+            "Невалиден формат на крайната дата (форматът трябва да бъде YYYY-MM-DD)"
+        )
+        .bail()
+        .toDate()
+        .custom((value, { req }) => {
+            if (req.query.startDate && value) {
+                const startDate = req.query.startDate;
+                if (value < startDate) {
+                    throw new Error(
+                        "Крайната дата трябва да бъде след началната дата"
+                    );
+                }
+            }
+            return true;
+        }),
 ];

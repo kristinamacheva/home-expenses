@@ -2,6 +2,7 @@ const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
 const { AppError } = require("../utils/AppError");
+const { default: mongoose } = require("mongoose");
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -95,6 +96,38 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
     const totalCount = await PaidExpense.countDocuments(matchConditions);
 
     return { paidExpenses, totalCount };
+};
+
+exports.getTotalAmountStats = async (householdId, userId, searchParams) => {
+    // Check if the user belongs to the household
+    const user = await User.findOne({ _id: userId, households: householdId });
+    if (!user) {
+        throw new AppError(`Потребителят не е част от домакинството`, 401);
+    }
+
+    // Proceed with querying the total amount statistics
+    const { startDate, endDate } = searchParams;
+
+    const expenses = await PaidExpense.aggregate([
+        {
+            $match: {
+                household: new mongoose.Types.ObjectId(householdId), // Filter by householdId
+                date: { $gte: new Date(startDate), $lte: new Date(endDate) },
+                expenseStatus: 'Одобрен',
+            },
+        },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m", date: "$date" } }, // Group key
+                totalAmount: { $sum: "$amount" },
+            },
+        },
+        {
+            $sort: { _id: 1 },
+        },
+    ]);
+
+    return expenses.map(e => ({ date: e._id, amount: e.totalAmount }));
 };
 
 exports.getOne = (paidExpenseId) =>

@@ -3,7 +3,10 @@ const paidExpenseManager = require("../managers/paidExpenseManager");
 const { isAuth } = require("../middlewares/authMiddleware");
 const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
 const { validationResult } = require("express-validator");
-const { getValidator } = require("../validators/paidExpenseValidator");
+const {
+    getValidator,
+    statisticsValidator,
+} = require("../validators/paidExpenseValidator");
 const { AppError } = require("../utils/AppError");
 
 router.get("/", getValidator, async (req, res, next) => {
@@ -96,6 +99,46 @@ router.post("/", async (req, res, next) => {
         });
 
         res.status(201).json(newPaidExpense);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/statistics", statisticsValidator, async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => ({
+            field: err.path,
+            message: err.msg,
+        }));
+
+        return next(
+            new AppError("Данните са некоректни", 400, formattedErrors)
+        );
+    }
+
+    const householdId = req.householdId;
+    const userId = req.userId;
+
+    const searchParams = {
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
+    };
+
+    const { type } = req.query;
+    let stats;
+
+    try {
+        if (type === "totalAmount") {
+            stats = await paidExpenseManager.getTotalAmountStats(householdId, userId, searchParams);
+        // } else if (type === "categories") {
+        //     users = await householdManager.getCategoriesStats(householdId);
+        } else {
+            stats = [];
+        }
+
+        res.status(200).json(stats);
     } catch (error) {
         next(error);
     }
