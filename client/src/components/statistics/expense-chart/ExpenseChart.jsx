@@ -13,15 +13,16 @@ import {
 } from "chart.js";
 import { Box, Text } from "@chakra-ui/react";
 
+// Registering the required components for Chart.js
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
+    CategoryScale, // For categorical x-axis
+    LinearScale, // For numerical y-axis
+    PointElement, // For points in charts like line charts
+    LineElement, // For drawing lines between points in line charts
+    Title, // For adding titles to the charts
+    Tooltip, // For showing tooltips when hovering over data points
+    Legend, // For displaying legends in charts
+    Filler // For filling the area under the line in line charts
 );
 
 export default function ExpenseChart({ data }) {
@@ -35,6 +36,8 @@ export default function ExpenseChart({ data }) {
 
     const chartData = {
         labels: data.map((item) => item.date),
+        // datasets is an array of objects where each object represents a set of data to display
+        // corresponding to the labels above.
         datasets: [
             {
                 label: "Обща сума (лв.)",
@@ -77,7 +80,8 @@ export default function ExpenseChart({ data }) {
         <Box>
             <Line data={chartData} options={options} />
             <Text mb={4} fontSize="xs" color="gray.600">
-                *Обща сума: Сумата на всички одобрени разходи за всеки месец, които попадат в избрания период.
+                *Обща сума: Сумата на всички одобрени разходи за всеки месец,
+                които попадат в избрания период.
             </Text>
         </Box>
     );

@@ -104,8 +104,6 @@ export default function Statistics() {
         const isValid = validateForm();
         if (!isValid) return;
 
-        console.log(searchValues);
-
         fetchTotalAmountData();
     };
 
