@@ -157,7 +157,7 @@ export default function PaidExpenseListItem({
                         <>
                         </>
                     )} */}
-                        {(userId === creator && expenseStatus === "За одобрение") && (
+                        {(userId === creator && expenseStatus === "Отхвърлен") && (
                             <>
                                 <IconButton
                                     aria-label="Редактирайте"
