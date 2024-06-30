@@ -113,7 +113,7 @@ exports.getTotalAmountStats = async (householdId, userId, searchParams) => {
             $match: {
                 household: new mongoose.Types.ObjectId(householdId), // Filter by householdId
                 date: { $gte: new Date(startDate), $lte: new Date(endDate) },
-                expenseStatus: 'Одобрен',
+                expenseStatus: "Одобрен",
             },
         },
         {
@@ -127,7 +127,7 @@ exports.getTotalAmountStats = async (householdId, userId, searchParams) => {
         },
     ]);
 
-    return expenses.map(e => ({ date: e._id, amount: e.totalAmount }));
+    return expenses.map((e) => ({ date: e._id, amount: e.totalAmount }));
 };
 
 exports.getOne = (paidExpenseId) =>
@@ -138,7 +138,9 @@ exports.getOne = (paidExpenseId) =>
 exports.getOneDetails = async (paidExpenseId, userId) => {
     const paidExpense = await PaidExpense.findById(paidExpenseId)
         .populate("creator", "_id name avatar avatarColor")
-        .populate("balance.user", "_id name avatar avatarColor");
+        .populate("balance.user", "_id name avatar avatarColor")
+        .populate("comments.user", "_id name avatar avatarColor")
+        .lean();
 
     // Filter userApprovals to only include the current user's status
     const currentUserApproval = paidExpense.userApprovals.find((entry) =>
@@ -354,7 +356,7 @@ exports.accept = async (userId, paidExpenseId) => {
     await paidExpense.save();
 };
 
-exports.reject = async (userId, paidExpenseId) => {
+exports.reject = async (userId, paidExpenseId, text) => {
     const paidExpense = await PaidExpense.findById(paidExpenseId);
 
     // Check if the overall expense status is "За одобрение"
@@ -385,26 +387,38 @@ exports.reject = async (userId, paidExpenseId) => {
     userApproval.status = "Отхвърлен";
     paidExpense.expenseStatus = "Отхвърлен";
 
+    // Add the rejection reason as a comment
+    paidExpense.comments.push({
+        user: userId,
+        text: `Причина за отхвърляне: ${text}`,
+        createdAt: new Date(),
+    });
+
     // Save the updated paid expense to the database
     await paidExpense.save();
 };
 
 exports.addComment = async (userId, paidExpenseId, text) => {
-    const paidExpense = await PaidExpense.findById(paidExpenseId);
-
+    // Create a comment object
     const comment = {
         user: userId,
         text: text,
         createdAt: new Date(),
     };
 
-    // Push the comment to the comments array in PaidExpense
-    paidExpense.comments.push(comment);
+    // Update the PaidExpense document by adding the comment and then fetching
+    // the updated document with populated user fields in comments
+    const updatedPaidExpense = await PaidExpense.findByIdAndUpdate(
+        paidExpenseId,
+        { $push: { comments: comment } },
+        { new: true } // Return the updated document
+    ).populate({
+        path: "comments.user",
+        select: "name avatar avatarColor",
+    });
 
-    // Save the PaidExpense document with the new comment
-    await paidExpense.save();
-
-    return paidExpense;
+    // Return the populated comments array
+    return updatedPaidExpense.comments;
 };
 
 // exports.update = (paidExpenseId, paidExpenseData) =>
@@ -412,3 +426,14 @@ exports.addComment = async (userId, paidExpenseId, text) => {
 
 // exports.delete = (paidExpenseId) =>
 //     PaidExpense.findByIdAndDelete(paidExpenseId);
+
+// exports.getAllComments = async (paidExpenseId) => {
+//     const paidExpense = await PaidExpense.findById(paidExpenseId)
+//         .populate({
+//             path: "comments.user",
+//             select: "name avatar avatarColor",
+//         })
+//         .lean();
+
+//     return paidExpense.comments;
+// };

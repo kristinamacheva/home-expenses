@@ -160,7 +160,6 @@ router.get("/:paidExpenseId", async (req, res, next) => {
             );
         } else {
             // Handle default case
-            // TODO: retirn only part of expense
             paidExpense = await paidExpenseManager.getOne(paidExpenseId);
         }
 
@@ -185,33 +184,51 @@ router.put("/:paidExpenseId/accept", async (req, res, next) => {
 router.put("/:paidExpenseId/reject", async (req, res, next) => {
     const paidExpenseId = req.paidExpenseId;
     const userId = req.userId;
+    const { text } = req.body;
+
+    if (text.trim() === "") {
+        return next(
+            new AppError(
+                "Трябва да дадете причина за отхвърляне на разхода",
+                400,
+                formattedErrors
+            )
+        );
+    }
 
     try {
-        await paidExpenseManager.reject(userId, paidExpenseId);
+        await paidExpenseManager.reject(userId, paidExpenseId, text);
         res.status(204).end();
     } catch (error) {
         next(error);
     }
 });
 
-router.post("/:paidExpenseId/comments", async (req, res) => {
-    try {
-        const { text } = req.body;
-        const paidExpenseId = req.paidExpenseId;
-        const userId = req.userId;
+router.post("/:paidExpenseId/comments", async (req, res, next) => {
+    const { text } = req.body;
+    const paidExpenseId = req.paidExpenseId;
+    const userId = req.userId;
 
-        const paidExpense = await paidExpenseManager.addComment(
+    if (text.trim() === "") {
+        return next(
+            new AppError(
+                "Не може да изпращате празен коментар",
+                400,
+                formattedErrors
+            )
+        );
+    }
+
+    try {
+        const comments = await paidExpenseManager.addComment(
             userId,
             paidExpenseId,
             text
         );
 
-        res.status(200).json(paidExpense);
+        res.status(201).json(comments);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Error adding comment to the paid expense",
-        });
+        next(error);
     }
 });
 
@@ -231,6 +248,20 @@ router.post("/:paidExpenseId/comments", async (req, res) => {
 //     await paidExpenseManager.delete(req.params.paidExpenseId);
 //     // TODO: result
 //     res.status(204).end();
+// });
+
+// router.get("/:paidExpenseId/comments", async (req, res, next) => {
+//     const paidExpenseId = req.paidExpenseId;
+//     // TODO: validate user is in household
+//     const userId = req.userId;
+
+//     try {
+//         const comments = await paidExpenseManager.getAllComments(paidExpenseId);
+
+//         res.status(200).json(comments);
+//     } catch (error) {
+//         next(error);
+//     }
 // });
 
 module.exports = router;
