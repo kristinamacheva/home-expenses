@@ -7,9 +7,12 @@ import {
     Card,
     Button,
 } from "@chakra-ui/react";
-
+import { useContext } from "react";
+import AuthContext from "../../../contexts/authContext";
 
 export default function BalanceListItem({ balance }) {
+    const { userId } = useContext(AuthContext);
+
     let badgeText = "";
     let badgeColor = "";
 
@@ -58,10 +61,10 @@ export default function BalanceListItem({ balance }) {
                         </Badge>
                     </Box>
                 </Stack>
-                {balance.type === "+" && balance.sum !== 0 && (
+                {userId === balance._id && balance.type === "+" && balance.sum !== 0 && (
                     <Button type="primary">Изпратете напомняне</Button>
                 )}
-                {balance.type === "-" && (
+                {userId === balance._id && balance.type === "-" && (
                     <Button type="primary">Погасете задължението</Button>
                 )}
             </Stack>
