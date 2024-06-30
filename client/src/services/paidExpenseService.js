@@ -53,9 +53,11 @@ export const accept = async (householdId, paidExpenseId) => {
     return result;
 };
 
-export const reject = async (householdId, paidExpenseId) => {
+export const reject = async (householdId, paidExpenseId, text) => {
     const url = baseUrl(householdId);
-    const result = await request.put(`${url}/${paidExpenseId}/reject`);
+    const result = await request.put(`${url}/${paidExpenseId}/reject`, {
+        text,
+    });
 
     return result;
 };
@@ -102,3 +104,10 @@ export const addComment = async (householdId, paidExpenseId, text) => {
 // };
 
 // export const remove = async (householdId) => request.remove(`${baseUrl}/${householdId}`);
+
+// export const getComments = async (householdId, paidExpenseId) => {
+//     const url = baseUrl(householdId);
+//     const result = await request.get(`${url}/${paidExpenseId}/comments`);
+
+//     return result;
+// };
