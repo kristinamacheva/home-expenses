@@ -2,6 +2,7 @@ const router = require("express").Router();
 
 const { validationResult } = require("express-validator");
 const userManager = require("../managers/userManager");
+const notificationController = require("./notificationController");
 const { isAuth } = require("../middlewares/authMiddleware");
 const {
     loginValidator,
@@ -170,5 +171,8 @@ router.get("/logout", isAuth, (req, res, next) => {
         next(error);
     }
 });
+
+router.use("/notifications", isAuth, notificationController);
+
 
 module.exports = router;
