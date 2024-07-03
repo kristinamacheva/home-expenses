@@ -1,8 +1,10 @@
 const Household = require("../models/Household");
 const HouseholdInvitation = require("../models/HouseholdInvitation");
+const Notification = require('../models/Notification');
 const User = require("../models/User");
 const mongoose = require("mongoose");
 const { AppError } = require("../utils/AppError");
+const { sendNotificationToUser } = require("../config/socket");
 
 exports.getOneWithMembers = async (householdId) => {
     const aggregationPipeline = [
@@ -430,6 +432,19 @@ exports.create = async (householdData) => {
         });
 
         await invitation.save();
+
+        // Create notification for the user
+        const notification = new Notification({
+            userId: currentUser._id,
+            message: `Имате нова покана за присъединяване към домакинство: ${name}`,
+            resourceType: 'HouseholdInvitation',
+            resourceId: invitation._id, // Use the invitation._id here
+        });
+
+        const savedNotification = await notification.save();
+
+        // Send notification to the user if they have an active connection
+        sendNotificationToUser(currentUser._id, savedNotification);
     }
 
     return newHousehold;
