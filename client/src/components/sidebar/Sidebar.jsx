@@ -142,6 +142,8 @@ const MobileNav = ({ onOpen, ...rest }) => {
 
             <HStack spacing={{ base: "2", md: "3" }} alignItems={"center"}>
                 <IconButton
+                    as={Link}
+                    to={Path.Notifications}
                     size="lg"
                     variant="ghost"
                     aria-label="open menu"
