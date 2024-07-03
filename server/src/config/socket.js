@@ -58,13 +58,13 @@ function getIO() {
 
 function sendNotificationToUser(userId, notification) {
     if (!io.userSockets) {
-        console.log('No active socket connections.');
+        // console.log('No active socket connections.');
         return;
     }
 
     const sockets = io.userSockets[userId];
     if (!sockets || sockets.length === 0) {
-        console.log(`No active socket connections for user ${userId}.`);
+        // console.log(`No active socket connections for user ${userId}.`);
         return;
     }
 
@@ -72,6 +72,5 @@ function sendNotificationToUser(userId, notification) {
         socket.emit("notification", notification);
     });
 }
-
 
 module.exports = { initializeSocket, getIO, sendNotificationToUser };
