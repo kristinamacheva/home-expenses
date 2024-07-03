@@ -2,7 +2,6 @@ import { createContext, useState, useContext, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
 import * as notificationService from '../services/notificationService';
 import AuthContext from './authContext';
-import { io } from 'socket.io-client';
 
 const NotificationContext = createContext();
 
@@ -10,7 +9,6 @@ export const NotificationProvider = ({ children }) => {
     const { logoutHandler, socket } = useContext(AuthContext);
     const toast = useToast();
     const [notifications, setNotifications] = useState([]);
-
 
     useEffect(() => {
         // Fetch initial notifications
