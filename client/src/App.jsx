@@ -16,40 +16,54 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import AuthGuard from "./components/guards/AuthGuard";
 import GuestGuard from "./components/guards/GuestGuard";
 import HouseholdInvitationList from "./components/household-invitation-list/HouseholdInvitationList";
+import NotificationList from "./components/notification-list/NotificationList";
+import { NotificationProvider } from "./contexts/notificationContext";
 
 function App() {
     return (
         <ErrorBoundary>
             <AuthProvider>
-                <Routes>
-                    <Route element={<AuthGuard />}>
-                        <Route element={<Sidebar />}>
-                            <Route path={Path.Home} element={<Home />} />
-                            <Route
-                                path={Path.HouseholdList}
-                                element={<HouseholdList />}
-                            />
-                            <Route
-                                path={Path.HouseholdDetails}
-                                element={<HouseholdDetails />}
-                            />
-                            <Route
-                                path={Path.HouseholdInvitations}
-                                element={<HouseholdInvitationList/>}
-                            />
-                            <Route
-                                path={Path.Profile}
-                                element={<ProfileEdit />}
-                            />
-                            <Route path={Path.Logout} element={<Logout />} />
+                <NotificationProvider>
+                    <Routes>
+                        <Route element={<AuthGuard />}>
+                            <Route element={<Sidebar />}>
+                                <Route path={Path.Home} element={<Home />} />
+                                <Route
+                                    path={Path.HouseholdList}
+                                    element={<HouseholdList />}
+                                />
+                                <Route
+                                    path={Path.HouseholdDetails}
+                                    element={<HouseholdDetails />}
+                                />
+                                <Route
+                                    path={Path.HouseholdInvitations}
+                                    element={<HouseholdInvitationList />}
+                                />
+                                <Route
+                                    path={Path.Profile}
+                                    element={<ProfileEdit />}
+                                />
+                                <Route
+                                    path={Path.Notifications}
+                                    element={<NotificationList />}
+                                />
+                                <Route
+                                    path={Path.Logout}
+                                    element={<Logout />}
+                                />
+                            </Route>
+                            <Route path="*" element={<NotFound />} />
                         </Route>
-                        <Route path="*" element={<NotFound />} />
-                    </Route>
-                    <Route element={<GuestGuard />}>
-                        <Route path={Path.Login} element={<Login />} />
-                        <Route path={Path.Register} element={<Register />} />
-                    </Route>
-                </Routes>
+                        <Route element={<GuestGuard />}>
+                            <Route path={Path.Login} element={<Login />} />
+                            <Route
+                                path={Path.Register}
+                                element={<Register />}
+                            />
+                        </Route>
+                    </Routes>
+                </NotificationProvider>
             </AuthProvider>
         </ErrorBoundary>
     );
