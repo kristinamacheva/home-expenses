@@ -1,5 +1,7 @@
+const { sendNotificationToUser } = require("../config/socket");
 const Household = require("../models/Household");
 const HouseholdInvitation = require("../models/HouseholdInvitation");
+const Notification = require("../models/Notification");
 const User = require("../models/User");
 const { AppError } = require("../utils/AppError");
 
@@ -63,6 +65,25 @@ exports.accept = async (userId, invitationId) => {
 
     // Delete the invitation
     await HouseholdInvitation.deleteOne({ _id: invitationId });
+
+    // Create and send notifications for all members except the newly added one
+    const message = `Нов потребител се присъедини към домакинството: ${household.name}`;
+
+    for (const member of household.members) {
+        if (member.user.toString() !== userId) {
+            const notification = new Notification({
+                userId: member.user,
+                message: message,
+                resourceType: "Household",
+                resourceId: household._id,
+            });
+
+            const savedNotification = await notification.save();
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(member.user, savedNotification);
+        }
+    }
 
     return household._id; // Return household ID after successful acceptance and deletion
 };
