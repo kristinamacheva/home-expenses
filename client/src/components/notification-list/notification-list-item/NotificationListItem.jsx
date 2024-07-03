@@ -31,9 +31,9 @@ export default function NotificationListItem({ notification }) {
             case "HouseholdInvitation":
                 navigate(`/household-invitations`);
                 break;
-            case "PaidExpense":
-                navigate(`/paid-expenses/${notification.resourceId}`);
-                break;
+            // case "PaidExpense":
+            //     navigate(`/paid-expenses/${notification.resourceId}`);
+            //     break;
             case "Household":
                 navigate(`/households/${notification.resourceId}`);
                 break;
@@ -42,7 +42,7 @@ export default function NotificationListItem({ notification }) {
                 break;
         }
     };
-    
+
     return (
         <>
             <Card
