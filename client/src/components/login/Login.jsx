@@ -11,14 +11,19 @@ import {
     Link as ChakraLink,
     useColorModeValue,
     useToast,
+    InputGroup,
+    Icon,
+    InputRightElement,
 } from "@chakra-ui/react";
 import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
 import Path from "../../paths";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
 
 export default function Login() {
     const { loginSubmitHandler } = useContext(AuthContext);
+    const [showPassword, setShowPassword] = useState(false);
     const toast = useToast();
 
     const [values, setValues] = useState({
@@ -153,13 +158,38 @@ export default function Login() {
                                 isInvalid={!!errors.password}
                             >
                                 <FormLabel>Парола</FormLabel>
-                                <Input
-                                    type="password"
-                                    name="password"
-                                    value={values.password}
-                                    onChange={onChange}
-                                    placeholder="Парола"
-                                />
+                                <InputGroup>
+                                    <Input
+                                        type={
+                                            showPassword ? "text" : "password"
+                                        }
+                                        name="password"
+                                        value={values.password}
+                                        onChange={onChange}
+                                        placeholder="Парола"
+                                    />
+                                    <InputRightElement h={"full"}>
+                                        <Button
+                                            bg="transparent"
+                                            variant={"ghost"}
+                                            onClick={() =>
+                                                setShowPassword(
+                                                    (showPassword) =>
+                                                        !showPassword
+                                                )
+                                            }
+                                        >
+                                            {showPassword ? (
+                                                <Icon as={FaEye} boxSize={3} />
+                                            ) : (
+                                                <Icon
+                                                    as={FaEyeSlash}
+                                                    boxSize={3}
+                                                />
+                                            )}
+                                        </Button>
+                                    </InputRightElement>
+                                </InputGroup>
                                 {errors.password && (
                                     <Text color="red.500" fontSize="sm">
                                         {errors.password}
