@@ -7,14 +7,15 @@ const socketAuthMiddleware = require("../middlewares/socketAuthMiddleware");
 const { initializeSocket } = require("./socket");
 
 function expressConfig(app) {
-    app.use(express.urlencoded({ extended: false }));
-    app.use(express.json());
+    // Set a limit for request body size (slightly higher than largest expected image size)
+    app.use(express.urlencoded({ extended: false, limit: "300kb" }));
+    app.use(express.json({ limit: "300kb" }));
 
     // Define allowed origins
     const allowedOrigins = [
         "http://localhost:5173",
         "http://localhost:4173",
-        "http://192.168.56.1:4173"
+        "http://192.168.56.1:4173",
     ];
 
     // CORS configuration
