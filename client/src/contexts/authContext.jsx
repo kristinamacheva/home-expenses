@@ -61,6 +61,8 @@ export const AuthProvider = ({ children }) => {
         setUser(result);
         initializeSocket();
         navigate(Path.Profile);
+
+        return result;
     };
 
     const logoutHandler = () => {

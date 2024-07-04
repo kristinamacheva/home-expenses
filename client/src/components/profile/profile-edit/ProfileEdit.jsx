@@ -184,7 +184,7 @@ export default function ProfileEdit() {
 
         try {
             console.log(currentUser);
-            await updateSubmitHandler(currentUser);
+            const updatedUser = await updateSubmitHandler(currentUser);
 
             toast({
                 title: "Успешно редактирахте профила си",
@@ -195,11 +195,14 @@ export default function ProfileEdit() {
             });
 
             setOriginalValues({
-                avatar: imgUrl,
-                name: values.name,
-                email: values.email,
-                phone: values.phone,
+                avatar: updatedUser.avatar,
+                avatarColor: updatedUser.avatarColor,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                phone: updatedUser.phone,
             }); // Update original values on successful update
+
+            setImage(null);
 
             setValues((state) => ({
                 ...state,
