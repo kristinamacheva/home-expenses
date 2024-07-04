@@ -15,15 +15,14 @@ import {
     useToast,
     Text,
 } from "@chakra-ui/react";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { RiCloseFill } from "react-icons/ri";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import * as authService from "../../../services/authService";
 import AuthContext from "../../../contexts/authContext";
+import useImagePreview from "../../../hooks/useImagePreview";
 
 const initialValues = {
-    avatar: "",
-    // currentAvatar: "",
     name: "",
     email: "",
     phone: "",
@@ -42,11 +41,15 @@ export default function ProfileEdit() {
         name: "",
         email: "",
         phone: "",
+        avatarColor:"",
     });
 
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
+
+    const fileRef = useRef(null);
+    const { handleImageChange, imgUrl, setImage } = useImagePreview();
 
     const [errors, setErrors] = useState({
         name: "",
@@ -69,7 +72,6 @@ export default function ProfileEdit() {
             .then((result) => {
                 setValues((state) => ({
                     ...state,
-                    avatar: result.avatar,
                     name: result.name,
                     email: result.email,
                     phone: result.phone,
@@ -77,6 +79,7 @@ export default function ProfileEdit() {
 
                 setOriginalValues({
                     avatar: result.avatar,
+                    avatarColor: result.avatarColor,
                     name: result.name,
                     email: result.email,
                     phone: result.phone,
@@ -163,7 +166,7 @@ export default function ProfileEdit() {
         });
 
         const currentUser = {
-            avatar: values.avatar,
+            avatar: imgUrl === null ? "" : imgUrl,
             name: values.name,
             email: values.email,
             phone: values.phone,
@@ -180,6 +183,7 @@ export default function ProfileEdit() {
         }
 
         try {
+            console.log(currentUser);
             await updateSubmitHandler(currentUser);
 
             toast({
@@ -191,7 +195,7 @@ export default function ProfileEdit() {
             });
 
             setOriginalValues({
-                avatar: values.avatar,
+                avatar: imgUrl,
                 name: values.name,
                 email: values.email,
                 phone: values.phone,
@@ -216,8 +220,12 @@ export default function ProfileEdit() {
                 });
                 handleErrors(error);
 
+                setImage(null);
+
                 setValues({
-                    ...originalValues,
+                    name: originalValues.name,
+                    phone: originalValues.phone,
+                    email: originalValues.email,
                     oldPassword: "",
                     password: "",
                     repeatPassword: "",
@@ -260,18 +268,23 @@ export default function ProfileEdit() {
                         <FormLabel>Профилна снимка</FormLabel>
                         <Stack direction={["column", "row"]} spacing={6}>
                             <Center>
-                                <Avatar size="xl" src={values.avatar}>
-                                    {/* <AvatarBadge
-                                        as={IconButton}
-                                        size="sm"
-                                        rounded="full"
-                                        top="-10px"
-                                        colorScheme="red"
-                                        aria-label="remove Image"
-                                        icon={<RiCloseFill />}
-                                    /> */}
-                                </Avatar>
-                                <Input ml={6} type="file"></Input>
+                                <Avatar
+                                    size="xl"
+                                    src={imgUrl === null ? originalValues.avatar : imgUrl }
+                                    background={originalValues.avatarColor}
+                                />
+                                <Input
+                                    ml={6}
+                                    type="file"
+                                    hidden
+                                    ref={fileRef}
+                                    onChange={handleImageChange}
+                                ></Input>
+                            </Center>
+                            <Center>
+                                <Button onClick={() => fileRef.current.click()}>
+                                    Сменете снимката
+                                </Button>
                             </Center>
                         </Stack>
                     </FormControl>
