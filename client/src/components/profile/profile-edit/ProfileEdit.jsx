@@ -194,15 +194,15 @@ export default function ProfileEdit() {
                 position: "bottom",
             });
 
+            setImage(null);
+
             setOriginalValues({
                 avatar: updatedUser.avatar,
                 avatarColor: updatedUser.avatarColor,
                 name: updatedUser.name,
                 email: updatedUser.email,
                 phone: updatedUser.phone,
-            }); // Update original values on successful update
-
-            setImage(null);
+            }); // Update original values on successful update            
 
             setValues((state) => ({
                 ...state,
@@ -221,9 +221,10 @@ export default function ProfileEdit() {
                     isClosable: true,
                     position: "bottom",
                 });
-                handleErrors(error);
-
+                
                 setImage(null);
+
+                handleErrors(error);
 
                 setValues({
                     name: originalValues.name,
