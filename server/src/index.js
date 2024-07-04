@@ -3,10 +3,17 @@ const express = require('express');
 const dbConnect = require('./config/dbConfig');
 const expressConfig = require('./config/expressConfig');
 const routes = require('./routes');
-const errorHandler = require('./middlewares/ErrorHandlerMiddleware');
+const errorHandler = require('./middlewares/ErrorHandlerMiddleware')
+const cloudinary = require('cloudinary').v2;
 
 const app = express();
 const PORT = 5000;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
 
 expressConfig(app);
 
