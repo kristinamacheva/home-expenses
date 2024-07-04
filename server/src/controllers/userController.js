@@ -45,6 +45,7 @@ router.post("/register", registerValidator, async (req, res, next) => {
             phone: user.phone,
             avatar: user.avatar,
             avatarColor: user.avatarColor,
+            avatar: user.avatar,
         });
     } catch (error) {
         next(error);
@@ -78,6 +79,7 @@ router.post("/login", loginValidator, async (req, res, next) => {
             name: user.name,
             phone: user.phone,
             avatarColor: user.avatarColor,
+            avatar: user.avatar,
         });
     } catch (error) {
         next(error);
