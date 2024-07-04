@@ -3,7 +3,7 @@ import { useContext, useEffect } from "react";
 import AuthContext from "../../../../contexts/authContext";
 
 export default function CurrentUser({ amount, onUpdate }) {
-    const { userId, name } = useContext(AuthContext);
+    const { userId, name, avatar, avatarColor } = useContext(AuthContext);
 
     useEffect(() => {
         onUpdate(userId, amount);
@@ -19,7 +19,7 @@ export default function CurrentUser({ amount, onUpdate }) {
             justifyContent="space-between"
         >
             <Stack display="flex" alignItems="center" direction="row" mr="2">
-                <Avatar name={name} background={"themeYellow.900"} mr="3" />
+                <Avatar name={name} background={avatarColor} src={avatar} mr="3" />
                 <Text>{name}</Text>
             </Stack>
             <Stack display="flex" alignItems="center" direction="row">
