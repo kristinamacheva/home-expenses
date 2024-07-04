@@ -5,6 +5,7 @@ const User = require("../models/User");
 const { getRandomColor } = require("../utils/color/color");
 const mongoose = require("mongoose");
 const { AppError } = require("../utils/AppError");
+const cloudinary = require("cloudinary").v2;
 
 exports.register = async (userData) => {
     const randomColor = getRandomColor();
@@ -168,8 +169,7 @@ exports.getHouseholdsWithBalances = async (userId) => {
         },
     ]);
     return result;
- 
-}
+};
 
 exports.update = async ({
     userId,
@@ -195,12 +195,22 @@ exports.update = async ({
 
     user.name = name;
     user.phone = phone;
-    user.avatar = avatar;
     user.email = email;
 
     if (password) {
         user.password = password;
         user.repeatPassword = repeatPassword;
+    }
+
+    if (avatar) {
+        if (user.avatar !== "") {
+            await cloudinary.uploader.destroy(
+                user.avatar.split("/").pop().split(".")[0]
+            );
+        }
+
+        const uploadedResponse = await cloudinary.uploader.upload(avatar);
+        user.avatar = uploadedResponse.secure_url;
     }
 
     await user.save();
