@@ -45,16 +45,20 @@ export const getOneWithMemberEmails = async (householdId) => {
 };
 
 export const getAllBalances = async (householdId) => {
-    try {
-        const result = await request.get(
-            `${baseUrl}/${householdId}/balances?details=true`
-        );
-        console.log(result);
-        return result;
-    } catch (error) {
-        console.error("Error fetching balances details:", error);
-        return null;
-    }
+    const result = await request.get(
+        `${baseUrl}/${householdId}/balances?details=true`
+    );
+
+    return result;
+};
+
+export const getAllPayments = async (householdId) => {
+    const result = await request.get(
+        `${baseUrl}/${householdId}/payments`
+    );
+
+    console.log(result);
+    return result;
 };
 
 export const create = async (householdData) => {
@@ -65,7 +69,10 @@ export const create = async (householdData) => {
 
 export const edit = async (householdId, householdData) => {
     // console.log(householdData);
-    const result = await request.put(`${baseUrl}/${householdId}`, householdData);
+    const result = await request.put(
+        `${baseUrl}/${householdId}`,
+        householdData
+    );
 
     return result;
 };
