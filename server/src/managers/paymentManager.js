@@ -51,14 +51,45 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
         { $sort: { date: -1, _id: -1 } }, // Sort by date and _id in descending order
         { $skip: skip }, // Pagination: Skip records
         { $limit: limit }, // Pagination: Limit records
+        // Lookup for payer details
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'payer',
+                foreignField: '_id',
+                as: 'payerDetails',
+            },
+        },
+        // Lookup for payee details
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'payee',
+                foreignField: '_id',
+                as: 'payeeDetails',
+            },
+        },
+        // Unwind the payer and payee details arrays
+        { $unwind: '$payerDetails' },
+        { $unwind: '$payeeDetails' },
         {
             $project: {
                 _id: 1,
-                payer: 1,
-                payee: 1,
                 amount: 1,
                 date: 1,
-                expenseStatus: 1, // Ensure the status field is included
+                paymentStatus: 1, // Ensure the status field is included
+                payer: {
+                    _id: "$payerDetails._id",
+                    name: "$payerDetails.name",
+                    avatar: "$payerDetails.avatar",
+                    avatarColor: "$payerDetails.avatarColor"
+                },
+                payee: {
+                    _id: "$payeeDetails._id",
+                    name: "$payeeDetails.name",
+                    avatar: "$payeeDetails.avatar",
+                    avatarColor: "$payeeDetails.avatarColor"
+                }
             },
         },
     ];
