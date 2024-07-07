@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema(
     {
-        title: {
-            type: String,
-            required: [true, "Полето 'Заглавие' е задължително"],
-        },
         payer: {
             type: mongoose.Types.ObjectId,
             ref: "User",
