@@ -38,10 +38,13 @@ exports.getProfile = async (userId) => {
     return user;
 };
 
-// Function to get households and balances for a specific user
+// Function to get households and balance for a specific user
 exports.getHouseholdsWithBalances = async (userId) => {
     const result = await User.aggregate([
+        // filter the User collection to find the user with the given userId
         { $match: { _id: new mongoose.Types.ObjectId(userId) } },
+        // left outer join with the households collection
+        // matches the households field in the User document with the _id field in the households collection
         {
             $lookup: {
                 from: "households",
@@ -50,7 +53,10 @@ exports.getHouseholdsWithBalances = async (userId) => {
                 as: "householdDetails",
             },
         },
+        // deconstructing the householdDetails array and outputting a document for each household in 
+        // which the user is a member
         { $unwind: "$householdDetails" },
+        // fetch details of all members in each household
         {
             $lookup: {
                 from: "users",
@@ -59,18 +65,12 @@ exports.getHouseholdsWithBalances = async (userId) => {
                 as: "membersDetails",
             },
         },
-        {
-            $lookup: {
-                from: "users",
-                localField: "householdDetails.balance.user",
-                foreignField: "_id",
-                as: "balanceDetails",
-            },
-        },
+        // Project the relevant fields including household ID, name, members, admins, and balance.
         {
             $project: {
                 _id: "$householdDetails._id",
                 name: "$householdDetails.name",
+                // use $map and $let to fetch the name, avatar, and avatarColor from membersDetails
                 members: {
                     $map: {
                         input: "$householdDetails.members",
@@ -154,15 +154,12 @@ exports.getHouseholdsWithBalances = async (userId) => {
                     },
                 },
                 admins: "$householdDetails.admins",
+                // use $filter to include only the balance details for the specified user
                 balance: {
-                    $map: {
+                    $filter: {
                         input: "$householdDetails.balance",
                         as: "bal",
-                        in: {
-                            _id: "$$bal._id",
-                            sum: "$$bal.sum",
-                            type: "$$bal.type",
-                        },
+                        cond: { $eq: ["$$bal.user", new mongoose.Types.ObjectId(userId)] },
                     },
                 },
             },
