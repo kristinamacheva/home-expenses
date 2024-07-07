@@ -52,15 +52,6 @@ export const getAllBalances = async (householdId) => {
     return result;
 };
 
-export const getAllPayments = async (householdId) => {
-    const result = await request.get(
-        `${baseUrl}/${householdId}/payments`
-    );
-
-    console.log(result);
-    return result;
-};
-
 export const create = async (householdData) => {
     const result = await request.post(baseUrl, householdData);
 
