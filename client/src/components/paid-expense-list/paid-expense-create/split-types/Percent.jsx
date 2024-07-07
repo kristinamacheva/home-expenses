@@ -174,7 +174,8 @@ export default function Percent({
                             >
                                 <Avatar
                                     name={member.name}
-                                    background={"themeYellow.900"}
+                                    src={member.avatar}
+                                    background={member.avatarColor}
                                     mr="3"
                                 />
                                 <Text>{member.name}</Text>
