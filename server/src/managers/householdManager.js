@@ -349,6 +349,60 @@ exports.getOneBalances = async (householdId) => {
     return [];
 };
 
+exports.getOnePayees = async (householdId) => {
+    const allPayees = await Household.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(householdId) } }, // Match the household by ID
+        { $unwind: "$balance" }, // Deconstruct the balance array
+        { $match: { "balance.type": "+", "balance.sum": { $gt: 0 } } }, // Filter balances with type '+' and sum > 0
+        {
+            $lookup: {
+                from: "users", // Perform a join with the users collection
+                localField: "balance.user", // Match user field in balance
+                foreignField: "_id", // with _id field in users collection
+                as: "userDetails", // Output to userDetails array
+            },
+        },
+        { $unwind: "$userDetails" }, // Deconstruct the userDetails array
+        {
+            $project: {
+                _id: 0, // Exclude the default _id field from the output
+                "balance._id": "$userDetails._id", // Include user _id in balance
+                "balance.email": "$userDetails.email", // Include user email in balance
+                "balance.name": "$userDetails.name", // Include user name in balance
+                "balance.avatar": "$userDetails.avatar", // Include user avatar in balance
+                "balance.avatarColor": "$userDetails.avatarColor", // Include user avatarColor in balance
+                "balance.sum": "$balance.sum", // Include balance sum
+            },
+        },
+        {
+            $group: {
+                _id: null, // Group by null since we're only matching one household
+                balance: {
+                    $push: {
+                        _id: "$balance._id",
+                        email: "$balance.email",
+                        name: "$balance.name",
+                        avatar: "$balance.avatar",
+                        avatarColor: "$balance.avatarColor",
+                        sum: "$balance.sum",
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0, // Exclude the grouping key from the output
+                balance: 1, // Include the balance array
+            },
+        },
+    ]);
+
+    if (allPayees.length > 0) {
+        return allPayees[0].balance;
+    }
+    return [];
+};
+
 exports.create = async (householdData) => {
     const { name, members, admin } = householdData;
 

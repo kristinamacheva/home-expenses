@@ -90,6 +90,18 @@ router.get("/:householdId/balances", async (req, res, next) => {
     }
 });
 
+router.get("/:householdId/payees", async (req, res, next) => {
+    const householdId = req.householdId;
+
+    try {
+        const payees = await householdManager.getOnePayees(householdId);
+
+        res.status(200).json(payees);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.put("/:householdId", updateValidator, async (req, res, next) => {
     const errors = validationResult(req);
 
