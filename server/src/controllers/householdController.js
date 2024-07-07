@@ -2,8 +2,7 @@ const router = require("express").Router();
 const householdManager = require("../managers/householdManager");
 const getHousehold = require("../middlewares/householdMiddleware");
 const paidExpenseController = require("./paidExpenseController");
-const { isAuth } = require("../middlewares/authMiddleware");
-const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
+const paymentController = require("./paymentController");
 const {
     createValidator,
     updateValidator,
@@ -138,6 +137,7 @@ router.put("/:householdId/leave", async (req, res, next) => {
 });
 
 router.use("/:householdId/paidExpenses", paidExpenseController);
+router.use("/:householdId/payments", paymentController);
 
 module.exports = router;
 
