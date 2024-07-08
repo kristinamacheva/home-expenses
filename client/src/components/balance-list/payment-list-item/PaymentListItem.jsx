@@ -17,6 +17,7 @@ import { FaEye, FaPen, FaRegTrashCan } from "react-icons/fa6";
 import { useParams } from "react-router-dom";
 import AuthContext from "../../../contexts/authContext";
 import PaymentDetails from "./payment-details/PaymentDetails";
+import PaymentEdit from "./payment-edit/PaymentEdit";
 
 export default function PaymentListItem({
     _id,
@@ -36,6 +37,12 @@ export default function PaymentListItem({
         isOpen: isDetailsModalOpen,
         onOpen: onOpenDetailsModal,
         onClose: onCloseDetailsModal,
+    } = useDisclosure();
+
+    const {
+        isOpen: isEditModalOpen,
+        onOpen: onOpenEditModal,
+        onClose: onCloseEditModal,
     } = useDisclosure();
 
     let statusColor = "";
@@ -149,24 +156,26 @@ export default function PaymentListItem({
                             variant="ghost"
                             color="themePurple.800"
                         />
-                        {userId === payer && expenseStatus === "Отхвърлен" && (
-                            <>
-                                <IconButton
-                                    aria-label="Редактирайте"
-                                    title="Редактирайте"
-                                    icon={<FaPen fontSize="20px" />}
-                                    variant="ghost"
-                                    color="themePurple.800"
-                                />
-                                <IconButton
-                                    aria-label="Изтрийте"
-                                    title="Изтрийте"
-                                    icon={<FaRegTrashCan fontSize="20px" />}
-                                    variant="ghost"
-                                    color="themePurple.800"
-                                />
-                            </>
-                        )}
+                        {userId === payer._id &&
+                            paymentStatus === "Отхвърлен" && (
+                                <>
+                                    <IconButton
+                                        aria-label="Редактирайте"
+                                        title="Редактирайте"
+                                        onClick={onOpenEditModal}
+                                        icon={<FaPen fontSize="20px" />}
+                                        variant="ghost"
+                                        color="themePurple.800"
+                                    />
+                                    <IconButton
+                                        aria-label="Изтрийте"
+                                        title="Изтрийте"
+                                        icon={<FaRegTrashCan fontSize="20px" />}
+                                        variant="ghost"
+                                        color="themePurple.800"
+                                    />
+                                </>
+                            )}
                     </HStack>
                 </Stack>
             </Card>
@@ -178,6 +187,15 @@ export default function PaymentListItem({
                     householdId={householdId}
                     fetchPayments={fetchPayments}
                     fetchBalances={fetchBalances}
+                />
+            )}
+            {isEditModalOpen && (
+                <PaymentEdit
+                    isOpen={isEditModalOpen}
+                    onClose={onCloseEditModal}
+                    paymentId={_id}
+                    householdId={householdId}
+                    fetchPayments={fetchPayments}
                 />
             )}
         </>
