@@ -6,12 +6,19 @@ import {
     Box,
     Card,
     Button,
+    useDisclosure,
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
+import PaymentCreate from "./payment-create/PaymentCreate";
 
-export default function BalanceListItem({ balance }) {
+export default function BalanceListItem({ balance, fetchPayments }) {
     const { userId } = useContext(AuthContext);
+    const {
+        isOpen: isCreatePaymentModalOpen,
+        onOpen: onOpenCreatePaymentModal,
+        onClose: onCloseCreatePaymentModal,
+    } = useDisclosure();
 
     let badgeText = "";
     let badgeColor = "";
@@ -61,11 +68,23 @@ export default function BalanceListItem({ balance }) {
                         </Badge>
                     </Box>
                 </Stack>
-                {userId === balance._id && balance.type === "+" && balance.sum !== 0 && (
-                    <Button type="primary">Изпратете напомняне</Button>
-                )}
+                {userId === balance._id &&
+                    balance.type === "+" &&
+                    balance.sum !== 0 && (
+                        <Button type="primary">Изпратете напомняне</Button>
+                    )}
                 {userId === balance._id && balance.type === "-" && (
-                    <Button type="primary">Погасете задължението</Button>
+                    <Button type="primary" onClick={onOpenCreatePaymentModal}>
+                        Погасете задължението
+                    </Button>
+                )}
+                {isCreatePaymentModalOpen && (
+                    <PaymentCreate
+                        isOpen={isCreatePaymentModalOpen}
+                        onClose={onCloseCreatePaymentModal}
+                        balanceSum={balance.sum}
+                        fetchPayments={fetchPayments}
+                    />
                 )}
             </Stack>
         </Card>
