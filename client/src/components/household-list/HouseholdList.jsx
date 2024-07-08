@@ -51,17 +51,6 @@ export default function HouseholdList() {
         onClose: onCloseCreateModal,
     } = useDisclosure();
 
-    // // TODO: unique key error
-    // const addHouseholdToState = (newHousehold) => {
-    //     setHouseholds((state) => ([...state, newHousehold]));
-    // };
-
-    // const removeHouseholdFromState = (householdId) => {
-    //     setHouseholds((prevHouseholds) => (
-    //         prevHouseholds.filter((household) => household._id !== householdId)
-    //     ));
-    // };
-
     return (
         <>
             <Stack>
