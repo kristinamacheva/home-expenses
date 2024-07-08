@@ -16,7 +16,6 @@ import {
     Text,
 } from "@chakra-ui/react";
 import { useContext, useState, useEffect, useRef } from "react";
-import { RiCloseFill } from "react-icons/ri";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import * as authService from "../../../services/authService";
 import AuthContext from "../../../contexts/authContext";
