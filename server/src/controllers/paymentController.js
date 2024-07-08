@@ -6,6 +6,7 @@ const { validationResult } = require("express-validator");
 const {
     getValidator,
     createValidator,
+    updateValidator,
 } = require("../validators/paymentValidator");
 const { AppError } = require("../utils/AppError");
 
@@ -68,11 +69,7 @@ router.post("/", createValidator, async (req, res, next) => {
         );
     }
 
-    const {
-        amount,
-        date,
-        payee,
-    } = req.body;
+    const { amount, date, payee } = req.body;
 
     const parsedAmount = Number(amount.toFixed(2));
 
@@ -91,27 +88,57 @@ router.post("/", createValidator, async (req, res, next) => {
     }
 });
 
-
 router.use("/:paymentId", getPayment);
 
 router.get("/:paymentId", async (req, res, next) => {
     const paymentId = req.paymentId;
     const userId = req.userId;
-    const { details } = req.query;
+    const { details, balance } = req.query;
 
     try {
         let payment;
         if (details === "all") {
-            payment = await paymentManager.getOneDetails(
-                paymentId,
-                userId
-            );
+            payment = await paymentManager.getOneDetails(paymentId, userId);
+        } else if (balance === "true") {
+            payment = await paymentManager.getOneWithBalance(paymentId, userId);
         } else {
             // Handle default case
             payment = await paymentManager.getOne(paymentId);
         }
 
         res.status(200).json(payment);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.put("/:paymentId", updateValidator, async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => ({
+            field: err.path,
+            message: err.msg,
+        }));
+
+        return next(new AppError("Invalid data", 400, formattedErrors));
+    }
+
+    const paymentId = req.paymentId;
+    const userId = req.userId;
+
+    const { amount, date } = req.body;
+
+    const parsedAmount = Number(amount.toFixed(2));
+
+    try {
+        await paymentManager.update({
+            userId,
+            paymentId,
+            amount: parsedAmount,
+            date,
+        });
+        res.status(204).end();
     } catch (error) {
         next(error);
     }

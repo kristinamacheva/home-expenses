@@ -313,3 +313,65 @@ exports.addComment = async (userId, paymentId, text) => {
     // Return the populated comments array
     return updatedPayment.comments;
 };
+
+
+exports.update = async (paymentData) => {
+    const { userId, paymentId, amount, date } = paymentData;
+
+    // Fetch the existing payment
+    const existingPayment = await Payment.findById(paymentId);
+
+    // Check if the user making the request is the payer
+    const payerId = existingPayment.payer.toString();
+    if (userId.toString() !== payerId) {
+        throw new AppError("Само платеца може да редактира плащането", 403);
+    }
+
+    // Check if the payment status is Отхвърлен
+    if (existingPayment.paymentStatus !== "Отхвърлен") {
+        throw new AppError("Само плащания със статус Отхвърлен могат да бъдат редактирани", 400);
+    }
+
+    // Fetch the household by ID
+    const paymentHousehold = await Household.findById(existingPayment.household);
+
+    // Retrieve payee ID from the existing payment
+    const payeeId = existingPayment.payee.toString();
+
+    // Check the payer's and payee's balance
+    const payerBalance = paymentHousehold.balance.find(
+        (entry) => entry.user.toString() === payerId
+    );
+    const payeeBalance = paymentHousehold.balance.find(
+        (entry) => entry.user.toString() === payeeId
+    );
+
+    if (!payerBalance || payerBalance.type !== "-") {
+        throw new AppError("Платецът трябва да има отрицателен баланс", 400);
+    }
+    if (!payeeBalance || payeeBalance.type !== "+") {
+        throw new AppError("Получателят трябва да има положителен баланс", 400);
+    }
+
+    // Convert amounts to cents
+    const amountInCents = Math.round(amount * 100);
+    const payerBalanceInCents = Math.round(payerBalance.sum * 100);
+    const payeeBalanceInCents = Math.round(payeeBalance.sum * 100);
+
+    // Check if the amount is valid
+    if (amountInCents > payerBalanceInCents) {
+        throw new AppError("Сумата на плащането надвишава баланса на платеца", 400);
+    }
+    if (amountInCents > payeeBalanceInCents) {
+        throw new AppError("Сумата на плащането надвишава баланса на получателя", 400);
+    }
+
+    // Update the payment details and set the status to За одобрение
+    existingPayment.amount = Number((amountInCents / 100).toFixed(2)); // Store the amount in the standard currency unit
+    existingPayment.date = date;
+    existingPayment.paymentStatus = "За одобрение";
+
+    // Save the updated payment to the database
+    await existingPayment.save();
+};
+
