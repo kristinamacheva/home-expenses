@@ -54,24 +54,24 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
         // Lookup for payer details
         {
             $lookup: {
-                from: 'users',
-                localField: 'payer',
-                foreignField: '_id',
-                as: 'payerDetails',
+                from: "users",
+                localField: "payer",
+                foreignField: "_id",
+                as: "payerDetails",
             },
         },
         // Lookup for payee details
         {
             $lookup: {
-                from: 'users',
-                localField: 'payee',
-                foreignField: '_id',
-                as: 'payeeDetails',
+                from: "users",
+                localField: "payee",
+                foreignField: "_id",
+                as: "payeeDetails",
             },
         },
         // Unwind the payer and payee details arrays
-        { $unwind: '$payerDetails' },
-        { $unwind: '$payeeDetails' },
+        { $unwind: "$payerDetails" },
+        { $unwind: "$payeeDetails" },
         {
             $project: {
                 _id: 1,
@@ -82,14 +82,14 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
                     _id: "$payerDetails._id",
                     name: "$payerDetails.name",
                     avatar: "$payerDetails.avatar",
-                    avatarColor: "$payerDetails.avatarColor"
+                    avatarColor: "$payerDetails.avatarColor",
                 },
                 payee: {
                     _id: "$payeeDetails._id",
                     name: "$payeeDetails.name",
                     avatar: "$payeeDetails.avatar",
-                    avatarColor: "$payeeDetails.avatarColor"
-                }
+                    avatarColor: "$payeeDetails.avatarColor",
+                },
             },
         },
     ];
@@ -106,7 +106,90 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
 exports.getOne = (paymentId) =>
     Payment.findById(paymentId)
         .select("_id payer payee amount date paymentStatus")
+        .populate("payee", "_id name avatar avatarColor")
         .lean();
+
+// exports.getOne = (paymentId) =>
+//     Payment.findById(paymentId)
+//         .select("_id payer payee amount date paymentStatus")
+//         .lean();
+
+exports.getOneWithBalance = async (paymentId) => {
+    // Retrieve payment details including household
+    const payment = await Payment.findById(paymentId)
+        .select("_id payer payee amount date paymentStatus household")
+        .populate("payee", "_id name avatar avatarColor")
+        .lean();
+
+    if (!payment) {
+        throw new Error("Payment not found");
+    }
+
+    // Retrieve payer and payee IDs
+    const payerId = payment.payer;
+    const payeeId = payment.payee._id;
+    const householdId = payment.household;
+
+    // Define aggregation pipeline to calculate balance sums within the household
+    const aggregationPipeline = [
+        {
+            $match: {
+                _id: new ObjectId(householdId),
+            },
+        },
+        {
+            $unwind: "$balance",
+        },
+        // filter the balances to only include those belonging to the payer or payee
+        {
+            $match: {
+                $or: [
+                    { "balance.user": new ObjectId(payerId) },
+                    { "balance.user": new ObjectId(payeeId) },
+                ],
+            },
+        },
+        {
+            $group: {
+                _id: null,
+                payerBalanceSum: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$balance.user", new ObjectId(payerId)] },
+                            "$balance.sum",
+                            0,
+                        ],
+                    },
+                },
+                payeeBalanceSum: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$balance.user", new ObjectId(payeeId)] },
+                            "$balance.sum",
+                            0,
+                        ],
+                    },
+                },
+            },
+        },
+    ];
+
+    // Perform aggregation on Household collection
+    const results = await Household.aggregate(aggregationPipeline);
+
+    // Extract balance sums from aggregation results
+    const balanceSums = results[0] || {
+        payerBalanceSum: 0,
+        payeeBalanceSum: 0,
+    };
+
+    // Add balance sums to the payment object
+    return {
+        ...payment,
+        payerBalanceSum: balanceSums.payerBalanceSum,
+        payeeBalanceSum: balanceSums.payeeBalanceSum,
+    };
+};
 
 exports.getOneDetails = async (paymentId, userId) => {
     const payment = await Payment.findById(paymentId)
@@ -314,7 +397,6 @@ exports.addComment = async (userId, paymentId, text) => {
     return updatedPayment.comments;
 };
 
-
 exports.update = async (paymentData) => {
     const { userId, paymentId, amount, date } = paymentData;
 
@@ -324,16 +406,21 @@ exports.update = async (paymentData) => {
     // Check if the user making the request is the payer
     const payerId = existingPayment.payer.toString();
     if (userId.toString() !== payerId) {
-        throw new AppError("Само платеца може да редактира плащането", 403);
+        throw new AppError("Само платецът може да редактира плащането", 403);
     }
 
     // Check if the payment status is Отхвърлен
     if (existingPayment.paymentStatus !== "Отхвърлен") {
-        throw new AppError("Само плащания със статус Отхвърлен могат да бъдат редактирани", 400);
+        throw new AppError(
+            "Само плащания със статус Отхвърлен могат да бъдат редактирани",
+            400
+        );
     }
 
     // Fetch the household by ID
-    const paymentHousehold = await Household.findById(existingPayment.household);
+    const paymentHousehold = await Household.findById(
+        existingPayment.household
+    );
 
     // Retrieve payee ID from the existing payment
     const payeeId = existingPayment.payee.toString();
@@ -360,10 +447,16 @@ exports.update = async (paymentData) => {
 
     // Check if the amount is valid
     if (amountInCents > payerBalanceInCents) {
-        throw new AppError("Сумата на плащането надвишава баланса на платеца", 400);
+        throw new AppError(
+            "Сумата на плащането надвишава баланса на платеца",
+            400
+        );
     }
     if (amountInCents > payeeBalanceInCents) {
-        throw new AppError("Сумата на плащането надвишава баланса на получателя", 400);
+        throw new AppError(
+            "Сумата на плащането надвишава баланса на получателя",
+            400
+        );
     }
 
     // Update the payment details and set the status to За одобрение
@@ -374,4 +467,3 @@ exports.update = async (paymentData) => {
     // Save the updated payment to the database
     await existingPayment.save();
 };
-
