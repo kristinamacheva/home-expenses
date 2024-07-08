@@ -28,6 +28,13 @@ export const create = async (householdId, paymentData) => {
     return result;
 };
 
+export const getOneWithBalance = async (householdId, paymentId) => {
+    const url = baseUrl(householdId);
+    const result = await request.get(`${url}/${paymentId}?balance=true`);
+
+    return result;
+};
+
 export const getOneDetails = async (householdId, paymentId) => {
     const url = baseUrl(householdId);
     const result = await request.get(`${url}/${paymentId}?details=all`);
@@ -56,6 +63,13 @@ export const addComment = async (householdId, paymentId, text) => {
     const result = await request.post(`${url}/${paymentId}/comments`, {
         text,
     });
+
+    return result;
+};
+
+export const edit = async (householdId, paymentId, paymentData) => {
+    const url = baseUrl(householdId);
+    const result = await request.put(`${url}/${paymentId}`, paymentData);
 
     return result;
 };
