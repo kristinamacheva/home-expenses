@@ -196,6 +196,7 @@ export default function PaymentListItem({
                     paymentId={_id}
                     householdId={householdId}
                     fetchPayments={fetchPayments}
+                    fetchBalances={fetchBalances}
                 />
             )}
         </>
