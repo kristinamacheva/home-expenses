@@ -11,6 +11,7 @@ import {
     IconButton,
     useDisclosure,
     Avatar,
+    useToast,
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import { FaEye, FaPen, FaRegTrashCan } from "react-icons/fa6";
@@ -18,6 +19,7 @@ import { useParams } from "react-router-dom";
 import AuthContext from "../../../contexts/authContext";
 import PaymentDetails from "./payment-details/PaymentDetails";
 import PaymentEdit from "./payment-edit/PaymentEdit";
+import * as paymentService from "../../../services/paymentService";
 
 export default function PaymentListItem({
     _id,
@@ -28,10 +30,12 @@ export default function PaymentListItem({
     paymentStatus,
     fetchPayments,
     fetchBalances,
+    onRemove,
 }) {
     const { householdId } = useParams();
 
-    const { userId } = useContext(AuthContext);
+    const { userId, logoutHandler } = useContext(AuthContext);
+    const toast = useToast();
 
     const {
         isOpen: isDetailsModalOpen,
@@ -44,6 +48,36 @@ export default function PaymentListItem({
         onOpen: onOpenEditModal,
         onClose: onCloseEditModal,
     } = useDisclosure();
+
+    const paymentDeleteHandler = async (_id) => {
+        const paymentId = _id;
+
+        try {
+            await paymentService.remove(householdId, paymentId);
+
+            toast({
+                title: "Успешно изтрихте плащането",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
+            onRemove(_id);
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message || "Неуспешно изтриване на плащането",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
+        }
+    };
 
     let statusColor = "";
     if (paymentStatus === "Одобрен") {
@@ -173,6 +207,9 @@ export default function PaymentListItem({
                                         icon={<FaRegTrashCan fontSize="20px" />}
                                         variant="ghost"
                                         color="themePurple.800"
+                                        onClick={() =>
+                                            paymentDeleteHandler(_id)
+                                        }
                                     />
                                 </>
                             )}

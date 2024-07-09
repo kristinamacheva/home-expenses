@@ -73,3 +73,8 @@ export const edit = async (householdId, paymentId, paymentData) => {
 
     return result;
 };
+
+export const remove = async (householdId, paymentId) => {
+    const url = baseUrl(householdId);
+    const result = await request.remove(`${url}/${paymentId}`);
+};
