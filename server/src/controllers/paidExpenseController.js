@@ -169,6 +169,19 @@ router.get("/:paidExpenseId", async (req, res, next) => {
     }
 });
 
+router.delete("/:paidExpenseId", async (req, res, next) => {
+    const userId = req.userId;
+    const paidExpenseId = req.paidExpenseId;
+
+    try {
+        await paidExpenseManager.delete(userId, paidExpenseId);
+
+        res.status(204).end();
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.put("/:paidExpenseId/accept", async (req, res, next) => {
     const paidExpenseId = req.paidExpenseId;
     const userId = req.userId;

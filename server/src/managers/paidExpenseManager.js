@@ -421,6 +421,41 @@ exports.addComment = async (userId, paidExpenseId, text) => {
     return updatedPaidExpense.comments;
 };
 
+exports.delete = async (userId, paidExpenseId) => {
+    // Fetch the existing paid expense
+    const existingPaidExpense = await PaidExpense.findById(paidExpenseId);
+
+    // Check if the user making the request is the creator or in the admins array
+    const creatorId = existingPaidExpense.creator.toString();
+    const householdId = existingPaidExpense.household.toString();
+
+    if (userId.toString() !== creatorId) {
+        const household = await Household.findById(householdId);
+
+        const isAdmin = household.admins.some(
+            (admin) => admin.toString() === userId.toString()
+        );
+
+        if (!isAdmin) {
+            throw new AppError(
+                "Само създателят или администраторите на домакинството могат да изтриват платените разходи",
+                403
+            );
+        }
+    }
+
+    // Check if the paid expense status is "Отхвърлен"
+    if (existingPaidExpense.expenseStatus !== "Отхвърлен") {
+        throw new AppError(
+            "Само платени разходи със статус 'Отхвърлен' могат да бъдат изтривани",
+            400
+        );
+    }
+
+    // Delete the existing paid expense from the database
+    await PaidExpense.findByIdAndDelete(paidExpenseId);
+};
+
 // exports.update = (paidExpenseId, paidExpenseData) =>
 //     PaidExpense.findByIdAndUpdate(paidExpenseId, paidExpenseData);
 
