@@ -61,3 +61,11 @@ module.exports.createValidator = [
         .notEmpty()
         .withMessage("Полето 'Получател' е задължително"),
 ];
+
+module.exports.updateValidator = [
+    body("amount")
+        .toFloat()
+        .isFloat({ gt: 0 })
+        .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
+    body("date").isISO8601().toDate().withMessage("Невалидна дата"),
+];
