@@ -30,6 +30,7 @@ export default function HouseholdDetails() {
     const [isLoading, setIsLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const { logoutHandler, userId } = useContext(AuthContext);
+    const [isAdmin, setIsAdmin] = useState(false);
     const toast = useToast();
 
     const { householdId } = useParams();
@@ -40,6 +41,10 @@ export default function HouseholdDetails() {
             .getOne(householdId)
             .then((result) => {
                 setHousehold(result);
+
+                // Check if the current user is an admin
+                setIsAdmin(result.admins.includes(userId));
+
                 setIsLoading(false);
             })
             .catch((error) => {
@@ -155,7 +160,7 @@ export default function HouseholdDetails() {
                                 </TabList>
                                 <TabPanels>
                                     <TabPanel px="2" pt="2">
-                                        <PaidExpenseList />
+                                        <PaidExpenseList isAdmin={isAdmin} />
                                     </TabPanel>
                                     <TabPanel px="2">
                                         <p>Неплатени</p>

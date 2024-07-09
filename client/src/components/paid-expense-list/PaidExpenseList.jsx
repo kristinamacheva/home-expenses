@@ -28,7 +28,7 @@ const initialSearchValues = {
     rejected: true,
 };
 
-export default function PaidExpenseList() {
+export default function PaidExpenseList({ isAdmin }) {
     const [paidExpenses, setPaidExpenses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [index, setIndex] = useState(2); // Page index starts at 2
@@ -148,7 +148,9 @@ export default function PaidExpenseList() {
 
     const removePaidExpenseFromState = (paidExpenseId) => {
         setPaidExpenses((prevPaidExpenses) =>
-            prevPaidExpenses.filter((paidExpense) => paidExpense._id !== paidExpenseId)
+            prevPaidExpenses.filter(
+                (paidExpense) => paidExpense._id !== paidExpenseId
+            )
         );
     };
 
@@ -282,6 +284,7 @@ export default function PaidExpenseList() {
                         {...paidExpense}
                         fetchPaidExpenses={fetchPaidExpenses}
                         onRemove={removePaidExpenseFromState}
+                        isAdmin={isAdmin}
                     />
                 ))}
             </Stack>
