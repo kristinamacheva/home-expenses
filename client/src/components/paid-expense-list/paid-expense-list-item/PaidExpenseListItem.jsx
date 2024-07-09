@@ -31,6 +31,7 @@ export default function PaidExpenseListItem({
     expenseStatus,
     fetchPaidExpenses,
     onRemove,
+    isAdmin,
 }) {
     const { householdId } = useParams();
     const toast = useToast();
@@ -186,12 +187,7 @@ export default function PaidExpenseListItem({
                             variant="ghost"
                             color="themePurple.800"
                         />
-                        {/* TODO: implement isAdmin logic */}
-                        {/* {(currentUserId === creator.userId || isAdmin(currentUserId)) && (
-                        <>
-                        </>
-                    )} */}
-                        {(userId === creator && expenseStatus === "Отхвърлен") && (
+                        {((userId === creator || isAdmin) && expenseStatus === "Отхвърлен") && (
                             <>
                                 <IconButton
                                     aria-label="Редактирайте"
