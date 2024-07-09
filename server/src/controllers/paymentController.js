@@ -144,6 +144,19 @@ router.put("/:paymentId", updateValidator, async (req, res, next) => {
     }
 });
 
+router.delete("/:paymentId", async (req, res, next) => {
+    const userId = req.userId;
+    const paymentId = req.paymentId;
+
+    try {
+        await paymentManager.delete(userId, paymentId);
+
+        res.status(204).end();
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.put("/:paymentId/accept", async (req, res, next) => {
     const paymentId = req.paymentId;
     const userId = req.userId;

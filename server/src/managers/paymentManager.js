@@ -467,3 +467,25 @@ exports.update = async (paymentData) => {
     // Save the updated payment to the database
     await existingPayment.save();
 };
+
+exports.delete = async (userId, paymentId) => {
+    // Fetch the existing payment
+    const existingPayment = await Payment.findById(paymentId);
+
+    // Check if the user making the request is the payer
+    const payerId = existingPayment.payer.toString();
+    if (userId.toString() !== payerId) {
+        throw new AppError("Само платецът може да изтрива плащането", 403);
+    }
+
+    // Check if the payment status is Отхвърлен
+    if (existingPayment.paymentStatus !== "Отхвърлен") {
+        throw new AppError(
+            "Само плащания със статус Отхвърлен могат да бъдат изтривани",
+            400
+        );
+    }
+
+    // Delete the existing payment from the database
+    await Payment.findByIdAndDelete(paymentId);
+};
