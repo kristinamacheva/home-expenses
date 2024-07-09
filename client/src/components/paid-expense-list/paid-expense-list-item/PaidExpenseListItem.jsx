@@ -10,12 +10,14 @@ import {
     HStack,
     IconButton,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import { FaEye, FaPen, FaRegTrashCan } from "react-icons/fa6";
 import { Link, useParams } from "react-router-dom";
 import AuthContext from "../../../contexts/authContext";
 import PaidExpenseDetails from "./paid-expense-details/PaidExpenseDetails";
+import * as paidExpenseService from "../../../services/paidExpenseService";
 
 // TODO: send only necessary data here
 export default function PaidExpenseListItem({
@@ -28,16 +30,48 @@ export default function PaidExpenseListItem({
     balance,
     expenseStatus,
     fetchPaidExpenses,
+    onRemove,
 }) {
     const { householdId } = useParams();
+    const toast = useToast();
 
-    const { userId } = useContext(AuthContext);
+    const { userId, logoutHandler } = useContext(AuthContext);
 
     const {
         isOpen: isDetailsModalOpen,
         onOpen: onOpenDetailsModal,
         onClose: onCloseDetailsModal,
     } = useDisclosure();
+
+    const paidExpenseDeleteHandler = async (_id) => {
+        const paidExpenseId = _id;
+
+        try {
+            await paidExpenseService.remove(householdId, paidExpenseId);
+
+            toast({
+                title: "Успешно изтрихте платения разход",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
+            onRemove(_id);
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message || "Неуспешно изтриване на платения разход",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
+        }
+    };
 
     let balanceText = "";
     let badgeColor = "";
@@ -172,6 +206,9 @@ export default function PaidExpenseListItem({
                                     icon={<FaRegTrashCan fontSize="20px" />}
                                     variant="ghost"
                                     color="themePurple.800"
+                                    onClick={() =>
+                                        paidExpenseDeleteHandler(_id)
+                                    }
                                 />
                             </>
                         )}
