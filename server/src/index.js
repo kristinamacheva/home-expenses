@@ -6,6 +6,7 @@ const routes = require('./routes');
 const errorHandler = require('./middlewares/ErrorHandlerMiddleware')
 const cloudinary = require('cloudinary').v2;
 
+// make an express app
 const app = express();
 const PORT = 5000;
 

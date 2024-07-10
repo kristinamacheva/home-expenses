@@ -7,8 +7,14 @@ const socketAuthMiddleware = require("../middlewares/socketAuthMiddleware");
 const { initializeSocket } = require("./socket");
 
 function expressConfig(app) {
+    // Body Parsing Middleware
+    // Parse incoming requests with URL-encoded payloads and JSON payloads
+    // Handle form submissions and JSON data in routes
     // Set a limit for request body size (slightly higher than largest expected image size)
+
+    // Middleware to parse URL-encoded bodies (includes query and path parameters from URLs)
     app.use(express.urlencoded({ extended: false, limit: "300kb" }));
+    // Middleware to parse JSON bodies
     app.use(express.json({ limit: "300kb" }));
 
     // Define allowed origins
@@ -33,11 +39,17 @@ function expressConfig(app) {
         })
     );
 
+    // Parse cookies attached to the client request object
     app.use(cookieParser());
+
+    // Custom middleware for handling authentication
     app.use(auth);
 
+    // Initialize and configure a Socket.io server instance
     const server = initializeSocket(app);
 
+    // Associate it with the Express application (app) to make the server instance accessible 
+    // throughout the Express application
     app.set("server", server);
 }
 
