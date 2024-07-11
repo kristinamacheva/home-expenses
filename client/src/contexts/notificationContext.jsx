@@ -1,32 +1,40 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import { useToast } from '@chakra-ui/react';
-import * as notificationService from '../services/notificationService';
-import AuthContext from './authContext';
+import { createContext, useState, useContext, useEffect } from "react";
+import { useToast } from "@chakra-ui/react";
+import * as notificationService from "../services/notificationService";
+import AuthContext from "./authContext";
 
 const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
-    const { logoutHandler, socket } = useContext(AuthContext);
+    const { logoutHandler, socket, userId } = useContext(AuthContext);
     const toast = useToast();
     const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
-        // Fetch initial notifications
-        fetchNotifications();
+        // Fetch initial notifications if user is authenticated
+        if (userId) {
+            fetchNotifications();
+        }
 
         // Setup socket event listener
         if (socket) {
-            socket.on('notification', handleNotification);
+            socket.on("notification", handleNotification);
         }
 
         // Cleanup function
         return () => {
             if (socket) {
-                socket.off('notification');
+                socket.off("notification");
             }
         };
-    }, [socket]); // Run effect only when socket changes
+    }, [userId]);
 
+    // Clear notifications when user logs out
+    useEffect(() => {
+        if (!userId) {
+            setNotifications([]);
+        }
+    }, [userId]);
 
     const fetchNotifications = () => {
         notificationService
@@ -37,25 +45,30 @@ export const NotificationProvider = ({ children }) => {
                     logoutHandler();
                 } else {
                     toast({
-                        title: error.message || 'Неуспешно зареждане на известията',
-                        status: 'error',
+                        title:
+                            error.message ||
+                            "Неуспешно зареждане на известията",
+                        status: "error",
                         duration: 6000,
                         isClosable: true,
-                        position: 'bottom',
+                        position: "bottom",
                     });
                 }
             });
     };
 
     const handleNotification = (notification) => {
-        setNotifications((prevNotifications) => [notification, ...prevNotifications]);
+        setNotifications((prevNotifications) => [
+            notification,
+            ...prevNotifications,
+        ]);
         toast({
-            title: 'Имате ново известие',
+            title: "Имате ново известие",
             description: notification.message,
-            status: 'info',
+            status: "info",
             duration: 6000,
             isClosable: true,
-            position: 'bottom',
+            position: "bottom",
         });
     };
 
@@ -71,6 +84,6 @@ export const NotificationProvider = ({ children }) => {
     );
 };
 
-NotificationContext.displayName = 'NotificationContext';
+NotificationContext.displayName = "NotificationContext";
 
 export default NotificationContext;
