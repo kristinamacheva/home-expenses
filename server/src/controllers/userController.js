@@ -88,9 +88,20 @@ router.post("/login", loginValidator, async (req, res, next) => {
 
 router.get("/households", isAuth, async (req, res, next) => {
     const userId = req.userId;
+    const { filterByBalance } = req.query;
 
     try {
-        const households = await userManager.getHouseholdsWithBalances(userId);
+        let households;
+
+        if (filterByBalance === "true") {
+            households =
+                await userManager.getHouseholdsWithExistingBalances(
+                    userId
+                );
+        } else {
+            // Handle default case
+            households = await userManager.getHouseholdsWithBalances(userId);
+        }
 
         res.status(200).json(households);
     } catch (error) {
@@ -175,6 +186,5 @@ router.get("/logout", isAuth, (req, res, next) => {
 });
 
 router.use("/notifications", isAuth, notificationController);
-
 
 module.exports = router;
