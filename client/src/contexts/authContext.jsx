@@ -1,75 +1,40 @@
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
-import Path from "../paths";
-import * as authService from "../services/authService";
 import usePersistedState from "../hooks/usePersistedState";
+import * as authService from "../services/authService";
+import Path from "../paths";
+import useSocket from "../hooks/useSocket";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
     const [user, setUser] = usePersistedState("user", {}, "localStorage");
-    const socketRef = useRef(null);
-
-    useEffect(() => {
-        if (user._id && !socketRef.current) {
-            socketRef.current = initializeSocket();
-        }
-
-        return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-                socketRef.current = null;
-            }
-        };
-    }, [user._id]);
-
-    const initializeSocket = () => {
-        const newSocket = io("http://localhost:5000", {
-            withCredentials: true,
-        });
-
-        newSocket.on("connect", () => {
-            console.log(`Connected to socket.io server`);
-        });
-
-        newSocket.on("disconnect", () => {
-            console.log(`Disconnected from socket.io server`);
-        });
-
-        socketRef.current = newSocket;
-        return newSocket;
-    };
+    const socket = useSocket(user._id);
 
     const loginSubmitHandler = async (values) => {
         const result = await authService.login(values);
         setUser(result);
-        initializeSocket();
         navigate(Path.Home);
     };
 
     const registerSubmitHandler = async (values) => {
         const result = await authService.register(values);
         setUser(result);
-        initializeSocket();
         navigate(Path.Home);
     };
 
     const updateSubmitHandler = async (values) => {
         const result = await authService.update(values);
         setUser(result);
-        initializeSocket();
         navigate(Path.Profile);
-
         return result;
     };
 
     const logoutHandler = () => {
         setUser({});
-        if (socketRef.current) {
-            socketRef.current.disconnect();
-            socketRef.current = null;
+        if (socket) {
+            socket.disconnect();
         }
         navigate(Path.Login);
     };
@@ -86,7 +51,7 @@ export const AuthProvider = ({ children }) => {
         avatar: user.avatar,
         avatarColor: user.avatarColor,
         isAuthenticated: !!user._id,
-        socket: socketRef.current,
+        socket,
     };
 
     return (
