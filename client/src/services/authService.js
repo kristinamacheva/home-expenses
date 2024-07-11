@@ -49,4 +49,10 @@ export const getHouseholds = async () => {
     return result;
 };
 
+export const getHouseholdsWithExistingBalances = async () => {
+    const result = await request.get(`${baseUrl}/households?filterByBalance=true`);
+
+    return result;
+};
+
 export const logout = () => request.get(`${baseUrl}/logout`);
