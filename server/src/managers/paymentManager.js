@@ -114,6 +114,7 @@ exports.getOne = (paymentId) =>
 //         .select("_id payer payee amount date paymentStatus")
 //         .lean();
 
+// TODO: test
 exports.getOneWithBalance = async (paymentId) => {
     // Retrieve payment details including household
     const payment = await Payment.findById(paymentId)
@@ -121,75 +122,82 @@ exports.getOneWithBalance = async (paymentId) => {
         .populate("payee", "_id name avatar avatarColor")
         .lean();
 
-    if (!payment) {
-        throw new Error("Payment not found");
-    }
-
     // Retrieve payer and payee IDs
     const payerId = payment.payer;
     const payeeId = payment.payee._id;
     const householdId = payment.household;
 
-    // Define aggregation pipeline to calculate balance sums within the household
+    // Define aggregation pipeline to find balances for payer and payee within the household
     const aggregationPipeline = [
         {
-            $match: {
-                _id: new ObjectId(householdId),
-            },
+            $match: { _id: new ObjectId(householdId) }
         },
         {
-            $unwind: "$balance",
-        },
-        // filter the balances to only include those belonging to the payer or payee
-        {
-            $match: {
-                $or: [
-                    { "balance.user": new ObjectId(payerId) },
-                    { "balance.user": new ObjectId(payeeId) },
-                ],
-            },
-        },
-        {
-            $group: {
-                _id: null,
-                payerBalanceSum: {
-                    $sum: {
-                        $cond: [
-                            { $eq: ["$balance.user", new ObjectId(payerId)] },
-                            "$balance.sum",
-                            0,
-                        ],
-                    },
+            $project: {
+                payerBalance: {
+                    // get the first element from the filtered balance array
+                    $arrayElemAt: [
+                        {
+                            $filter: {
+                                input: "$balance",
+                                as: "balance",
+                                cond: { $eq: ["$$balance.user", new ObjectId(payerId)] }
+                            }
+                        },
+                        0
+                    ]
                 },
-                payeeBalanceSum: {
-                    $sum: {
-                        $cond: [
-                            { $eq: ["$balance.user", new ObjectId(payeeId)] },
-                            "$balance.sum",
-                            0,
-                        ],
-                    },
-                },
-            },
-        },
+                payeeBalance: {
+                    // get the first element from the filtered balance array
+                    $arrayElemAt: [
+                        {
+                            $filter: {
+                                input: "$balance",
+                                as: "balance",
+                                cond: { $eq: ["$$balance.user", new ObjectId(payeeId)] }
+                            }
+                        },
+                        0
+                    ]
+                }
+            }
+        }
     ];
 
     // Perform aggregation on Household collection
     const results = await Household.aggregate(aggregationPipeline);
 
-    // Extract balance sums from aggregation results
-    const balanceSums = results[0] || {
-        payerBalanceSum: 0,
-        payeeBalanceSum: 0,
-    };
+    // Check if payer balance was not found
+    if (!results[0]?.payerBalance) {
+        throw new AppError("Балансът на платеца не е намерен.", 404);
+    }
+
+    // Check if payee balance was not found
+    if (!results[0]?.payeeBalance) {
+        throw new AppError("Балансът на получателя не е намерен.", 404);
+    }
+
+    // Extract balance sums and types from aggregation results
+    const payerBalance = results[0].payerBalance;
+    const payeeBalance = results[0].payeeBalance;
+
+    // Check if balance type has changed
+    if (payerBalance.type !== "-" || payeeBalance.type !== "+") {
+        throw new AppError("Има промени в баланса. Не може да се осъществи плащане.", 400);
+    }
+
+    // Calculate final balance sums considering the balance type
+    const payerBalanceSum = payerBalance.sum;
+    const payeeBalanceSum = payeeBalance.sum;
 
     // Add balance sums to the payment object
     return {
         ...payment,
-        payerBalanceSum: balanceSums.payerBalanceSum,
-        payeeBalanceSum: balanceSums.payeeBalanceSum,
+        payerBalanceSum,
+        payeeBalanceSum
     };
 };
+
 
 exports.getOneDetails = async (paymentId, userId) => {
     const payment = await Payment.findById(paymentId)
