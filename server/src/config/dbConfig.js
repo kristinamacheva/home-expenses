@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
 
-const uri = 'mongodb://127.0.0.1:27017/home-expenses'
-
 async function dbConnect() {
-    await mongoose.connect(uri);
+    await mongoose.connect(process.env.MONGODB_URI);
 }
 
 module.exports = dbConnect;
