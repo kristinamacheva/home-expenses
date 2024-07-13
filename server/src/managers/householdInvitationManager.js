@@ -15,77 +15,100 @@ exports.getAll = async (userId) => {
     return result;
 };
 
+const mongoose = require("mongoose");
+
 exports.accept = async (userId, invitationId) => {
-    const invitation = await HouseholdInvitation.findById(invitationId);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Verify that the invitation is for the current user
-    if (invitation.user.toString() !== userId) {
-        throw new AppError(
-            "Неоторизиран: Потребителят не съответства на поканата",
-            401
-        );
-    }
+    try {
+        const invitation = await HouseholdInvitation.findById(
+            invitationId
+        ).session(session);
 
-    const household = await Household.findById(invitation.household);
-
-    if (!household) {
-        throw new AppError("Домакинството не е намерено", 404);
-    }
-
-    const role = invitation.role;
-
-    // Add user to the household members
-    household.members.push({
-        user: userId,
-        role: role,
-    });
-
-    // Update admins array if the user's role is "Админ"
-    if (role === "Админ") {
-        household.admins.push(userId);
-    }
-
-    // Add to balance with default values if the user's role is not "Дете"
-    if (role !== "Дете") {
-        household.balance.push({
-            user: userId,
-            sum: 0,
-            type: "+",
-        });
-    }
-
-    // TODO: transaction
-    // Save the updated household
-    await household.save();
-
-    // Add householdId to the user's households array
-    await User.findByIdAndUpdate(userId, {
-        $addToSet: { households: household._id },
-    });
-
-    // Delete the invitation
-    await HouseholdInvitation.deleteOne({ _id: invitationId });
-
-    // Create and send notifications for all members except the newly added one
-    const message = `Нов потребител се присъедини към домакинството: ${household.name}`;
-
-    for (const member of household.members) {
-        if (member.user.toString() !== userId) {
-            const notification = new Notification({
-                userId: member.user,
-                message: message,
-                resourceType: "Household",
-                resourceId: household._id,
-            });
-
-            const savedNotification = await notification.save();
-
-            // Send notification to the user if they have an active connection
-            sendNotificationToUser(member.user, savedNotification);
+        // Verify that the invitation is for the current user
+        if (invitation.user.toString() !== userId) {
+            throw new AppError(
+                "Неоторизиран: Потребителят не съответства на поканата",
+                401
+            );
         }
-    }
 
-    return household._id; // Return household ID after successful acceptance and deletion
+        const household = await Household.findById(
+            invitation.household
+        ).session(session);
+
+        if (!household) {
+            throw new AppError("Домакинството не е намерено", 404);
+        }
+
+        const role = invitation.role;
+
+        // Add user to the household members
+        household.members.push({
+            user: userId,
+            role: role,
+        });
+
+        // Update admins array if the user's role is "Админ"
+        if (role === "Админ") {
+            household.admins.push(userId);
+        }
+
+        // Add to balance with default values if the user's role is not "Дете"
+        if (role !== "Дете") {
+            household.balance.push({
+                user: userId,
+                sum: 0,
+                type: "+",
+            });
+        }
+
+        // Save the updated household
+        await household.save({ session });
+
+        // Add householdId to the user's households array
+        await User.findByIdAndUpdate(
+            userId,
+            {
+                $addToSet: { households: household._id },
+            },
+            { session }
+        );
+
+        // Delete the invitation
+        await HouseholdInvitation.deleteOne({ _id: invitationId }).session(
+            session
+        );
+
+        // Create and send notifications for all members except the newly added one
+        const message = `Нов потребител се присъедини към домакинството: ${household.name}`;
+
+        for (const member of household.members) {
+            if (member.user.toString() !== userId) {
+                const notification = new Notification({
+                    userId: member.user,
+                    message: message,
+                    resourceType: "Household",
+                    resourceId: household._id,
+                });
+
+                const savedNotification = await notification.save({ session });
+
+                // Send notification to the user if they have an active connection
+                sendNotificationToUser(member.user, savedNotification);
+            }
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return household._id; // Return household ID after successful acceptance and deletion
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
+    }
 };
 
 exports.reject = async (userId, invitationId) => {
