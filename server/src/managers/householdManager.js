@@ -1,6 +1,6 @@
 const Household = require("../models/Household");
 const HouseholdInvitation = require("../models/HouseholdInvitation");
-const Notification = require('../models/Notification');
+const Notification = require("../models/Notification");
 const User = require("../models/User");
 const mongoose = require("mongoose");
 const { AppError } = require("../utils/AppError");
@@ -405,104 +405,120 @@ exports.getOnePayees = async (householdId) => {
 };
 
 exports.create = async (householdData) => {
-    const { name, members, admin } = householdData;
+    const session = await mongoose.startSession();
 
-    // Fetch the admin user by ID
-    const adminUser = await User.findById(admin);
-    // if (!adminUser) {
-    //     throw new AppError("Админът не е намерен", 401);
-    // }
+    try {
+        session.startTransaction();
 
-    // Check if admin's email is in members array
-    const adminEmail = adminUser.email;
-    const adminInMembers = members.some(
-        (member) => member.email === adminEmail
-    );
-    if (adminInMembers) {
-        throw new AppError(
-            "Създателят не може да бъде добавен повторно като член на домакинството",
-            400
+        const { name, members, admin } = householdData;
+
+        // Fetch the admin user by ID
+        const adminUser = await User.findById(admin).session(session);
+        // if (!adminUser) {
+        //     throw new AppError("Админът не е намерен", 401);
+        // }
+
+        // Check if admin's email is in members array
+        const adminEmail = adminUser.email;
+        const adminInMembers = members.some(
+            (member) => member.email === adminEmail
         );
-    }
-
-    // Check for duplicate emails in members
-    const uniqueEmails = new Set();
-    for (const member of members) {
-        if (uniqueEmails.has(member.email)) {
+        if (adminInMembers) {
             throw new AppError(
-                `Имейлът се среща повече от 1 път: ${member.email}`,
+                "Създателят не може да бъде добавен повторно като член на домакинството",
                 400
             );
         }
-        uniqueEmails.add(member.email);
-    }
 
-    // Fetch member users by their emails
-    const memberUsers = await User.find({
-        email: { $in: Array.from(uniqueEmails) },
-    }).select("_id email");
+        // Check for duplicate emails in members
+        const uniqueEmails = new Set();
+        for (const member of members) {
+            if (uniqueEmails.has(member.email)) {
+                throw new AppError(
+                    `Имейлът се среща повече от 1 път: ${member.email}`,
+                    400
+                );
+            }
+            uniqueEmails.add(member.email);
+        }
 
-    if (memberUsers.length !== uniqueEmails.size) {
-        throw new AppError("1 или повече имейла не бяха намерени", 400);
-    }
+        // Fetch member users by their emails
+        const memberUsers = await User.find({
+            email: { $in: Array.from(uniqueEmails) },
+        })
+            .select("_id email")
+            .session(session);
 
-    // Create the new household
-    const newHousehold = new Household({
-        name,
-        members: [
-            {
-                user: adminUser._id,
-                role: "Админ",
-            },
-        ],
-        admins: [adminUser._id],
-        balance: [
-            {
-                user: adminUser._id,
-                sum: 0, // Default sum
-                type: "+", // Default type
-            },
-        ],
-    });
+        if (memberUsers.length !== uniqueEmails.size) {
+            throw new AppError("1 или повече имейла не бяха намерени", 400);
+        }
 
-    // Save the household to the database
-    await newHousehold.save();
-
-    // Add the household ID to the admin user's households array
-    adminUser.households.push(newHousehold._id);
-    await adminUser.save();
-
-    //TODO: check if user is already a member
-    // Create invitations for each member
-    for (const member of members) {
-        const currentUser = memberUsers.find(
-            (user) => user.email === member.email
-        );
-
-        const invitation = new HouseholdInvitation({
-            user: currentUser._id,
-            household: newHousehold._id,
-            role: member.role,
-            creator: adminUser._id,
+        // Create the new household
+        const newHousehold = new Household({
+            name,
+            members: [
+                {
+                    user: adminUser._id,
+                    role: "Админ",
+                },
+            ],
+            admins: [adminUser._id],
+            balance: [
+                {
+                    user: adminUser._id,
+                    sum: 0, // Default sum
+                    type: "+", // Default type
+                },
+            ],
         });
 
-        await invitation.save();
+        // Save the household to the database
+        await newHousehold.save({ session });
 
-        // Create notification for the user
-        const notification = new Notification({
-            userId: currentUser._id,
-            message: `Имате нова покана за присъединяване към домакинство: ${name}`,
-            resourceType: 'HouseholdInvitation',
-            resourceId: invitation._id, // Use the invitation._id here
-        });
+        // Add the household ID to the admin user's households array
+        adminUser.households.push(newHousehold._id);
+        await adminUser.save({ session });
 
-        const savedNotification = await notification.save();
+        //TODO: check if user is already a member
+        // Create invitations for each member
+        for (const member of members) {
+            const currentUser = memberUsers.find(
+                (user) => user.email === member.email
+            );
 
-        // Send notification to the user if they have an active connection
-        sendNotificationToUser(currentUser._id, savedNotification);
+            const invitation = new HouseholdInvitation({
+                user: currentUser._id,
+                household: newHousehold._id,
+                role: member.role,
+                creator: adminUser._id,
+            });
+
+            await invitation.save({ session });
+
+            // Create notification for the user
+            const notification = new Notification({
+                userId: currentUser._id,
+                message: `Имате нова покана за присъединяване към домакинство: ${name}`,
+                resourceType: "HouseholdInvitation",
+                resourceId: invitation._id, // Use the invitation._id here
+            });
+
+            const savedNotification = await notification.save({ session });
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(currentUser._id, savedNotification);
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return newHousehold;
+    } catch (error) {
+        // Discard all changes and release any locks held by the transaction
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
     }
-
-    return newHousehold;
 };
 
 exports.update = async (householdId, admin, name, members, newMembers) => {
@@ -685,40 +701,44 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
 };
 
 exports.leave = async (userId, householdId) => {
-    const household = await Household.findById(householdId);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Check if the user is a member of the household
-    const userIndex = household.members.findIndex(
-        (member) => member.user.toString() === userId
-    );
-    if (userIndex === -1) {
-        throw new AppError("Потребителят не е член на домакинството.", 401);
-    }
-
-    // Check if the user is an admin (using admins array)
-    const isAdmin = household.admins.some(
-        (admin) => admin.toString() === userId
-    );
-    if (isAdmin) {
-        // If the user is an admin, check if they are the last admin
-        if (household.admins.length === 1) {
-            throw new AppError(
-                "Вие сте единственият админ на домакинството и не може да го напуснете.",
-                403
-            );
-        }
-    }
-
-    // Check if the user's role is not "Дете"
-    const userRole = household.members[userIndex].role;
-    if (userRole !== "Дете") {
-        // Check if the user has a non-zero balance sum
-        const userBalance = household.balance.find(
-            (entry) => entry.user.toString() === userId
+    try {
+        const household = await Household.findById(householdId).session(
+            session
         );
 
-        if (userBalance) {
-            if (userBalance.sum !== 0) {
+        // Check if the user is a member of the household
+        const userIndex = household.members.findIndex(
+            (member) => member.user.toString() === userId
+        );
+        if (userIndex === -1) {
+            throw new AppError("Потребителят не е член на домакинството.", 401);
+        }
+
+        // Check if the user is an admin (using admins array)
+        const isAdmin = household.admins.some(
+            (admin) => admin.toString() === userId
+        );
+        if (isAdmin) {
+            // If the user is an admin, check if they are the last admin
+            if (household.admins.length === 1) {
+                throw new AppError(
+                    "Вие сте единственият админ на домакинството и не може да го напуснете.",
+                    403
+                );
+            }
+        }
+
+        // Check if the user's role is not "Дете"
+        const userRole = household.members[userIndex].role;
+        if (userRole !== "Дете") {
+            // Check if the user has a non-zero balance sum
+            const userBalance = household.balance.find(
+                (entry) => entry.user.toString() === userId
+            );
+            if (userBalance && userBalance.sum !== 0) {
                 throw new AppError(
                     "Не може да напуснете домакинството, ако балансът ви не е 0.",
                     403
@@ -730,26 +750,36 @@ exports.leave = async (userId, householdId) => {
                 (entry) => entry.user.toString() !== userId
             );
         }
-    }
 
-    // Remove the user from the members array
-    household.members.splice(userIndex, 1);
+        // Remove the user from the members array
+        household.members.splice(userIndex, 1);
 
-    // Remove the user from the admins array
-    if (isAdmin) {
-        household.admins = household.admins.filter(
-            (admin) => admin.toString() !== userId
+        // Remove the user from the admins array
+        if (isAdmin) {
+            household.admins = household.admins.filter(
+                (admin) => admin.toString() !== userId
+            );
+        }
+
+        // Save the updated household
+        await household.save({ session });
+
+        // Remove the household from the user's households array
+        await User.findByIdAndUpdate(
+            userId,
+            { $pull: { households: householdId } },
+            { session }
         );
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return household._id; // Return household ID after successful leave
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
     }
-
-    // Save the updated household
-    await household.save();
-
-    // TODO:transaction
-    // Remove the household from the user's households array
-    await User.findByIdAndUpdate(userId, {
-        $pull: { households: householdId },
-    });
 };
 
 // TODO: send different response if the resourse doesnt exist or is not found
