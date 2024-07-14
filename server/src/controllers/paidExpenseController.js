@@ -150,6 +150,7 @@ router.get("/:paidExpenseId", async (req, res, next) => {
     const paidExpenseId = req.paidExpenseId;
     const userId = req.userId;
     const { details } = req.query;
+    const { details, editable } = req.query;
 
     try {
         let paidExpense;
@@ -158,6 +159,8 @@ router.get("/:paidExpenseId", async (req, res, next) => {
                 paidExpenseId,
                 userId
             );
+        } else if (editable === "true") {
+            paidExpense = await paidExpenseManager.getEditableFields(paidExpenseId);
         } else {
             // Handle default case
             paidExpense = await paidExpenseManager.getOne(paidExpenseId);

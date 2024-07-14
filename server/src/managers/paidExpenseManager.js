@@ -158,6 +158,110 @@ exports.getOneDetails = async (paidExpenseId, userId) => {
     return paidExpense;
 };
 
+exports.getEditableFields = async (paidExpenseId) => {
+    const paidExpense = await PaidExpense.aggregate([
+        { $match: { _id: new ObjectId(paidExpenseId) } },
+        {
+            $lookup: {
+                from: "users",
+                localField: "paid.user",
+                foreignField: "_id",
+                as: "paidUserDetails",
+            },
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owed.user",
+                foreignField: "_id",
+                as: "owedUserDetails",
+            },
+        },
+        // restructure the documents by embedding user details
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                amount: 1,
+                category: 1,
+                date: 1,
+                paid: {
+                    $map: {
+                        input: "$paid",
+                        as: "p",
+                        in: {
+                            sum: "$$p.sum",
+                            user: {
+                                $arrayElemAt: [
+                                    {
+                                        $filter: {
+                                            input: "$paidUserDetails",
+                                            as: "pu",
+                                            cond: {
+                                                $eq: ["$$pu._id", "$$p.user"],
+                                            },
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                        },
+                    },
+                },
+                paidSplitType: 1,
+                owed: {
+                    $map: {
+                        input: "$owed",
+                        as: "o",
+                        in: {
+                            sum: "$$o.sum",
+                            user: {
+                                $arrayElemAt: [
+                                    {
+                                        $filter: {
+                                            input: "$owedUserDetails",
+                                            as: "ou",
+                                            cond: {
+                                                $eq: ["$$ou._id", "$$o.user"],
+                                            },
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                        },
+                    },
+                },
+                owedSplitType: 1,
+            },
+        },
+        // define the fields to include only the desired information
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                amount: 1,
+                category: 1,
+                date: 1,
+                paidSplitType: 1,
+                "paid.sum": 1,
+                "paid.user._id": 1,
+                "paid.user.name": 1,
+                "paid.user.avatar": 1,
+                "paid.user.avatarColor": 1,
+                owedSplitType: 1,
+                "owed.sum": 1,
+                "owed.user._id": 1,
+                "owed.user.name": 1,
+                "owed.user.avatar": 1,
+                "owed.user.avatarColor": 1,
+            },
+        },
+    ]);
+
+    return paidExpense[0];
+};
+
 exports.create = async (paidExpenseData) => {
     const {
         title,
