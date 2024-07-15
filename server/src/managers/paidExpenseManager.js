@@ -164,78 +164,85 @@ exports.getEditableFields = async (paidExpenseId) => {
         {
             $lookup: {
                 from: "users",
-                localField: "paid.user",
-                foreignField: "_id",
+                let: { paidUserIds: "$paid.user" },
+                pipeline: [
+                    { $match: { $expr: { $in: ["$_id", "$$paidUserIds"] } } },
+                    { $project: { _id: 1, name: 1, avatar: 1, avatarColor: 1 } }
+                ],
                 as: "paidUserDetails",
             },
         },
         {
             $lookup: {
                 from: "users",
-                localField: "owed.user",
-                foreignField: "_id",
+                let: { owedUserIds: "$owed.user" },
+                pipeline: [
+                    { $match: { $expr: { $in: ["$_id", "$$owedUserIds"] } } },
+                    { $project: { _id: 1, name: 1, avatar: 1, avatarColor: 1 } }
+                ],
                 as: "owedUserDetails",
             },
         },
-        // restructure the documents by embedding user details
         {
-            $project: {
-                _id: 1,
-                title: 1,
-                amount: 1,
-                category: 1,
-                date: 1,
+            $addFields: {
                 paid: {
                     $map: {
                         input: "$paid",
                         as: "p",
                         in: {
                             sum: "$$p.sum",
-                            user: {
+                            _id: "$$p.user",
+                            name: {
                                 $arrayElemAt: [
-                                    {
-                                        $filter: {
-                                            input: "$paidUserDetails",
-                                            as: "pu",
-                                            cond: {
-                                                $eq: ["$$pu._id", "$$p.user"],
-                                            },
-                                        },
-                                    },
-                                    0,
-                                ],
+                                    "$paidUserDetails.name",
+                                    { $indexOfArray: ["$paidUserDetails._id", "$$p.user"] }
+                                ]
                             },
-                        },
-                    },
+                            avatar: {
+                                $arrayElemAt: [
+                                    "$paidUserDetails.avatar",
+                                    { $indexOfArray: ["$paidUserDetails._id", "$$p.user"] }
+                                ]
+                            },
+                            avatarColor: {
+                                $arrayElemAt: [
+                                    "$paidUserDetails.avatarColor",
+                                    { $indexOfArray: ["$paidUserDetails._id", "$$p.user"] }
+                                ]
+                            }
+                        }
+                    }
                 },
-                paidSplitType: 1,
                 owed: {
                     $map: {
                         input: "$owed",
                         as: "o",
                         in: {
                             sum: "$$o.sum",
-                            user: {
+                            _id: "$$o.user",
+                            name: {
                                 $arrayElemAt: [
-                                    {
-                                        $filter: {
-                                            input: "$owedUserDetails",
-                                            as: "ou",
-                                            cond: {
-                                                $eq: ["$$ou._id", "$$o.user"],
-                                            },
-                                        },
-                                    },
-                                    0,
-                                ],
+                                    "$owedUserDetails.name",
+                                    { $indexOfArray: ["$owedUserDetails._id", "$$o.user"] }
+                                ]
                             },
-                        },
-                    },
-                },
-                owedSplitType: 1,
-            },
+                            avatar: {
+                                $arrayElemAt: [
+                                    "$owedUserDetails.avatar",
+                                    { $indexOfArray: ["$owedUserDetails._id", "$$o.user"] }
+                                ]
+                            },
+                            avatarColor: {
+                                $arrayElemAt: [
+                                    "$owedUserDetails.avatarColor",
+                                    { $indexOfArray: ["$owedUserDetails._id", "$$o.user"] }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
         },
-        // define the fields to include only the desired information
         {
             $project: {
                 _id: 1,
@@ -244,19 +251,19 @@ exports.getEditableFields = async (paidExpenseId) => {
                 category: 1,
                 date: 1,
                 paidSplitType: 1,
-                "paid.sum": 1,
-                "paid.user._id": 1,
-                "paid.user.name": 1,
-                "paid.user.avatar": 1,
-                "paid.user.avatarColor": 1,
                 owedSplitType: 1,
+                "paid.sum": 1,
+                "paid._id": 1,
+                "paid.name": 1,
+                "paid.avatar": 1,
+                "paid.avatarColor": 1,
                 "owed.sum": 1,
-                "owed.user._id": 1,
-                "owed.user.name": 1,
-                "owed.user.avatar": 1,
-                "owed.user.avatarColor": 1,
-            },
-        },
+                "owed._id": 1,
+                "owed.name": 1,
+                "owed.avatar": 1,
+                "owed.avatarColor": 1,
+            }
+        }
     ]);
 
     return paidExpense[0];
