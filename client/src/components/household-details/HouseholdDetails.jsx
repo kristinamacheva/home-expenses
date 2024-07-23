@@ -1,6 +1,7 @@
 import {
     Avatar,
     AvatarGroup,
+    Box,
     Card,
     HStack,
     Heading,
@@ -23,6 +24,7 @@ import AuthContext from "../../contexts/authContext";
 import Path from "../../paths";
 import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 import Statistics from "../statistics/Statistics";
+import CategoryList from "../category-list/CategoryList";
 
 export default function HouseholdDetails() {
     // TODO: load all details here and pass as props or make seperate requests
@@ -105,16 +107,19 @@ export default function HouseholdDetails() {
             </Card>
 
             <Tabs isLazy colorScheme="themePurple" mx="1" mt="4">
-                <TabList>
-                    {currentUserRole !== "Дете" && (
-                        <>
-                            <Tab>Баланс</Tab>
-                            <Tab>Разходи</Tab>
-                            <Tab>Анализ</Tab>
-                        </>
-                    )}
-                    <Tab>Членове</Tab>
-                </TabList>
+                <Box width="100%" overflowX="auto" p={2}>
+                    <TabList>
+                        {currentUserRole !== "Дете" && (
+                            <>
+                                <Tab>Баланс</Tab>
+                                <Tab>Разходи</Tab>
+                                <Tab>Анализ</Tab>
+                                <Tab>Категории</Tab>
+                            </>
+                        )}
+                        <Tab>Членове</Tab>
+                    </TabList>
+                </Box>
 
                 <TabPanels>
                     {currentUserRole !== "Дете" && (
@@ -175,6 +180,11 @@ export default function HouseholdDetails() {
                     {currentUserRole !== "Дете" && (
                         <TabPanel>
                             <Statistics />
+                        </TabPanel>
+                    )}
+                    {currentUserRole !== "Дете" && (
+                        <TabPanel>
+                            <CategoryList />
                         </TabPanel>
                     )}
                     <TabPanel>
