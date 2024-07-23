@@ -60,6 +60,12 @@ const householdSchema = new mongoose.Schema({
             sum: { type: Number, default: 0 },
         },
     ],
+    categories: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: 'Category',
+        },
+    ],
 });
 
 // Create index for frequently queried array fields

@@ -6,7 +6,11 @@ const paidExpenseSchema = new mongoose.Schema(
             type: String,
             required: [true, "Полето 'Заглавие' е задължително"],
         },
-        category: { type: String },
+        category: {
+            type: mongoose.Types.ObjectId,
+            ref: 'Category',
+            required: [true, "Полето 'Категория' е задължително"],
+        },
         creator: {
             type: mongoose.Types.ObjectId,
             ref: "User",
