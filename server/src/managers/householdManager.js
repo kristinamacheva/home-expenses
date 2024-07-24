@@ -1,6 +1,7 @@
 const Household = require("../models/Household");
 const HouseholdInvitation = require("../models/HouseholdInvitation");
 const Notification = require("../models/Notification");
+const Category = require("../models/Category");
 const User = require("../models/User");
 const mongoose = require("mongoose");
 const { AppError } = require("../utils/AppError");
@@ -453,6 +454,13 @@ exports.create = async (householdData) => {
             throw new AppError("1 или повече имейла не бяха намерени", 400);
         }
 
+        // Fetch predefined category IDs
+        const predefinedCategoryIds = await Category.find({ predefined: true })
+            .select("_id")
+            .session(session)
+            .lean()
+            .then((categories) => categories.map((category) => category._id));
+
         // Create the new household
         const newHousehold = new Household({
             name,
@@ -470,6 +478,7 @@ exports.create = async (householdData) => {
                     type: "+", // Default type
                 },
             ],
+            categories: predefinedCategoryIds,
         });
 
         // Save the household to the database

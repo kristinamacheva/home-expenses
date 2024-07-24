@@ -3,6 +3,7 @@ const householdManager = require("../managers/householdManager");
 const getHousehold = require("../middlewares/householdMiddleware");
 const paidExpenseController = require("./paidExpenseController");
 const paymentController = require("./paymentController");
+const categoryController = require("./categoryController");
 const {
     createValidator,
     updateValidator,
@@ -150,6 +151,7 @@ router.put("/:householdId/leave", async (req, res, next) => {
 
 router.use("/:householdId/paidExpenses", paidExpenseController);
 router.use("/:householdId/payments", paymentController);
+router.use("/:householdId/categories", categoryController);
 
 module.exports = router;
 
