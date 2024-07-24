@@ -4,14 +4,14 @@ const categorySchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String },
     predefined: { type: Boolean, default: false },
-    householdId: {
+    household: {
         type: mongoose.Types.ObjectId,
         ref: "Household",
         required: function () {
             return !this.predefined;
         }, // required only if not predefined
     },
-    createdBy: {
+    creator: {
         type: mongoose.Types.ObjectId,
         ref: "User",
         required: function () {
