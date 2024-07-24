@@ -290,7 +290,7 @@ export default function PaidExpenseDetails({
                                                 background={"themePurple.200"}
                                                 color={"themePurple.800"}
                                             >
-                                                {paidExpenseDetails.category}
+                                                {paidExpenseDetails.category.title}
                                             </Badge>
                                         </Box>
                                         <Text color={"gray.500"} fontSize="sm">
