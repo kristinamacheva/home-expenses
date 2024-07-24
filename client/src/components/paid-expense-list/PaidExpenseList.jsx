@@ -7,6 +7,7 @@ import {
     FormControl,
     FormLabel,
     Input,
+    Select,
     Spinner,
     Stack,
     Text,
@@ -15,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import PaidExpenseCreate from "./paid-expense-create/PaidExpenseCreate";
 import * as paidExpenseService from "../../services/paidExpenseService";
+import * as categoryService from "../../services/categoryService";
 import { useParams } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
 
@@ -30,6 +32,7 @@ const initialSearchValues = {
 
 export default function PaidExpenseList({ isAdmin }) {
     const [paidExpenses, setPaidExpenses] = useState([]);
+    const [householdCategories, setHouseholdCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [index, setIndex] = useState(2); // Page index starts at 2
     const [hasMore, setHasMore] = useState(false); // Track if there are more items
@@ -47,6 +50,7 @@ export default function PaidExpenseList({ isAdmin }) {
 
     useEffect(() => {
         fetchPaidExpenses();
+        fetchCategories();
     }, []);
 
     // TODO: Display search errors
@@ -91,6 +95,27 @@ export default function PaidExpenseList({ isAdmin }) {
         },
         [householdId, searchValues]
     );
+
+    const fetchCategories = () => {
+        categoryService
+            .getAll(householdId)
+            .then((result) => setHouseholdCategories(result))
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title:
+                            error.message ||
+                            "Неуспешно зареждане на категориите на домакинството",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
+            });
+    };
 
     const fetchMorePaidExpenses = useCallback(async () => {
         if (isLoading || !hasMore) return;
@@ -197,14 +222,18 @@ export default function PaidExpenseList({ isAdmin }) {
 
                     <FormControl id="category">
                         <FormLabel>Категория на разход</FormLabel>
-                        <Input
-                            size="md"
-                            type="search"
+                        <Select
                             name="category"
-                            value={searchValues.category || ""}
+                            value={searchValues.category}
                             onChange={onChange}
-                            placeholder="Въведете категория"
-                        />
+                            placeholder="Изберете категория"
+                        >
+                            {householdCategories.map((category) => (
+                                <option value={category._id}>
+                                    {category.title}
+                                </option>
+                            ))}
+                        </Select>
                     </FormControl>
 
                     <FormControl id="startDate">
