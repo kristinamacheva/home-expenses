@@ -184,7 +184,7 @@ export default function HouseholdDetails() {
                     )}
                     {currentUserRole !== "Дете" && (
                         <TabPanel>
-                            <CategoryList />
+                            <CategoryList isAdmin={isAdmin} />
                         </TabPanel>
                     )}
                     <TabPanel>

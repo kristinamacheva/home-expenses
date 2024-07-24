@@ -23,6 +23,7 @@ const predefinedCategories = [
     { title: 'Лични разходи', description: 'Дрехи, обувки, забавления, козметика и пътувания', predefined: true },
     { title: 'Образование', description: 'Курсове, учебни материали и такси за образование', predefined: true },
     { title: 'Други', description: 'Разходи, които не попадат в другите категории', predefined: true },
+    { title: 'Некатегоризиран', description: 'Разходи, които нямат категория', predefined: true },
 ];
 
 module.exports = predefinedCategories;
