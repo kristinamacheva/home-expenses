@@ -22,7 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
 import { MdGroupAdd } from "react-icons/md";
-import { FaHouse, FaPeopleRoof, FaList, FaChildren } from "react-icons/fa6";
+import { FaHouse, FaPeopleRoof, FaChildren } from "react-icons/fa6";
 import Path from "../../paths";
 import AuthContext from "../../contexts/authContext";
 
@@ -30,7 +30,6 @@ const LinkItems = [
     { name: "Начало", icon: FaHouse, to: Path.Home },
     { name: "Домакинства", icon: FaPeopleRoof, to: Path.HouseholdList },
     { name: "Джобни", icon: FaChildren, to: "/allowance" },
-    { name: "Категории", icon: FaList, to: "/expense-categories" },
     { name: "Покани", icon: MdGroupAdd, to: Path.HouseholdInvitations },
 ];
 
