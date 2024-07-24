@@ -19,11 +19,11 @@ import {
     Text,
     useToast,
 } from "@chakra-ui/react";
-import categoriesOptions from "../../../data/categoriesOptions ";
 import moment from "moment";
 import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
 import * as householdService from "../../../services/householdService";
+import * as categoryService from "../../../services/categoryService";
 import * as paidExpenseService from "../../../services/paidExpenseService";
 import { useParams } from "react-router-dom";
 import Equally from "./split-types/Equally";
@@ -50,6 +50,7 @@ export default function PaidExpenseCreate({
     const { householdId } = useParams();
 
     const [householdMembers, setHouseholdMembers] = useState([]);
+    const [householdCategories, setHouseholdCategories] = useState([]);
     const [paid, setPaid] = useState([]);
     const [owed, setOwed] = useState([]);
 
@@ -59,7 +60,6 @@ export default function PaidExpenseCreate({
     const [errors, setErrors] = useState({
         title: "",
         amount: "",
-        category: "",
         date: "",
         paidSplitType: "",
         paid: "",
@@ -79,6 +79,25 @@ export default function PaidExpenseCreate({
                         title:
                             error.message ||
                             "Неуспешно зареждане на членовете на домакинството",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
+            });
+
+            categoryService
+            .getAll(householdId)
+            .then((result) => setHouseholdCategories(result))
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title:
+                            error.message ||
+                            "Неуспешно зареждане на категориите на домакинството",
                         status: "error",
                         duration: 6000,
                         isClosable: true,
@@ -171,7 +190,6 @@ export default function PaidExpenseCreate({
         const newErrors = {
             title: "",
             amount: "",
-            category: "",
             date: "",
             paidSplitType: "",
             paid: "",
@@ -194,11 +212,6 @@ export default function PaidExpenseCreate({
         if (!values.date.trim()) {
             newErrors.date = "Датата не може да бъде празна";
         }
-
-        // TODO: Category
-        // if (!values.category.trim()) {
-        //     newErrors.category = "Категорията не може да бъде празна";
-        // }
 
         if (!values.payersOptionField) {
             newErrors.paidSplitType =
@@ -258,7 +271,7 @@ export default function PaidExpenseCreate({
 
         const newPaidExpense = {
             title: values.title,
-            // category: values.category,
+            category: values.category,
             amount: values.amount,
             date: values.date,
             paidSplitType,
@@ -267,7 +280,7 @@ export default function PaidExpenseCreate({
             owed,
         };
 
-        console.log(newPaidExpense);
+        // console.log(newPaidExpense);
 
         try {
             await paidExpenseService.create(householdId, newPaidExpense);
@@ -380,31 +393,12 @@ export default function PaidExpenseCreate({
                                     onChange={onChange}
                                     placeholder="Изберете категория"
                                 >
-                                    {categoriesOptions.map(
-                                        (categoryGroup, index) => (
-                                            <optgroup
-                                                label={categoryGroup.category}
-                                                key={index}
-                                            >
-                                                {categoryGroup.items.map(
-                                                    (item, i) => (
-                                                        <option
-                                                            value={item}
-                                                            key={`${index}-${i}`}
-                                                        >
-                                                            {item}
-                                                        </option>
-                                                    )
-                                                )}
-                                            </optgroup>
-                                        )
-                                    )}
+                                    {householdCategories.map((category) => (
+                                        <option value={category._id}>
+                                            {category.title}
+                                        </option>
+                                    ))}
                                 </Select>
-                                {errors.category && (
-                                    <Text color="red.500" fontSize="sm">
-                                        {errors.category}
-                                    </Text>
-                                )}
                             </FormControl>
                         </Stack>
                         <Divider />
