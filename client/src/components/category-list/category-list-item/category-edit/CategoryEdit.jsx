@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
     Button,
     FormControl,
@@ -18,13 +18,12 @@ import {
 
 import * as categoryService from "../../../../services/categoryService";
 import AuthContext from "../../../../contexts/authContext";
-import { useParams } from "react-router-dom";
 
 export default function CategoryEdit({
     isOpen,
     onClose,
     categoryId,
-    householdIdId,
+    householdId,
     fetchCategories,
 }) {
     const [values, setValues] = useState({
@@ -36,29 +35,32 @@ export default function CategoryEdit({
     });
 
     const { logoutHandler } = useContext(AuthContext);
-    const { householdId } = useParams();
-
     const toast = useToast();
 
-    useEffect(async () => {
-        try {
-            const result = await categoryService.getOne(_id);
-
-            setInitialCategory(result);
-        } catch (error) {
-            if (error.status === 401) {
-                logoutHandler();
-            } else {
-                toast({
-                    title: "Грешка.",
-                    description:
-                        error.message || "Неуспешно зареждане на категорията.",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
+    useEffect(() => {
+        categoryService
+            .getOne(householdId, categoryId)
+            .then((result) => {
+                setValues({
+                    title: result.title,
+                    description: result.description,
                 });
-            }
-        }
+            })
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title: "Грешка.",
+                        description:
+                            error.message ||
+                            "Неуспешно зареждане на категорията.",
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                }
+            });
     }, []);
 
     const onChange = (e) => {
@@ -89,21 +91,21 @@ export default function CategoryEdit({
             title: "",
         });
 
-        const newCategory = {
+        const updatedCategory = {
             title: values.title,
             description: values.description,
         };
 
         // Validate form fields
-        if (!validateForm(newCategory)) {
+        if (!validateForm(updatedCategory)) {
             return;
         }
 
         try {
-            await categoryService.create(householdId, newCategory);
+            await categoryService.edit(householdId, categoryId, updatedCategory);
 
             toast({
-                title: "Успешно създаване на категория",
+                title: "Успешно редактиране на категория",
                 status: "success",
                 duration: 6000,
                 isClosable: true,
@@ -117,7 +119,8 @@ export default function CategoryEdit({
                 logoutHandler();
             } else {
                 toast({
-                    title: error.message || "Неуспешно създаване на категория",
+                    title:
+                        error.message || "Неуспешно редактиране на категория",
                     status: "error",
                     duration: 6000,
                     isClosable: true,
@@ -131,7 +134,7 @@ export default function CategoryEdit({
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent mx={{ base: "4", md: "0" }}>
-                <ModalHeader>Създайте категория</ModalHeader>
+                <ModalHeader>Редактирайте категория</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <form onSubmit={onSubmit}>
@@ -163,7 +166,7 @@ export default function CategoryEdit({
                 </ModalBody>
                 <ModalFooter>
                     <Button variant="primary" mr={3} onClick={onSubmit}>
-                        Създайте
+                        Редактирайте
                     </Button>
                     <Button onClick={onClose}>Отменете</Button>
                 </ModalFooter>
