@@ -74,6 +74,11 @@ const paidExpenseSchema = new mongoose.Schema(
                 },
             },
         ],
+        child: {
+            type: mongoose.Types.ObjectId,
+            ref: "User",
+            required: [true, "Полето 'Дете' е задължително"],
+        },
         balance: [
             {
                 user: {
