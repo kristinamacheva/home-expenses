@@ -16,6 +16,7 @@ import { useParams } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
 import * as paidExpenseService from "../../services/paidExpenseService";
 import CategoryExpenseChart from "./category-expense-chart/CategoryExpenseChart";
+import StatisticsCard from "./statistics-card/StatisticsCard";
 
 const initialSearchValues = {
     startDate: moment().subtract(3, "months").format("YYYY-MM-DD"),
@@ -24,6 +25,8 @@ const initialSearchValues = {
 
 export default function Statistics() {
     const [searchValues, setSearchValues] = useState(initialSearchValues);
+    const [totalAmount, setTotalAmount] = useState("");
+    const [count, setCount] = useState("");
     const [totalAmountData, setTotalAmountData] = useState([]);
     const [totalAmountCategoryData, setTotalAmountCategoryData] = useState([]);
     const { logoutHandler } = useContext(AuthContext);
@@ -37,9 +40,35 @@ export default function Statistics() {
     });
 
     useEffect(() => {
+        fetchTotalAmountAndCountStats();
         fetchTotalAmountData();
         fetchTotalAmountCategoryData();
     }, []);
+
+    const fetchTotalAmountAndCountStats = async () => {
+        try {
+            const { totalAmount, count } =
+                await paidExpenseService.getTotalAmountAndCountStats(
+                    householdId,
+                    searchValues
+                );
+            setTotalAmount(totalAmount);
+            setCount(count);
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: "Грешка.",
+                    description:
+                        "Възникна грешка при зареждането на сумата и броят на разходите",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        }
+    };
 
     const fetchTotalAmountData = async () => {
         try {
@@ -129,6 +158,7 @@ export default function Statistics() {
         const isValid = validateForm();
         if (!isValid) return;
 
+        fetchTotalAmountAndCountStats();
         fetchTotalAmountData();
         fetchTotalAmountCategoryData();
     };
@@ -182,6 +212,13 @@ export default function Statistics() {
                 <Heading as="h4" size="md" my={2}>
                     Анализ на одобрените разходи за избран период
                 </Heading>
+                <Flex direction={{ base: "column", md: "row" }} gap={4} mt={6}>
+                    <StatisticsCard
+                        label="Обща сума на разходите"
+                        value={`${totalAmount} лв.`}
+                    />
+                    <StatisticsCard label="Брой разходи" value={count} />
+                </Flex>
                 <ExpenseChart data={totalAmountData} />
                 <CategoryExpenseChart data={totalAmountCategoryData} />
             </Stack>
