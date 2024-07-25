@@ -142,6 +142,12 @@ router.get("/statistics", statisticsValidator, async (req, res, next) => {
                 userId,
                 searchParams
             );
+        } else if (type === "totalAmountAndCount") {
+            stats = await paidExpenseManager.getTotalAmountAndCountStats(
+                householdId,
+                userId,
+                searchParams
+            );
         } else {
             stats = [];
         }

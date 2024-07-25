@@ -183,6 +183,46 @@ exports.getTotalAmountByCategoryStats = async (householdId, userId, searchParams
     return expenses.map((e) => ({ category: e.category, totalAmount: e.totalAmount }));
 };
 
+exports.getTotalAmountAndCountStats = async (householdId, userId, searchParams) => {
+    // Check if the user belongs to the household
+    const user = await User.findOne({ _id: userId, households: householdId });
+    if (!user) {
+        throw new AppError(`Потребителят не е част от домакинството`, 401);
+    }
+
+    const { startDate, endDate } = searchParams;
+
+    const stats = await PaidExpense.aggregate([
+        {
+            $match: {
+                household: new mongoose.Types.ObjectId(householdId),
+                date: { $gte: new Date(startDate), $lte: new Date(endDate) },
+                expenseStatus: "Одобрен",
+            },
+        },
+        {
+            $group: {
+                _id: null,
+                totalAmount: { $sum: "$amount" },
+                count: { $sum: 1 },
+            },
+        },
+        {
+            $project: {
+                _id: 0,
+                totalAmount: 1,
+                count: 1,
+            },
+        },
+    ]);
+
+    if (stats.length > 0) {
+        return stats[0];
+    } else {
+        return { totalAmount: 0, count: 0 };
+    }
+};
+
 exports.getOne = (paidExpenseId) =>
     PaidExpense.findById(paidExpenseId)
         .select("_id title category creator amount date expenseStatus balance")
