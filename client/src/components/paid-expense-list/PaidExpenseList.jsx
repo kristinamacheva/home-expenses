@@ -6,6 +6,7 @@ import {
     Flex,
     FormControl,
     FormLabel,
+    Heading,
     Input,
     Select,
     Spinner,
@@ -229,7 +230,7 @@ export default function PaidExpenseList({ isAdmin }) {
                             placeholder="Изберете категория"
                         >
                             {householdCategories.map((category) => (
-                                <option value={category._id}>
+                                <option key={category._id} value={category._id}>
                                     {category.title}
                                 </option>
                             ))}
@@ -307,15 +308,21 @@ export default function PaidExpenseList({ isAdmin }) {
             </form>
 
             <Stack>
-                {paidExpenses.map((paidExpense) => (
-                    <PaidExpenseListItem
-                        key={paidExpense._id}
-                        {...paidExpense}
-                        fetchPaidExpenses={fetchPaidExpenses}
-                        onRemove={removePaidExpenseFromState}
-                        isAdmin={isAdmin}
-                    />
-                ))}
+                {Array.isArray(paidExpenses) && paidExpenses.length > 0 ? (
+                    paidExpenses.map((paidExpense) => (
+                        <PaidExpenseListItem
+                            key={paidExpense._id}
+                            {...paidExpense}
+                            fetchPaidExpenses={fetchPaidExpenses}
+                            onRemove={removePaidExpenseFromState}
+                            isAdmin={isAdmin}
+                        />
+                    ))
+                ) : (
+                    <Heading as="h5" size="sm" my={2}>
+                        Няма платени разходи
+                    </Heading>
+                )}
             </Stack>
 
             <Stack ref={loaderRef} p="2">

@@ -394,7 +394,7 @@ export default function PaidExpenseCreate({
                                     placeholder="Изберете категория"
                                 >
                                     {householdCategories.map((category) => (
-                                        <option value={category._id}>
+                                        <option key={category._id} value={category._id}>
                                             {category.title}
                                         </option>
                                     ))}
