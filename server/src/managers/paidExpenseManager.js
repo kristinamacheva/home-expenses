@@ -395,7 +395,7 @@ exports.getEditableFields = async (paidExpenseId) => {
 exports.create = async (paidExpenseData) => {
     const {
         title,
-        category,
+        category: inputCategory,
         creator,
         amount,
         date,
@@ -483,6 +483,24 @@ exports.create = async (paidExpenseData) => {
             type: balanceType,
         };
     });
+
+    let category = inputCategory;
+
+    if (!category) {
+        // Find uncategorized category if no category is provided
+        const uncategorizedCategory = await Category.findOne({ title: "Некатегоризиран" });
+        if (uncategorizedCategory) {
+            category = uncategorizedCategory._id;
+        } else {
+            throw new AppError("Категорията 'Некатегоризиран' не е намерена", 404);
+        }
+    } else {
+        // Check if the provided category ID exists
+        const existingCategory = await Category.findById(category);
+        if (!existingCategory) {
+            throw new AppError("Посочената категория не съществува", 404);
+        }
+    }
 
     // Create the new expense
     const newPaidExpense = new PaidExpense({
