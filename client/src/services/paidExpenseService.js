@@ -25,7 +25,6 @@ export const getAll = async (householdId, page, params = {}) => {
 export const getTotalAmountStats = async (householdId, searchValues) => {
     const url = `${baseUrl(householdId)}`;
 
-    console.log(url);
     const result = await request.get(
         `${url}/statistics?type=totalAmount&startDate=${searchValues.startDate}&endDate=${searchValues.endDate}`
     );
@@ -35,7 +34,6 @@ export const getTotalAmountStats = async (householdId, searchValues) => {
 export const getTotalAmountByCategoryStats = async (householdId, searchValues) => {
     const url = `${baseUrl(householdId)}`;
 
-    console.log(url);
     const result = await request.get(
         `${url}/statistics?type=totalAmountByCategory&startDate=${searchValues.startDate}&endDate=${searchValues.endDate}`
     );
@@ -52,6 +50,13 @@ export const create = async (householdId, paidExpenseData) => {
 export const getOneDetails = async (householdId, paidExpenseId) => {
     const url = baseUrl(householdId);
     const result = await request.get(`${url}/${paidExpenseId}?details=all`);
+
+    return result;
+};
+
+export const getEditableFields = async (householdId, paidExpenseId) => {
+    const url = baseUrl(householdId);
+    const result = await request.get(`${url}/${paidExpenseId}?editable=true`);
 
     return result;
 };
