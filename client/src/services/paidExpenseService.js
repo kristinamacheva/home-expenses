@@ -44,7 +44,7 @@ export const getTotalAmountAndCountStats = async (householdId, searchValues) => 
     const url = `${baseUrl(householdId)}`;
 
     const result = await request.get(
-        `${url}/statistics?type=getTotalAmountAndCountStats&startDate=${searchValues.startDate}&endDate=${searchValues.endDate}`
+        `${url}/statistics?type=totalAmountAndCount&startDate=${searchValues.startDate}&endDate=${searchValues.endDate}`
     );
     return result;
 };
