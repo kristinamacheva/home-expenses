@@ -15,6 +15,7 @@ import ExpenseChart from "./expense-chart/ExpenseChart";
 import { useParams } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
 import * as paidExpenseService from "../../services/paidExpenseService";
+import CategoryExpenseChart from "./category-expense-chart/CategoryExpenseChart";
 
 const initialSearchValues = {
     startDate: moment().subtract(3, "months").format("YYYY-MM-DD"),
@@ -24,6 +25,7 @@ const initialSearchValues = {
 export default function Statistics() {
     const [searchValues, setSearchValues] = useState(initialSearchValues);
     const [totalAmountData, setTotalAmountData] = useState([]);
+    const [totalAmountCategoryData, setTotalAmountCategoryData] = useState([]);
     const { logoutHandler } = useContext(AuthContext);
     const { householdId } = useParams();
     const toast = useToast();
@@ -36,7 +38,7 @@ export default function Statistics() {
 
     useEffect(() => {
         fetchTotalAmountData();
-        //   fetchCategoryData();
+        fetchTotalAmountCategoryData();
     }, []);
 
     const fetchTotalAmountData = async () => {
@@ -54,6 +56,29 @@ export default function Statistics() {
                     title: "Грешка.",
                     description:
                         "Възникна грешка при зареждането на статистиката за сумата на разхода",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        }
+    };
+
+    const fetchTotalAmountCategoryData = async () => {
+        try {
+            const data = await paidExpenseService.getTotalAmountByCategoryStats(
+                householdId,
+                searchValues
+            );
+            setTotalAmountCategoryData(data);
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: "Грешка.",
+                    description:
+                        "Възникна грешка при зареждането на статистиката за категориите",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
@@ -105,6 +130,7 @@ export default function Statistics() {
         if (!isValid) return;
 
         fetchTotalAmountData();
+        fetchTotalAmountCategoryData();
     };
 
     return (
@@ -157,6 +183,7 @@ export default function Statistics() {
                     Анализ на одобрените разходи за избран период
                 </Heading>
                 <ExpenseChart data={totalAmountData} />
+                <CategoryExpenseChart data={totalAmountCategoryData} />
             </Stack>
         </>
     );
