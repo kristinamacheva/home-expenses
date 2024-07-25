@@ -29,7 +29,7 @@ export default function ExpenseChart({ data }) {
     if (data.length === 0) {
         return (
             <div style={{ textAlign: "center", padding: "20px" }}>
-                <p>Няма налична информация</p>
+                <p>Няма налична информация за тенденции на разходите във времето</p>
             </div>
         );
     }
