@@ -130,6 +130,59 @@ exports.getTotalAmountStats = async (householdId, userId, searchParams) => {
     return expenses.map((e) => ({ date: e._id, amount: e.totalAmount }));
 };
 
+exports.getTotalAmountByCategoryStats = async (householdId, userId, searchParams) => {
+    // Check if the user belongs to the household
+    const user = await User.findOne({ _id: userId, households: householdId });
+    if (!user) {
+        throw new AppError(`Потребителят не е част от домакинството`, 401);
+    }
+
+    // Proceed with querying the total amount statistics by category
+    const { startDate, endDate } = searchParams;
+
+    const expenses = await PaidExpense.aggregate([
+        // Match expenses by household, date range, and approval status
+        {
+            $match: {
+                household: new mongoose.Types.ObjectId(householdId), // Filter by householdId
+                date: { $gte: new Date(startDate), $lte: new Date(endDate) },
+                expenseStatus: "Одобрен",
+            },
+        },
+        // Group by category and sum the amounts
+        {
+            $group: {
+                _id: "$category", // Group by category
+                totalAmount: { $sum: "$amount" },
+            },
+        },
+        // Lookup the category details
+        {
+            $lookup: {
+                from: 'categories',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'category',
+            },
+        },
+        {
+            $unwind: "$category",
+        },
+        {
+            $project: {
+                category: "$category.title",
+                totalAmount: 1,
+            },
+        },
+        // Sort the results by category title
+        {
+            $sort: { category: 1 },
+        },
+    ]);
+
+    return expenses.map((e) => ({ category: e.category, totalAmount: e.totalAmount }));
+};
+
 exports.getOne = (paidExpenseId) =>
     PaidExpense.findById(paidExpenseId)
         .select("_id title category creator amount date expenseStatus balance")

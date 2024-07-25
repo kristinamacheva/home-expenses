@@ -131,9 +131,17 @@ router.get("/statistics", statisticsValidator, async (req, res, next) => {
 
     try {
         if (type === "totalAmount") {
-            stats = await paidExpenseManager.getTotalAmountStats(householdId, userId, searchParams);
-        // } else if (type === "categories") {
-        //     users = await householdManager.getCategoriesStats(householdId);
+            stats = await paidExpenseManager.getTotalAmountStats(
+                householdId,
+                userId,
+                searchParams
+            );
+        } else if (type === "totalAmountByCategory") {
+            stats = await paidExpenseManager.getTotalAmountByCategoryStats(
+                householdId,
+                userId,
+                searchParams
+            );
         } else {
             stats = [];
         }
