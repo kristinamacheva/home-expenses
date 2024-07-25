@@ -33,9 +33,6 @@ export const AuthProvider = ({ children }) => {
 
     const logoutHandler = () => {
         setUser({});
-        if (socket) {
-            socket.disconnect();
-        }
         navigate(Path.Login);
     };
 

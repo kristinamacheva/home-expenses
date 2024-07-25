@@ -6,35 +6,35 @@ import AuthContext from "./authContext";
 const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
-    const { logoutHandler, socket, userId } = useContext(AuthContext);
+    const { logoutHandler, socket, isAuthenticated } = useContext(AuthContext);
     const toast = useToast();
     const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
-        // Fetch initial notifications if user is authenticated
-        if (userId) {
+        if (isAuthenticated) {
+            console.log("Fetching initial notifications...");
             fetchNotifications();
         }
+    }, [isAuthenticated]);
 
-        // Setup socket event listener
-        if (socket) {
-            socket.on("notification", handleNotification);
-        }
-
-        // Cleanup function
-        return () => {
-            if (socket) {
-                socket.off("notification");
-            }
-        };
-    }, [userId]);
-
-    // Clear notifications when user logs out
     useEffect(() => {
-        if (!userId) {
+        if (socket && isAuthenticated) {
+            console.log("Setting up socket listener for notifications");
+            socket.on("notification", handleNotification);
+
+            return () => {
+                console.log("Removing socket listener for notifications");
+                socket.off("notification", handleNotification);
+            };
+        }
+    }, [socket, isAuthenticated]);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            console.log("User logged out, clearing notifications");
             setNotifications([]);
         }
-    }, [userId]);
+    }, [isAuthenticated]);
 
     const fetchNotifications = () => {
         notificationService
@@ -58,6 +58,7 @@ export const NotificationProvider = ({ children }) => {
     };
 
     const handleNotification = (notification) => {
+        console.log("Notification received:", notification);
         setNotifications((prevNotifications) => [
             notification,
             ...prevNotifications,
@@ -74,7 +75,6 @@ export const NotificationProvider = ({ children }) => {
 
     const values = {
         notifications,
-        // removeNotification
     };
 
     return (

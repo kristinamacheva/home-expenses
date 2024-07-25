@@ -1,50 +1,46 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 const useSocket = (userId) => {
-    const socketRef = useRef(null);
+    const [socket, setSocket] = useState(null);
 
+    // If the useEffect dependencies change, React will first call the cleanup function before re-running 
+    // the effect.
     useEffect(() => {
-        if (userId && !socketRef.current) {
-            socketRef.current = initializeSocket();
-        }
+        if (userId) {
+            const newSocket = io("http://localhost:5000", {
+                withCredentials: true,
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+            });
 
-        return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-                socketRef.current = null;
-            }
-        };
+            newSocket.on("connect", () => {
+                console.log(
+                    `Connected to socket.io server with ID: ${newSocket.id}`
+                );
+                setSocket(newSocket);
+            });
+
+            newSocket.on("disconnect", () => {
+                console.log("Disconnected from socket.io server");
+            });
+
+            newSocket.on("connect_error", (error) => {
+                console.error(`Connection error: ${error.message}`);
+            });
+
+            newSocket.on("error", (error) => {
+                console.error(`Socket error: ${error.message}`);
+            });
+
+            return () => {
+                newSocket.disconnect();
+            };
+        }
     }, [userId]);
 
-    const initializeSocket = () => {
-        const socket = io("http://localhost:5000", {
-            withCredentials: true,
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
-        });
-
-        socket.on("connect", () => {
-            console.log(`Connected to socket.io server with ID: ${socket.id}`);
-        });
-
-        socket.on("disconnect", () => {
-            console.log(`Disconnected from socket.io server`);
-        });
-
-        socket.on("connect_error", (error) => {
-            console.error(`Connection error: ${error.message}`);
-        });
-
-        socket.on("error", (error) => {
-            console.error(`Socket error: ${error.message}`);
-        });
-
-        return socket;
-    };
-
-    return socketRef.current;
+    return socket;
 };
 
 export default useSocket;
