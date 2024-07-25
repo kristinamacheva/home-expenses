@@ -29,7 +29,6 @@ import AuthContext from "../../contexts/authContext";
 const LinkItems = [
     { name: "Начало", icon: FaHouse, to: Path.Home },
     { name: "Домакинства", icon: FaPeopleRoof, to: Path.HouseholdList },
-    { name: "Джобни", icon: FaChildren, to: "/allowance" },
     { name: "Покани", icon: MdGroupAdd, to: Path.HouseholdInvitations },
 ];
 
@@ -195,9 +194,6 @@ const MobileNav = ({ onOpen, ...rest }) => {
                         >
                             <Link to={Path.Profile}>
                                 <MenuItem>Профил</MenuItem>
-                            </Link>
-                            <Link to="/settings">
-                                <MenuItem>Настройки</MenuItem>
                             </Link>
                             <MenuDivider />
                             <Link to={Path.Logout}>
