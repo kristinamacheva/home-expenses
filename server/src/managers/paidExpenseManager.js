@@ -1,6 +1,7 @@
 const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
+const Category = require("../models/Category");
 const { AppError } = require("../utils/AppError");
 const { default: mongoose } = require("mongoose");
 
@@ -19,9 +20,7 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
     }
 
     if (searchParams.category) {
-        matchConditions.category = {
-            $regex: new RegExp(searchParams.category, "i"),
-        }; // Case-insensitive search
+        matchConditions.category = new ObjectId(searchParams.category); // Exact match by ID
     }
 
     // Date range filter
@@ -58,10 +57,39 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
 
     // Aggregation pipeline to fetch paid expenses and filter balance array
     const pipeline = [
-        { $match: matchConditions }, // Match documents with dynamic conditions
-        { $sort: { date: -1, _id: -1 } }, // Sort by date and _id in descending order
-        { $skip: skip }, // Pagination: Skip records
-        { $limit: limit }, // Pagination: Limit records
+        // Stage 1: Match documents with dynamic conditions
+        { $match: matchConditions },
+    
+        // Stage 2: Lookup to join with the categories collection
+        {
+            $lookup: {
+                from: "categories",
+                localField: "category",
+                foreignField: "_id",
+                as: "categoryDetails",
+            },
+        },
+    
+        // Stage 3: Unwind the categoryDetails array to de-normalize the results
+        { $unwind: "$categoryDetails" },
+    
+        // Stage 4: Optionally add fields or replace values
+        {
+            $addFields: {
+                category: "$categoryDetails.title", // Replace category _id with title
+            },
+        },
+    
+        // Stage 5: Sort by date and _id in descending order
+        { $sort: { date: -1, _id: -1 } },
+    
+        // Stage 6: Pagination: Skip records
+        { $skip: skip },
+    
+        // Stage 7: Pagination: Limit records
+        { $limit: limit },
+    
+        // Stage 8: Filter balance array based on userId
         {
             $addFields: {
                 balance: {
@@ -70,24 +98,26 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
                         as: "entry",
                         cond: {
                             $eq: ["$$entry.user", new ObjectId(userId)],
-                        }, // Filter by userId
+                        },
                     },
                 },
             },
         },
+    
+        // Stage 9: Project the final shape of the documents
         {
             $project: {
                 _id: 1,
                 title: 1,
-                category: 1,
+                category: 1, 
                 creator: 1,
                 amount: 1,
                 date: 1,
-                expenseStatus: 1, // Ensure the status field is included
+                expenseStatus: 1,
                 balance: 1,
             },
         },
-    ];
+    ];    
 
     // Execute aggregation pipeline
     const paidExpenses = await PaidExpense.aggregate(pipeline);
