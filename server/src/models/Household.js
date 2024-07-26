@@ -66,6 +66,7 @@ const householdSchema = new mongoose.Schema({
             ref: 'Category',
         },
     ],
+    archived: { type: Boolean, default: false },
 });
 
 // Create index for frequently queried array fields
