@@ -793,6 +793,102 @@ exports.leave = async (userId, householdId) => {
     }
 };
 
+exports.archive = async (userId, householdId) => {
+    // Fetch the household by ID
+    const household = await Household.findById(householdId);
+
+    if (!household.admins.includes(userId)) {
+        throw new AppError(
+            "Потребителят не е администратор на това домакинство.",
+            403
+        );
+    }
+
+    // Check if all balances are zero
+    const allBalancesZero = household.balance.every(
+        (balance) => balance.sum === 0
+    );
+
+    // Check if allowances exist and if all allowances are zero
+    const allowancesExist =
+        household.allowances && household.allowances.length > 0;
+    const allAllowancesZero = allowancesExist
+        ? household.allowances.every((allowance) => allowance.sum === 0)
+        : true;
+
+    if (!allBalancesZero || !allAllowancesZero) {
+        throw new AppError(
+            "Домакинството не може да бъде архивирано, защото не всички баланси и джобни са нула.",
+            400
+        );
+    }
+
+    // Archive the household
+    household.archived = true;
+    await household.save();
+
+    // Send notifications to all members except the current user
+    for (const member of household.members) {
+        if (member.user.equals(userId)) {
+            continue; // Skip the current user
+        }
+
+        // Create notification for the user
+        const notification = new Notification({
+            userId: member.user,
+            message: `Домакинството ${household.name} беше архивирано`,
+            resourceType: "Household",
+            resourceId: household._id,
+        });
+
+        const savedNotification = await notification.save();
+
+        // Send notification to the user if they have an active connection
+        sendNotificationToUser(member.user, savedNotification);
+    }
+};
+
+exports.restore = async (userId, householdId) => {
+    // Fetch the household by ID
+    const household = await Household.findById(householdId);
+
+    if (!household.admins.includes(userId)) {
+        throw new AppError(
+            "Потребителят не е администратор на това домакинство.",
+            403
+        );
+    }
+
+    // Ensure the household is currently archived
+    if (!household.archived) {
+        throw new AppError("Домакинството не е архивирано и не може да бъде възстановено.", 400);
+    }
+
+    // Restore the household (unarchive it)
+    household.archived = false;
+    await household.save();
+
+    // Send notifications to all members except the current user
+    for (const member of household.members) {
+        if (member.user.equals(userId)) {
+            continue; // Skip the current user
+        }
+
+        // Create notification for the user
+        const notification = new Notification({
+            userId: member.user,
+            message: `Домакинството ${household.name} беше възстановено`,
+            resourceType: "Household",
+            resourceId: household._id,
+        });
+
+        const savedNotification = await notification.save();
+
+        // Send notification to the user if they have an active connection
+        sendNotificationToUser(member.user, savedNotification);
+    }
+};
+
 // TODO: send different response if the resourse doesnt exist or is not found
 // TODO: filter with search params in the db
 // exports.getAll = () => Household.find();
