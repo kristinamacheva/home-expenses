@@ -29,7 +29,13 @@ export default function HouseholdList() {
     const fetchHouseholds = () => {
         authService
             .getHouseholds()
-            .then((result) => setHouseholds(result))
+            .then((result) => {
+                // Sort households: non-archived ones first
+                const sortedHouseholds = result.sort((a, b) => {
+                    return a.archived === b.archived ? 0 : a.archived ? 1 : -1;
+                });
+                setHouseholds(sortedHouseholds);
+            })
             .catch((error) => {
                 if (error.status === 401) {
                     logoutHandler();
