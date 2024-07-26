@@ -149,6 +149,33 @@ router.put("/:householdId/leave", async (req, res, next) => {
     }
 });
 
+
+router.put("/:householdId/archive", async (req, res, next) => {
+    const userId = req.userId;
+    const householdId = req.householdId;
+
+    try {
+        await householdManager.archive(userId, householdId);
+
+        res.status(204).end();
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.put("/:householdId/restore", async (req, res, next) => {
+    const userId = req.userId;
+    const householdId = req.householdId;
+
+    try {
+        await householdManager.restore(userId, householdId);
+
+        res.status(204).end();
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.use("/:householdId/paidExpenses", paidExpenseController);
 router.use("/:householdId/payments", paymentController);
 router.use("/:householdId/categories", categoryController);
