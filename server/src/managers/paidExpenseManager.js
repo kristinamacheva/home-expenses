@@ -59,7 +59,7 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
     const pipeline = [
         // Stage 1: Match documents with dynamic conditions
         { $match: matchConditions },
-    
+
         // Stage 2: Lookup to join with the categories collection
         {
             $lookup: {
@@ -69,26 +69,25 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
                 as: "categoryDetails",
             },
         },
-    
+
         // Stage 3: Unwind the categoryDetails array to de-normalize the results
         { $unwind: "$categoryDetails" },
-    
+
         // Stage 4: Optionally add fields or replace values
         {
             $addFields: {
                 category: "$categoryDetails.title", // Replace category _id with title
             },
         },
-    
         // Stage 5: Sort by date and _id in descending order
         { $sort: { date: -1, _id: -1 } },
-    
+
         // Stage 6: Pagination: Skip records
         { $skip: skip },
-    
+
         // Stage 7: Pagination: Limit records
         { $limit: limit },
-    
+
         // Stage 8: Filter balance array based on userId
         {
             $addFields: {
@@ -104,12 +103,14 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
             },
         },
     
+
         // Stage 9: Project the final shape of the documents
         {
             $project: {
                 _id: 1,
                 title: 1,
                 category: 1, 
+                category: 1,
                 creator: 1,
                 amount: 1,
                 date: 1,
@@ -117,7 +118,7 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
                 balance: 1,
             },
         },
-    ];    
+    ];
 
     // Execute aggregation pipeline
     const paidExpenses = await PaidExpense.aggregate(pipeline);
@@ -160,7 +161,11 @@ exports.getTotalAmountStats = async (householdId, userId, searchParams) => {
     return expenses.map((e) => ({ date: e._id, amount: e.totalAmount }));
 };
 
-exports.getTotalAmountByCategoryStats = async (householdId, userId, searchParams) => {
+exports.getTotalAmountByCategoryStats = async (
+    householdId,
+    userId,
+    searchParams
+) => {
     // Check if the user belongs to the household
     const user = await User.findOne({ _id: userId, households: householdId });
     if (!user) {
@@ -189,10 +194,10 @@ exports.getTotalAmountByCategoryStats = async (householdId, userId, searchParams
         // Lookup the category details
         {
             $lookup: {
-                from: 'categories',
-                localField: '_id',
-                foreignField: '_id',
-                as: 'category',
+                from: "categories",
+                localField: "_id",
+                foreignField: "_id",
+                as: "category",
             },
         },
         {
@@ -210,8 +215,12 @@ exports.getTotalAmountByCategoryStats = async (householdId, userId, searchParams
         },
     ]);
 
-    return expenses.map((e) => ({ category: e.category, totalAmount: e.totalAmount }));
+    return expenses.map((e) => ({
+        category: e.category,
+        totalAmount: e.totalAmount,
+    }));
 };
+
 
 exports.getTotalAmountAndCountStats = async (householdId, userId, searchParams) => {
     // Check if the user belongs to the household
@@ -231,25 +240,65 @@ exports.getTotalAmountAndCountStats = async (householdId, userId, searchParams) 
             },
         },
         {
+            $lookup: {
+                from: "categories",
+                localField: "category",
+                foreignField: "_id",
+                as: "categoryDetails"
+            }
+        },
+        {
+            $unwind: "$categoryDetails"
+        },
+        {
             $group: {
                 _id: null,
                 totalAmount: { $sum: "$amount" },
                 count: { $sum: 1 },
-            },
+                uncategorizedAmount: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$categoryDetails.title", "Некатегоризиран"] },
+                            "$amount",
+                            0
+                        ]
+                    }
+                }
+            }
         },
         {
             $project: {
                 _id: 0,
                 totalAmount: 1,
                 count: 1,
-            },
-        },
+                uncategorizedPercentage: {
+                    $cond: [
+                        { $eq: ["$totalAmount", 0] },
+                        0,
+                        {
+                            $multiply: [
+                                { $divide: ["$uncategorizedAmount", "$totalAmount"] },
+                                100
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
     ]);
 
     if (stats.length > 0) {
-        return stats[0];
+        return {
+            totalAmount: parseFloat(stats[0].totalAmount.toFixed(2)),
+            count: stats[0].count,
+            uncategorizedPercentage: parseFloat(stats[0].uncategorizedPercentage.toFixed(2))
+        };
     } else {
-        return { totalAmount: 0, count: 0 };
+        return {
+            totalAmount: 0,
+            count: 0,
+            uncategorizedPercentage: 0
+        };
     }
 };
 
