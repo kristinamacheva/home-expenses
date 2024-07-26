@@ -28,6 +28,7 @@ export default function Statistics() {
     const [totalAmount, setTotalAmount] = useState("");
     const [count, setCount] = useState("");
     const [totalAmountData, setTotalAmountData] = useState([]);
+    const [uncategorizedPercentage, setUncategorizedPercentage] = useState([]);
     const [totalAmountCategoryData, setTotalAmountCategoryData] = useState([]);
     const { logoutHandler } = useContext(AuthContext);
     const { householdId } = useParams();
@@ -47,13 +48,14 @@ export default function Statistics() {
 
     const fetchTotalAmountAndCountStats = async () => {
         try {
-            const { totalAmount, count } =
+            const { totalAmount, count, uncategorizedPercentage } =
                 await paidExpenseService.getTotalAmountAndCountStats(
                     householdId,
                     searchValues
                 );
             setTotalAmount(totalAmount);
             setCount(count);
+            setUncategorizedPercentage(uncategorizedPercentage);
         } catch (error) {
             if (error.status === 401) {
                 logoutHandler();
@@ -218,6 +220,10 @@ export default function Statistics() {
                         value={`${totalAmount} лв.`}
                     />
                     <StatisticsCard label="Брой разходи" value={count} />
+                    <StatisticsCard
+                        label="Процент некатегоризирани разходи"
+                        value={`${uncategorizedPercentage}%`}
+                    />
                 </Flex>
                 <ExpenseChart data={totalAmountData} />
                 <CategoryExpenseChart data={totalAmountCategoryData} />
