@@ -11,7 +11,7 @@ import {
     Legend,
     Filler,
 } from "chart.js";
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Stack, Text } from "@chakra-ui/react";
 
 // Registering the required components for Chart.js
 ChartJS.register(
@@ -29,7 +29,10 @@ export default function ExpenseChart({ data }) {
     if (data.length === 0) {
         return (
             <div style={{ textAlign: "center", padding: "20px" }}>
-                <p>Няма налична информация за тенденции на разходите във времето</p>
+                <p>
+                    Няма налична информация за тенденции на разходите във
+                    времето
+                </p>
             </div>
         );
     }
@@ -57,6 +60,9 @@ export default function ExpenseChart({ data }) {
             },
             title: {
                 display: true,
+                font: {
+                    size: 16,
+                },
                 text: "Тенденции на разходите във времето",
             },
         },
@@ -77,12 +83,21 @@ export default function ExpenseChart({ data }) {
     };
 
     return (
-        <Box>
-            <Line data={chartData} options={options} />
+        <Stack>
+            <Box
+                mt={10}
+                maxHeight={{ base: "350px", md: "400px", lg: "450px" }}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                position="relative"
+            >
+                <Line data={chartData} options={options} />
+            </Box>
             <Text mb={4} fontSize="xs" color="gray.600">
                 *Обща сума: Сумата на всички одобрени разходи за всеки месец,
                 които попадат в избрания период.
             </Text>
-        </Box>
+        </Stack>
     );
 }

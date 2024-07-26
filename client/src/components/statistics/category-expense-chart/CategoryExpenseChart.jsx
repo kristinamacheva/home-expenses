@@ -41,7 +41,10 @@ export default function CategoryExpenseChart({ data }) {
     if (data.length === 0) {
         return (
             <div style={{ textAlign: "center", padding: "20px" }}>
-                <p>Няма налична информация за обща сума на разходите по категории</p>
+                <p>
+                    Няма налична информация за обща сума на разходите по
+                    категории
+                </p>
             </div>
         );
     }
@@ -66,10 +69,18 @@ export default function CategoryExpenseChart({ data }) {
         responsive: true,
         plugins: {
             legend: {
-                position: "top",
+                position: "right", // Position the legend to the right of the chart
+                align: "center", // Align the legend to the center vertically
+                labels: {
+                    boxWidth: 20,
+                    padding: 15,
+                },
             },
             title: {
                 display: true,
+                font: {
+                    size: 16,
+                },
                 text: "Обща сума на разходите по категории",
             },
         },
@@ -78,7 +89,7 @@ export default function CategoryExpenseChart({ data }) {
     return (
         <Stack>
             <Box
-                maxHeight={{ base: "350px", md: "450px", lg: "500px" }}
+                maxHeight={{ base: "350px", md: "400px", lg: "450px" }}
                 display="flex"
                 justifyContent="center"
                 alignItems="center"
@@ -88,7 +99,8 @@ export default function CategoryExpenseChart({ data }) {
                 <Doughnut data={chartData} options={options} />
             </Box>
             <Text mb={4} fontSize="xs" color="gray.600">
-                *Обща сума: Сумата на всички одобрени разходи по категории за избрания период.
+                *Обща сума: Сумата на всички одобрени разходи по категории за
+                избрания период.
             </Text>
         </Stack>
     );
