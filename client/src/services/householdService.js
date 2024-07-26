@@ -73,7 +73,6 @@ export const create = async (householdData) => {
 };
 
 export const edit = async (householdId, householdData) => {
-    // console.log(householdData);
     const result = await request.put(
         `${baseUrl}/${householdId}`,
         householdData
@@ -82,20 +81,20 @@ export const edit = async (householdId, householdData) => {
     return result;
 };
 
-// export const edit = async (householdId, householdData) => {
-//     const result = await request.put(
-//         `${baseUrl}/${householdId}`,
-//         householdData
-//     );
-
-//     return result;
-// };
-
 export const leave = async (householdId) => {
     const result = await request.put(`${baseUrl}/${householdId}/leave`);
 
     return result;
 };
 
-// export const remove = async (householdId) =>
-//     request.remove(`${baseUrl}/${householdId}`);
+export const archive = async (householdId) => {
+    const result = await request.put(`${baseUrl}/${householdId}/archive`);
+
+    return result;
+};
+
+export const restore = async (householdId) => {
+    const result = await request.put(`${baseUrl}/${householdId}/restore`);
+
+    return result;
+};
