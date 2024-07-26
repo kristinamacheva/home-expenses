@@ -14,17 +14,14 @@ import {
 } from "@chakra-ui/react";
 import { FaEye, FaPen } from "react-icons/fa6";
 import { FaSignOutAlt } from "react-icons/fa";
+import { HiArchiveBox, HiArchiveBoxArrowDown } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 import HouseholdEdit from "./household-edit/HouseholdEdit";
 import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
 import * as householdService from "../../../services/householdService";
 
-export default function HouseholdListItem({
-    household,
-    fetchHouseholds,
-    // removeHouseholdFromState
-}) {
+export default function HouseholdListItem({ household, fetchHouseholds }) {
     const {
         isOpen: isEditModalOpen,
         onOpen: onOpenEditModal,
@@ -40,6 +37,62 @@ export default function HouseholdListItem({
 
             toast({
                 title: "Успешно напуснахте домакинството",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
+            fetchHouseholds();
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message,
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
+        }
+    };
+
+    const archiveHouseholdHandler = async (householdId) => {
+        try {
+            await householdService.archive(householdId);
+
+            toast({
+                title: "Успешно архивирахте домакинството",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+
+            fetchHouseholds();
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message,
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
+        }
+    };
+
+    const restoreHouseholdHandler = async (householdId) => {
+        try {
+            await householdService.restore(householdId);
+
+            toast({
+                title: "Успешно възстановихте домакинството",
                 status: "success",
                 duration: 6000,
                 isClosable: true,
@@ -97,13 +150,34 @@ export default function HouseholdListItem({
                 mx="4"
                 my="1"
                 boxShadow="md"
-                // borderRadius="lg"
                 borderTop="4px solid #676F9D"
                 background="white"
                 spacing="4"
                 direction={{ base: "column", md: "row" }}
                 justifyContent="space-between"
                 alignItems={{ md: "center" }}
+                position="relative" // Allow overlay to be positioned absolutely
+                _after={
+                    household.archived
+                        ? {
+                              content: `"Архивирано домакинство"`,
+                              position: "absolute",
+                              top: "0",
+                              left: "0",
+                              width: "100%",
+                              height: "100%",
+                              backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+                              color: "white",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "lg",
+                              fontWeight: "bold",
+                              borderRadius: "md",
+                              zIndex: 1,
+                          }
+                        : {}
+                }
             >
                 <Stack
                     direction={{ base: "column", md: "row" }}
@@ -138,6 +212,7 @@ export default function HouseholdListItem({
                     spacing="0"
                     w={["auto", "auto", "90px"]}
                     justifyContent="flex-end"
+                    zIndex={2} // Ensure buttons are above overlay
                 >
                     <IconButton
                         as={Link}
@@ -148,7 +223,7 @@ export default function HouseholdListItem({
                         variant="ghost"
                         color="themePurple.800"
                     />
-                    {isAdmin && (
+                    {isAdmin && !household.archived && (
                         <>
                             <IconButton
                                 aria-label="Редактирайте"
@@ -158,24 +233,37 @@ export default function HouseholdListItem({
                                 color="themePurple.800"
                                 onClick={onOpenEditModal}
                             />
-                            {/* <IconButton
-                            aria-label="Изтрийте"
-                            title="Изтрийте"
-                            icon={<FaRegTrashCan fontSize="20px" />}
-                            variant="ghost"
-                            color="themePurple.800"
-                        /> */}
+                            <IconButton
+                                aria-label="Архивирайте"
+                                title="Архивирайте"
+                                icon={<HiArchiveBox fontSize="22px" />}
+                                variant="ghost"
+                                color="themePurple.800"
+                                onClick={() => archiveHouseholdHandler(household._id)}
+                            />
                         </>
                     )}
-                    <IconButton
-                        as={Link}
-                        aria-label="Напуснете"
-                        title="Напуснете"
-                        icon={<FaSignOutAlt fontSize="20px" />}
-                        variant="ghost"
-                        color="themePurple.800"
-                        onClick={() => leaveHouseholdHandler(household._id)}
-                    />
+                    {isAdmin && household.archived && (
+                        <IconButton
+                            aria-label="Възстановете"
+                            title="Възстановете"
+                            icon={<HiArchiveBoxArrowDown fontSize="22px" />}
+                            variant="ghost"
+                            color="themePurple.800"
+                            onClick={() => restoreHouseholdHandler(household._id)}
+                        />
+                    )}
+                    {!household.archived && (
+                        <IconButton
+                            as={Link}
+                            aria-label="Напуснете"
+                            title="Напуснете"
+                            icon={<FaSignOutAlt fontSize="20px" />}
+                            variant="ghost"
+                            color="themePurple.800"
+                            onClick={() => leaveHouseholdHandler(household._id)}
+                        />
+                    )}
                 </HStack>
             </Card>
             {isEditModalOpen && (
