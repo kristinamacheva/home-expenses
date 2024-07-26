@@ -162,6 +162,7 @@ exports.getHouseholdsWithBalances = async (userId) => {
                         cond: { $eq: ["$$bal.user", new mongoose.Types.ObjectId(userId)] },
                     },
                 },
+                archived: "$householdDetails.archived",
             },
         },
     ]);
