@@ -12,9 +12,7 @@ import NotificationListItem from "./notification-list-item/NotificationListItem"
 import NotificationContext from "../../contexts/notificationContext";
 
 export default function NotificationList() {
-    const { logoutHandler } = useContext(AuthContext);
     const { notifications } = useContext(NotificationContext);
-    const toast = useToast();
 
     return (
         <>
