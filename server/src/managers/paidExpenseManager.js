@@ -684,6 +684,26 @@ exports.create = async (paidExpenseData) => {
     const newPaidExpense = new PaidExpense(newPaidExpenseData);
     await newPaidExpense.save();
 
+    // Create and send notifications for all users part of the expense
+    const message = `Създаден е нов разход в домакинство: ${expenseHousehold.name}`;
+
+    Array.from(uniqueUserIds).map(async (userId) => {
+        if (userId !== creator.toString()) {
+            const notification = new Notification({
+                userId: userId,
+                message: message,
+                resourceType: "PaidExpense",
+                resourceId: newPaidExpense._id,
+                household: expenseHousehold._id,
+            });
+
+            const savedNotification = await notification.save();
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(userId, savedNotification);
+        }
+    });
+
     return newPaidExpense;
 };
 
@@ -728,8 +748,7 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
         const notification = new Notification({
             userId: newEntry.user,
             message: message,
-            resourceType: "Household",
-            resourceId: expenseHousehold._id,
+            household: expenseHousehold._id,
         });
 
         const savedNotification = await notification.save();
@@ -772,8 +791,7 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
         const notification = new Notification({
             userId: childId,
             message: message,
-            resourceType: "Household",
-            resourceId: expenseHousehold._id,
+            household: expenseHousehold._id,
         });
 
         const savedNotification = await notification.save();

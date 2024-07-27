@@ -94,8 +94,7 @@ exports.accept = async (userId, invitationId) => {
                 const notification = new Notification({
                     userId: member.user,
                     message: message,
-                    resourceType: "Household",
-                    resourceId: household._id,
+                    household: household._id,
                 });
 
                 const savedNotification = await notification.save({ session });
