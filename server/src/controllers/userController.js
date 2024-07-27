@@ -88,16 +88,19 @@ router.post("/login", loginValidator, async (req, res, next) => {
 
 router.get("/households", isAuth, async (req, res, next) => {
     const userId = req.userId;
-    const { filterByBalance } = req.query;
+    const { filterByBalance, filterByAllowance } = req.query;
 
     try {
         let households;
 
         if (filterByBalance === "true") {
-            households =
-                await userManager.getHouseholdsWithExistingBalances(
-                    userId
-                );
+            households = await userManager.getHouseholdsWithExistingBalances(
+                userId
+            );
+        } else if (filterByAllowance === "true") {
+            households = await userManager.getHouseholdsWithExistingAllowances(
+                userId
+            );
         } else {
             // Handle default case
             households = await userManager.getHouseholdsWithBalances(userId);

@@ -307,6 +307,144 @@ exports.getHouseholdsWithExistingBalances = async (userId) => {
     return result;
 };
 
+exports.getHouseholdsWithExistingAllowances = async (userId) => {
+    const result = await User.aggregate([
+        // Filter the User collection to find the user with the given userId
+        { $match: { _id: new mongoose.Types.ObjectId(userId) } },
+        // Left outer join with the households collection
+        {
+            $lookup: {
+                from: "households",
+                localField: "households",
+                foreignField: "_id",
+                as: "householdDetails",
+            },
+        },
+        // Deconstructing the householdDetails array
+        { $unwind: "$householdDetails" },
+        // Filter households where the user is present in the balance array
+        {
+            $match: {
+                "householdDetails.allowances.user": new mongoose.Types.ObjectId(userId),
+            },
+        },
+        // Fetch details of all members in each household
+        {
+            $lookup: {
+                from: "users",
+                localField: "householdDetails.members.user",
+                foreignField: "_id",
+                as: "membersDetails",
+            },
+        },
+        // Project the relevant fields including household ID, name, members, admins, and balance
+        {
+            $project: {
+                _id: "$householdDetails._id",
+                name: "$householdDetails.name",
+                // Use $map and $let to fetch the name, avatar, and avatarColor from membersDetails
+                members: {
+                    $map: {
+                        input: "$householdDetails.members",
+                        as: "member",
+                        in: {
+                            _id: "$$member.user",
+                            role: "$$member.role",
+                            name: {
+                                $let: {
+                                    vars: {
+                                        memberDetail: {
+                                            $arrayElemAt: [
+                                                {
+                                                    $filter: {
+                                                        input: "$membersDetails",
+                                                        as: "memberDetail",
+                                                        cond: {
+                                                            $eq: [
+                                                                "$$memberDetail._id",
+                                                                "$$member.user",
+                                                            ],
+                                                        },
+                                                    },
+                                                },
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: "$$memberDetail.name",
+                                },
+                            },
+                            avatar: {
+                                $let: {
+                                    vars: {
+                                        memberDetail: {
+                                            $arrayElemAt: [
+                                                {
+                                                    $filter: {
+                                                        input: "$membersDetails",
+                                                        as: "memberDetail",
+                                                        cond: {
+                                                            $eq: [
+                                                                "$$memberDetail._id",
+                                                                "$$member.user",
+                                                            ],
+                                                        },
+                                                    },
+                                                },
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: "$$memberDetail.avatar",
+                                },
+                            },
+                            avatarColor: {
+                                $let: {
+                                    vars: {
+                                        memberDetail: {
+                                            $arrayElemAt: [
+                                                {
+                                                    $filter: {
+                                                        input: "$membersDetails",
+                                                        as: "memberDetail",
+                                                        cond: {
+                                                            $eq: [
+                                                                "$$memberDetail._id",
+                                                                "$$member.user",
+                                                            ],
+                                                        },
+                                                    },
+                                                },
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: "$$memberDetail.avatarColor",
+                                },
+                            },
+                        },
+                    },
+                },
+                // Use $filter to include only the allowance details for the specified user
+                allowances: {
+                    $arrayElemAt: [
+                        {
+                            $filter: {
+                                input: "$householdDetails.allowances",
+                                as: "allowance",
+                                cond: { $eq: ["$$allowance.user", new mongoose.Types.ObjectId(userId)] },
+                            },
+                        },
+                        0,
+                    ],
+                },
+            },
+        },
+    ]);
+
+    return result;
+};
+
 exports.update = async ({
     userId,
     avatar,
