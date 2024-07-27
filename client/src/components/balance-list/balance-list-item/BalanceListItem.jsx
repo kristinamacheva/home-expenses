@@ -23,13 +23,24 @@ export default function BalanceListItem({ balance, fetchPayments }) {
     let badgeText = "";
     let badgeColor = "";
 
-    if (balance.type === "-") {
-        badgeText = `Дължите ${balance.sum} лв.`;
+    if (userId === balance._id) {
+        if (balance.type === "-") {
+            badgeText = `Дължите ${balance.sum} лв.`;
+        } else {
+            badgeText =
+                balance.sum === 0
+                    ? "Нямате задължения"
+                    : `Дължат Ви ${balance.sum} лв.`;
+        }
     } else {
-        badgeText =
-            balance.sum === 0
-                ? "Нямате задължения"
-                : `Дължат Ви ${balance.sum} лв.`;
+        if (balance.type === "-") {
+            badgeText = `Дължи ${balance.sum} лв.`;
+        } else {
+            badgeText =
+                balance.sum === 0
+                    ? "Няма задължения"
+                    : `Дължат му ${balance.sum} лв.`;
+        }
     }
 
     badgeColor = balance.type === "-" ? "red" : "green";
