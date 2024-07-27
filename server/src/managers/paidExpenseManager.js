@@ -614,11 +614,16 @@ exports.create = async (paidExpenseData) => {
 
     if (!category) {
         // Find uncategorized category if no category is provided
-        const uncategorizedCategory = await Category.findOne({ title: "Некатегоризиран" });
+        const uncategorizedCategory = await Category.findOne({
+            title: "Некатегоризиран",
+        });
         if (uncategorizedCategory) {
             category = uncategorizedCategory._id;
         } else {
-            throw new AppError("Категорията 'Некатегоризиран' не е намерена", 404);
+            throw new AppError(
+                "Категорията 'Некатегоризиран' не е намерена",
+                404
+            );
         }
     } else {
         // Check if the provided category ID exists
@@ -626,10 +631,34 @@ exports.create = async (paidExpenseData) => {
         if (!existingCategory) {
             throw new AppError("Посочената категория не съществува", 404);
         }
+
+        // Check if the category title is "Джобни"
+        if (existingCategory.title === "Джобни") {
+            // Validate the child ID if it's provided
+            if (!child) {
+                throw new AppError(
+                    "Не е посочено дете за категория 'Джобни'",
+                    400
+                );
+            }
+
+            // Check if the child ID exists and has the role "Дете"
+            const childMember = expenseHousehold.members.find(
+                (member) =>
+                    member.user.toString() === child && member.role === "Дете"
+            );
+
+            if (!childMember) {
+                throw new AppError(
+                    "Посоченото дете не е член на домакинството или няма ролята 'Дете'",
+                    404
+                );
+            }
+        }
     }
 
-    // Create the new expense
-    const newPaidExpense = new PaidExpense({
+    // Create the new expense object
+    const newPaidExpenseData = {
         title,
         category,
         creator,
@@ -642,9 +671,15 @@ exports.create = async (paidExpenseData) => {
         household,
         userApprovals,
         balance,
-    });
+    };
 
-    // Save the household to the database
+    // Add child only if it is valid and the category is "Джобни"
+    if (child) {
+        newPaidExpenseData.child = child;
+    }
+
+    // Create and save the new expense
+    const newPaidExpense = new PaidExpense(newPaidExpenseData);
     await newPaidExpense.save();
 
     return newPaidExpense;
