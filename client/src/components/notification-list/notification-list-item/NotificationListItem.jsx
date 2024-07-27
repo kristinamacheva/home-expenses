@@ -19,11 +19,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
 import * as notificationService from "../../../services/notificationService";
+import PaidExpenseDetails from "../../paid-expense-list/paid-expense-list-item/paid-expense-details/PaidExpenseDetails";
 
 export default function NotificationListItem({ notification }) {
     const navigate = useNavigate();
     // const { userId, logoutHandler } = useContext(AuthContext);
     // const toast = useToast();
+
+    const {
+        isOpen: isPaidExpenseDetailsModalOpen,
+        onOpen: onOpenPaidExpenseDetailsModal,
+        onClose: onClosePaidExpenseDetailsModal,
+    } = useDisclosure();
 
     // Handler to navigate based on notification type
     const handleDetailsClick = () => {
@@ -31,14 +38,11 @@ export default function NotificationListItem({ notification }) {
             case "HouseholdInvitation":
                 navigate(`/household-invitations`);
                 break;
-            // case "PaidExpense":
-            //     navigate(`/paid-expenses/${notification.resourceId}`);
-            //     break;
-            case "Household":
-                navigate(`/households/${notification.resourceId}`);
+            case "PaidExpense":
+                onOpenPaidExpenseDetailsModal();
                 break;
             default:
-                console.log("Unknown notification type");
+                navigate(`/households/${notification.household}`);
                 break;
         }
     };
@@ -98,6 +102,14 @@ export default function NotificationListItem({ notification }) {
                     />
                 </HStack>
             </Card>
+            {isPaidExpenseDetailsModalOpen && (
+                <PaidExpenseDetails
+                    isOpen={isPaidExpenseDetailsModalOpen}
+                    onClose={onClosePaidExpenseDetailsModal}
+                    paidExpenseId={notification.resourceId}
+                    householdId={notification.household}
+                />
+            )}
         </>
     );
 }
