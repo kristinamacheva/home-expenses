@@ -55,4 +55,10 @@ export const getHouseholdsWithExistingBalances = async () => {
     return result;
 };
 
+export const getHouseholdsWithExistingAllowances = async () => {
+    const result = await request.get(`${baseUrl}/households?filterByAllowance=true`);
+
+    return result;
+};
+
 export const logout = () => request.get(`${baseUrl}/logout`);
