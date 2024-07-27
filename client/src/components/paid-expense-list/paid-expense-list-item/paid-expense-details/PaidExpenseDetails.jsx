@@ -129,7 +129,11 @@ export default function PaidExpenseDetails({
                     duration: 5000,
                     isClosable: true,
                 });
-                fetchPaidExpenses();
+
+                if (fetchPaidExpenses) {     
+                    fetchPaidExpenses();
+                }
+
                 onCloseForm();
             })
             .catch((error) => {
@@ -161,7 +165,11 @@ export default function PaidExpenseDetails({
                     duration: 5000,
                     isClosable: true,
                 });
-                fetchPaidExpenses();
+
+                if (fetchPaidExpenses) {     
+                    fetchPaidExpenses();
+                }
+                
                 onCloseForm();
             })
             .catch((error) => {
@@ -290,7 +298,10 @@ export default function PaidExpenseDetails({
                                                 background={"themePurple.200"}
                                                 color={"themePurple.800"}
                                             >
-                                                {paidExpenseDetails.category.title}
+                                                {
+                                                    paidExpenseDetails.category
+                                                        .title
+                                                }
                                             </Badge>
                                         </Box>
                                         <Text color={"gray.500"} fontSize="sm">
@@ -422,7 +433,10 @@ export default function PaidExpenseDetails({
                                                 base: "column",
                                                 lg: "row",
                                             }}
-                                            alignItems="center"
+                                            alignItems={{
+                                                base: "flex-start",
+                                                md: "center",
+                                            }}
                                             pl={4}
                                         >
                                             <Text fontWeight="bold">
@@ -452,6 +466,47 @@ export default function PaidExpenseDetails({
                                                 </Text>
                                             </Box>
                                         </Stack>
+                                        {paidExpenseDetails.child && (
+                                            <Stack
+                                                direction={{
+                                                    base: "column",
+                                                    lg: "row",
+                                                }}
+                                                alignItems={{
+                                                    base: "flex-start",
+                                                    md: "center",
+                                                }}
+                                                pl={4}
+                                            >
+                                                <Text fontWeight="bold">
+                                                    Дете:{" "}
+                                                </Text>
+                                                <Box
+                                                    display="flex"
+                                                    alignItems="center"
+                                                >
+                                                    <Avatar
+                                                        size="sm"
+                                                        src={
+                                                            paidExpenseDetails
+                                                                .child.avatar
+                                                        }
+                                                        bg={
+                                                            paidExpenseDetails
+                                                                .child
+                                                                .avatarColor
+                                                        }
+                                                        mr={2}
+                                                    />
+                                                    <Text>
+                                                        {
+                                                            paidExpenseDetails
+                                                                .child.name
+                                                        }
+                                                    </Text>
+                                                </Box>
+                                            </Stack>
+                                        )}
                                     </VStack>
                                 </Card>
                             </Stack>
