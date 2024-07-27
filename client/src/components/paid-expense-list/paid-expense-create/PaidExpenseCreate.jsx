@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import {
+    Avatar,
+    Box,
     Button,
+    Card,
     Divider,
     FormControl,
     FormLabel,
@@ -50,6 +53,8 @@ export default function PaidExpenseCreate({
     const { householdId } = useParams();
 
     const [householdMembers, setHouseholdMembers] = useState([]);
+    const [childMembers, setChildMembers] = useState([]);
+    const [selectedChild, setSelectedChild] = useState(null);
     const [householdCategories, setHouseholdCategories] = useState([]);
     const [paid, setPaid] = useState([]);
     const [owed, setOwed] = useState([]);
@@ -65,6 +70,7 @@ export default function PaidExpenseCreate({
         paid: "",
         owedSplitType: "",
         owed: "",
+        child: "",
     });
 
     useEffect(() => {
@@ -87,7 +93,7 @@ export default function PaidExpenseCreate({
                 }
             });
 
-            categoryService
+        categoryService
             .getAll(householdId)
             .then((result) => setHouseholdCategories(result))
             .catch((error) => {
@@ -108,7 +114,7 @@ export default function PaidExpenseCreate({
     }, [householdId]);
 
     // TODO: error?
-    const onChange = (e) => {
+    const onChange = async (e) => {
         let value = e.target.value;
         setErrors((prevErrors) => ({ ...prevErrors, [e.target.name]: "" }));
 
@@ -123,10 +129,64 @@ export default function PaidExpenseCreate({
             value = Number(value) || 0;
         }
 
+        if (e.target.name === "category") {
+            const selectedCategory = householdCategories.find(
+                (cat) => cat._id === value
+            );
+
+            if (selectedCategory && selectedCategory.title === "Джобни") {
+                try {
+                    const childMembersResult =
+                        await householdService.getOneChildMembers(householdId);
+
+                    if (childMembersResult.length > 0) {
+                        setChildMembers(childMembersResult);
+                    } else {
+                        toast({
+                            title: "Грешка при зареждане на децата",
+                            description:
+                                "Няма членове с роля Дете в домакинството",
+                            status: "error",
+                            duration: 6000,
+                            isClosable: true,
+                            position: "bottom",
+                        });
+                        value = "";
+                    }
+                } catch (error) {
+                    if (error.status === 401) {
+                        logoutHandler();
+                    } else {
+                        toast({
+                            title: "Грешка при зареждане на децата",
+                            description:
+                                "Възникна грешка при зареждането на детските членове",
+                            status: "error",
+                            duration: 6000,
+                            isClosable: true,
+                            position: "bottom",
+                        });
+                    }
+                }
+            } else {
+                setChildMembers([]);
+                setSelectedChild(null);
+            }
+        }
+
         setValues((state) => ({
             ...state,
             [e.target.name]: value,
         }));
+    };
+
+    // Function to handle child member selection
+    const handleChildSelection = (e) => {
+        const selectedChildId = e.target.value;
+        const selectedChildObject = childMembers.find(
+            (child) => child._id === selectedChildId
+        );
+        setSelectedChild(selectedChildObject);
     };
 
     const handlePaidCurrentUpdate = () => {
@@ -186,6 +246,13 @@ export default function PaidExpenseCreate({
         }
     };
 
+    const getCategoryTitleById = (categoryId) => {
+        const category = householdCategories.find(
+            (cat) => cat._id === categoryId
+        );
+        return category ? category.title : "";
+    };
+
     const validateForm = (values, paid, owed) => {
         const newErrors = {
             title: "",
@@ -195,6 +262,7 @@ export default function PaidExpenseCreate({
             paid: "",
             owedSplitType: "",
             owed: "",
+            child: "",
         };
 
         if (!values.title.trim()) {
@@ -241,6 +309,12 @@ export default function PaidExpenseCreate({
                 "Разходът трябва да се разпредели минимум между двама членове на домакинството";
         }
 
+        const categoryTitle = getCategoryTitleById(values.category);
+        if (categoryTitle === "Джобни" && !selectedChild) {
+            newErrors.child =
+                "Полето 'Дете' е задължително, когато категорията е 'Джобни'.";
+        }
+
         setErrors(newErrors);
 
         return !Object.values(newErrors).some((error) => error);
@@ -254,7 +328,6 @@ export default function PaidExpenseCreate({
 
         let paidSplitType = "";
         if (values.payersOptionField === "currentUser") {
-            console.log(paid);
             paidSplitType = "Единично";
         } else {
             values.paidSplitTypeField === "equally"
@@ -279,6 +352,12 @@ export default function PaidExpenseCreate({
             owedSplitType,
             owed,
         };
+
+        // Include child ID only if category is "Джобни"
+        const categoryTitle = getCategoryTitleById(values.category);
+        if (categoryTitle === "Джобни" && selectedChild) {
+            newPaidExpense.child = selectedChild._id;
+        }
 
         // console.log(newPaidExpense);
 
@@ -394,15 +473,76 @@ export default function PaidExpenseCreate({
                                     placeholder="Изберете категория"
                                 >
                                     {householdCategories.map((category) => (
-                                        <option key={category._id} value={category._id}>
+                                        <option
+                                            key={category._id}
+                                            value={category._id}
+                                        >
                                             {category.title}
                                         </option>
                                     ))}
                                 </Select>
                             </FormControl>
                         </Stack>
-                        <Divider />
-                        <Stack mt="3" spacing="4">
+                        <Divider mb="3" />
+                        {childMembers.length > 0 && (
+                            <Stack
+                                direction={{ base: "column", lg: "row" }}
+                                spacing={{ lg: "4" }}
+                            >
+                                <FormControl mb={{ base: 2, md: 4 }}>
+                                    <FormLabel>Изберете дете*</FormLabel>
+                                    <Select
+                                        name="childMember"
+                                        value={
+                                            selectedChild
+                                                ? selectedChild._id
+                                                : ""
+                                        }
+                                        onChange={handleChildSelection}
+                                        placeholder="Изберете дете"
+                                    >
+                                        {childMembers.map((child) => (
+                                            <option
+                                                key={child._id}
+                                                value={child._id}
+                                            >
+                                                {child.email}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                    {errors.child && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.child}
+                                        </Text>
+                                    )}
+                                </FormControl>
+                                {selectedChild && (
+                                    <Card
+                                        mt={4}
+                                        mb={{ base: 4, md: 0 }}
+                                        p={4}
+                                        width="100%"
+                                    >
+                                        <Stack
+                                            direction="row"
+                                            align="center"
+                                            spacing="4"
+                                        >
+                                            <Avatar
+                                                src={selectedChild.avatar}
+                                                bg={selectedChild.avatarColor}
+                                            />
+                                            <Box>
+                                                <Text>
+                                                    {selectedChild.name}
+                                                </Text>
+                                            </Box>
+                                        </Stack>
+                                    </Card>
+                                )}
+                            </Stack>
+                        )}
+                        <Stack spacing="4">
                             <FormControl
                                 mb={2}
                                 isInvalid={errors.paidSplitType}
