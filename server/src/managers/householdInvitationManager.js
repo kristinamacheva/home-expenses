@@ -62,6 +62,11 @@ exports.accept = async (userId, invitationId) => {
                 sum: 0,
                 type: "+",
             });
+        } else {
+            household.allowances.push({
+                user: userId,
+                sum: 0,
+            });
         }
 
         // Save the updated household
