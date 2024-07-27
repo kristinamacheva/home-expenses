@@ -4,6 +4,8 @@ const PaidExpense = require("../models/PaidExpense");
 const Category = require("../models/Category");
 const { AppError } = require("../utils/AppError");
 const { default: mongoose } = require("mongoose");
+const { sendNotificationToUser } = require("../config/socket");
+const Notification = require("../models/Notification");
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -691,7 +693,7 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
     const existingCategory = await Category.findById(categoryId);
 
     // Update the household balance based on the new balance of the expense
-    expense.balance.forEach((newEntry) => {
+    expense.balance.forEach(async (newEntry) => {
         const existingEntry = expenseHousehold.balance.find((entry) =>
             entry.user.equals(newEntry.user)
         );
@@ -719,6 +721,21 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
             );
             existingEntry.type = "-";
         }
+
+        // Create and send notifications for all members
+        const message = `Има промени по баланса в домакинство: ${expenseHousehold.name}`;
+
+        const notification = new Notification({
+            userId: newEntry.user,
+            message: message,
+            resourceType: "Household",
+            resourceId: expenseHousehold._id,
+        });
+
+        const savedNotification = await notification.save();
+
+        // Send notification to the user if they have an active connection
+        sendNotificationToUser(newEntry.user, savedNotification);
     });
 
     // If the category title is "Джобни", update the child's allowance
@@ -748,6 +765,21 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
                 100
             ).toFixed(2)
         );
+
+        // Create and send notifications for child
+        const message = `Налична е нова сума за джобни в домакинство: ${expenseHousehold.name}`;
+
+        const notification = new Notification({
+            userId: childId,
+            message: message,
+            resourceType: "Household",
+            resourceId: expenseHousehold._id,
+        });
+
+        const savedNotification = await notification.save();
+
+        // Send notification to the user if they have an active connection
+        sendNotificationToUser(childId, savedNotification);
     }
 
     await expenseHousehold.save();
