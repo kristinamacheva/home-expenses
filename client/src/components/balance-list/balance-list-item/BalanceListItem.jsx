@@ -39,7 +39,7 @@ export default function BalanceListItem({ balance, fetchPayments }) {
             badgeText =
                 balance.sum === 0
                     ? "Няма задължения"
-                    : `Дължат му ${balance.sum} лв.`;
+                    : `Ще получи ${balance.sum} лв.`;
         }
     }
 
