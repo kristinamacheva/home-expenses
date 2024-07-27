@@ -79,6 +79,7 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
                 category: "$categoryDetails.title", // Replace category _id with title
             },
         },
+
         // Stage 5: Sort by date and _id in descending order
         { $sort: { date: -1, _id: -1 } },
 
@@ -102,14 +103,12 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
                 },
             },
         },
-    
 
         // Stage 9: Project the final shape of the documents
         {
             $project: {
                 _id: 1,
                 title: 1,
-                category: 1, 
                 category: 1,
                 creator: 1,
                 amount: 1,
@@ -221,8 +220,11 @@ exports.getTotalAmountByCategoryStats = async (
     }));
 };
 
-
-exports.getTotalAmountAndCountStats = async (householdId, userId, searchParams) => {
+exports.getTotalAmountAndCountStats = async (
+    householdId,
+    userId,
+    searchParams
+) => {
     // Check if the user belongs to the household
     const user = await User.findOne({ _id: userId, households: householdId });
     if (!user) {
@@ -244,11 +246,11 @@ exports.getTotalAmountAndCountStats = async (householdId, userId, searchParams) 
                 from: "categories",
                 localField: "category",
                 foreignField: "_id",
-                as: "categoryDetails"
-            }
+                as: "categoryDetails",
+            },
         },
         {
-            $unwind: "$categoryDetails"
+            $unwind: "$categoryDetails",
         },
         {
             $group: {
@@ -258,13 +260,18 @@ exports.getTotalAmountAndCountStats = async (householdId, userId, searchParams) 
                 uncategorizedAmount: {
                     $sum: {
                         $cond: [
-                            { $eq: ["$categoryDetails.title", "Некатегоризиран"] },
+                            {
+                                $eq: [
+                                    "$categoryDetails.title",
+                                    "Некатегоризиран",
+                                ],
+                            },
                             "$amount",
-                            0
-                        ]
-                    }
-                }
-            }
+                            0,
+                        ],
+                    },
+                },
+            },
         },
         {
             $project: {
@@ -277,27 +284,34 @@ exports.getTotalAmountAndCountStats = async (householdId, userId, searchParams) 
                         0,
                         {
                             $multiply: [
-                                { $divide: ["$uncategorizedAmount", "$totalAmount"] },
-                                100
-                            ]
-                        }
-                    ]
-                }
-            }
-        }
+                                {
+                                    $divide: [
+                                        "$uncategorizedAmount",
+                                        "$totalAmount",
+                                    ],
+                                },
+                                100,
+                            ],
+                        },
+                    ],
+                },
+            },
+        },
     ]);
 
     if (stats.length > 0) {
         return {
             totalAmount: parseFloat(stats[0].totalAmount.toFixed(2)),
             count: stats[0].count,
-            uncategorizedPercentage: parseFloat(stats[0].uncategorizedPercentage.toFixed(2))
+            uncategorizedPercentage: parseFloat(
+                stats[0].uncategorizedPercentage.toFixed(2)
+            ),
         };
     } else {
         return {
             totalAmount: 0,
             count: 0,
-            uncategorizedPercentage: 0
+            uncategorizedPercentage: 0,
         };
     }
 };
@@ -310,9 +324,19 @@ exports.getOne = (paidExpenseId) =>
 exports.getOneDetails = async (paidExpenseId, userId) => {
     const paidExpense = await PaidExpense.findById(paidExpenseId)
         .populate("creator", "_id name avatar avatarColor")
+        .populate("category", "_id title")
         .populate("balance.user", "_id name avatar avatarColor")
         .populate("comments.user", "_id name avatar avatarColor")
         .lean();
+
+    // Check if the child field is present and populate it if necessary
+    if (paidExpense.child) {
+        const childDetails = await User.findById(
+            paidExpense.child,
+            "_id name avatar avatarColor"
+        ).lean();
+        paidExpense.child = childDetails;
+    }
 
     // Filter userApprovals to only include the current user's status
     const currentUserApproval = paidExpense.userApprovals.find((entry) =>
@@ -339,7 +363,14 @@ exports.getEditableFields = async (paidExpenseId) => {
                 let: { paidUserIds: "$paid.user" },
                 pipeline: [
                     { $match: { $expr: { $in: ["$_id", "$$paidUserIds"] } } },
-                    { $project: { _id: 1, name: 1, avatar: 1, avatarColor: 1 } }
+                    {
+                        $project: {
+                            _id: 1,
+                            name: 1,
+                            avatar: 1,
+                            avatarColor: 1,
+                        },
+                    },
                 ],
                 as: "paidUserDetails",
             },
@@ -350,7 +381,14 @@ exports.getEditableFields = async (paidExpenseId) => {
                 let: { owedUserIds: "$owed.user" },
                 pipeline: [
                     { $match: { $expr: { $in: ["$_id", "$$owedUserIds"] } } },
-                    { $project: { _id: 1, name: 1, avatar: 1, avatarColor: 1 } }
+                    {
+                        $project: {
+                            _id: 1,
+                            name: 1,
+                            avatar: 1,
+                            avatarColor: 1,
+                        },
+                    },
                 ],
                 as: "owedUserDetails",
             },
@@ -367,23 +405,38 @@ exports.getEditableFields = async (paidExpenseId) => {
                             name: {
                                 $arrayElemAt: [
                                     "$paidUserDetails.name",
-                                    { $indexOfArray: ["$paidUserDetails._id", "$$p.user"] }
-                                ]
+                                    {
+                                        $indexOfArray: [
+                                            "$paidUserDetails._id",
+                                            "$$p.user",
+                                        ],
+                                    },
+                                ],
                             },
                             avatar: {
                                 $arrayElemAt: [
                                     "$paidUserDetails.avatar",
-                                    { $indexOfArray: ["$paidUserDetails._id", "$$p.user"] }
-                                ]
+                                    {
+                                        $indexOfArray: [
+                                            "$paidUserDetails._id",
+                                            "$$p.user",
+                                        ],
+                                    },
+                                ],
                             },
                             avatarColor: {
                                 $arrayElemAt: [
                                     "$paidUserDetails.avatarColor",
-                                    { $indexOfArray: ["$paidUserDetails._id", "$$p.user"] }
-                                ]
-                            }
-                        }
-                    }
+                                    {
+                                        $indexOfArray: [
+                                            "$paidUserDetails._id",
+                                            "$$p.user",
+                                        ],
+                                    },
+                                ],
+                            },
+                        },
+                    },
                 },
                 owed: {
                     $map: {
@@ -395,25 +448,40 @@ exports.getEditableFields = async (paidExpenseId) => {
                             name: {
                                 $arrayElemAt: [
                                     "$owedUserDetails.name",
-                                    { $indexOfArray: ["$owedUserDetails._id", "$$o.user"] }
-                                ]
+                                    {
+                                        $indexOfArray: [
+                                            "$owedUserDetails._id",
+                                            "$$o.user",
+                                        ],
+                                    },
+                                ],
                             },
                             avatar: {
                                 $arrayElemAt: [
                                     "$owedUserDetails.avatar",
-                                    { $indexOfArray: ["$owedUserDetails._id", "$$o.user"] }
-                                ]
+                                    {
+                                        $indexOfArray: [
+                                            "$owedUserDetails._id",
+                                            "$$o.user",
+                                        ],
+                                    },
+                                ],
                             },
                             avatarColor: {
                                 $arrayElemAt: [
                                     "$owedUserDetails.avatarColor",
-                                    { $indexOfArray: ["$owedUserDetails._id", "$$o.user"] }
-                                ]
-                            }
-                        }
-                    }
-                }
-            }
+                                    {
+                                        $indexOfArray: [
+                                            "$owedUserDetails._id",
+                                            "$$o.user",
+                                        ],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                },
+            },
         },
         {
             $project: {
@@ -434,8 +502,16 @@ exports.getEditableFields = async (paidExpenseId) => {
                 "owed.name": 1,
                 "owed.avatar": 1,
                 "owed.avatarColor": 1,
-            }
-        }
+                // Conditionally include the child field
+                child: {
+                    $cond: {
+                        if: { $gt: ["$child", null] },
+                        then: "$child",
+                        else: "$$REMOVE",
+                    },
+                },
+            },
+        },
     ]);
 
     return paidExpense[0];
@@ -453,6 +529,7 @@ exports.create = async (paidExpenseData) => {
         owedSplitType,
         owed,
         household,
+        child,
     } = paidExpenseData;
 
     // Fetch the household by ID
