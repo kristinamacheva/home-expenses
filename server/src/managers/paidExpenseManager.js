@@ -685,11 +685,11 @@ exports.create = async (paidExpenseData) => {
     return newPaidExpense;
 };
 
-const updateBalance = async (houesholdId, expenseId) => {
-    const expenseHousehold = await Household.findById(houesholdId);
+const updateBalance = async (householdId, expenseId, childId, categoryId) => {
+    const expenseHousehold = await Household.findById(householdId);
     const expense = await PaidExpense.findById(expenseId);
+    const existingCategory = await Category.findById(categoryId);
 
-    // TODO: do this only when all users have approved
     // Update the household balance based on the new balance of the expense
     expense.balance.forEach((newEntry) => {
         const existingEntry = expenseHousehold.balance.find((entry) =>
@@ -720,6 +720,35 @@ const updateBalance = async (houesholdId, expenseId) => {
             existingEntry.type = "-";
         }
     });
+
+    // If the category title is "Джобни", update the child's allowance
+    if (existingCategory.title === "Джобни") {
+        // Verify if the child still has the role "Дете" in the household
+        const childMember = expenseHousehold.members.find(
+            (member) => member.user.equals(childId) && member.role === "Дете"
+        );
+
+        if (!childMember) {
+            throw new AppError(
+                "Посоченото дете вече не е член на домакинството или няма ролята 'Дете'",
+                404
+            );
+        }
+
+        // Add the expense sum to the child's allowances
+        const childAllowance = expenseHousehold.allowances.find((allowance) =>
+            allowance.user.equals(childId)
+        );
+
+        const expenseAmountInCents = Math.round(expense.amount * 100);
+
+        childAllowance.sum = Number(
+            (
+                (Math.round(childAllowance.sum * 100) + expenseAmountInCents) /
+                100
+            ).toFixed(2)
+        );
+    }
 
     await expenseHousehold.save();
 };
@@ -762,7 +791,12 @@ exports.accept = async (userId, paidExpenseId) => {
     if (allApproved) {
         paidExpense.expenseStatus = "Одобрен";
 
-        await updateBalance(paidExpense.household, paidExpenseId);
+        await updateBalance(
+            paidExpense.household,
+            paidExpenseId,
+            paidExpense.child,
+            paidExpense.category
+        );
     }
 
     // Save the updated paid expense to the database
