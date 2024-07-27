@@ -188,6 +188,7 @@ exports.getHouseholdsWithExistingBalances = async (userId) => {
         {
             $match: {
                 "householdDetails.balance.user": new mongoose.Types.ObjectId(userId),
+                "householdDetails.archived": false, // Filter out archived households
             },
         },
         // Fetch details of all members in each household
@@ -322,10 +323,11 @@ exports.getHouseholdsWithExistingAllowances = async (userId) => {
         },
         // Deconstructing the householdDetails array
         { $unwind: "$householdDetails" },
-        // Filter households where the user is present in the balance array
+        // Filter households where the user is present in the allowances array
         {
             $match: {
                 "householdDetails.allowances.user": new mongoose.Types.ObjectId(userId),
+                "householdDetails.archived": false, // Filter out archived households
             },
         },
         // Fetch details of all members in each household
