@@ -550,237 +550,265 @@ exports.create = async (householdData) => {
 };
 
 exports.update = async (householdId, admin, name, members, newMembers) => {
-    // Fetch the admin user by ID
-    const adminUser = await User.findById(admin);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Fetch the household by ID
-    const household = await Household.findById(householdId);
+    try {
+        // Fetch the admin user by ID
+        const adminUser = await User.findById(admin).session(session);
 
-    if (!household.admins.includes(adminUser._id)) {
-        throw new AppError(
-            "Потребителят не е администратор на това домакинство.",
-            403
-        );
-    }
-
-    // Update household name if it has changed
-    if (name !== household.name) {
-        household.name = name;
-    }
-
-    // Update roles for existing members and handle removal if needed
-    for (const existingMember of household.members) {
-        // Check if the existing member is in the updated members list
-        const updatedMember = members.find(
-            (member) => member._id === existingMember.user.toString()
+        // Fetch the household by ID
+        const household = await Household.findById(householdId).session(
+            session
         );
 
-        if (updatedMember) {
-            // Update role if it has changed
-            if (updatedMember.role !== existingMember.role) {
-                // Prevent changing role to "Дете" if current role is "Админ" or "Член"
-                if (
-                    (existingMember.role === "Админ" ||
-                        existingMember.role === "Член") &&
-                    updatedMember.role === "Дете"
-                ) {
-                    throw new AppError(
-                        `Не може да промените ролята на потребителя от Админ или Член в 'Дете'.`,
-                        403
-                    );
-                }
+        if (!household.admins.includes(adminUser._id)) {
+            throw new AppError(
+                "Потребителят не е администратор на това домакинство.",
+                403
+            );
+        }
 
-                // Check if user is becoming an admin
-                if (updatedMember.role === "Админ") {
-                    // Add to admins array if not already an admin
-                    if (!household.admins.includes(updatedMember._id)) {
-                        household.admins.push(updatedMember._id);
+        // Update household name if it has changed
+        if (name !== household.name) {
+            household.name = name;
+        }
+
+        // Update roles for existing members and handle removal if needed
+        for (const existingMember of household.members) {
+            // Check if the existing member is in the updated members list
+            const updatedMember = members.find(
+                (member) => member._id === existingMember.user.toString()
+            );
+
+            if (updatedMember) {
+                // Update role if it has changed
+                if (updatedMember.role !== existingMember.role) {
+                    // Prevent changing role to "Дете" if current role is "Админ" or "Член"
+                    if (
+                        (existingMember.role === "Админ" ||
+                            existingMember.role === "Член") &&
+                        updatedMember.role === "Дете"
+                    ) {
+                        throw new AppError(
+                            `Не може да промените ролята на потребителя от Админ или Член в 'Дете'.`,
+                            403
+                        );
                     }
-                } else if (
-                    existingMember.role === "Админ" &&
-                    updatedMember.role === "Член"
-                ) {
-                    // Remove from admins array if changing from admin to member
-                    household.admins = household.admins.filter(
-                        (adminId) => adminId.toString() !== updatedMember._id
-                    );
-                }
 
-                existingMember.role = updatedMember.role;
-            }
-        } else {
-            // Remove from balance array if balance is 0
-            const userBalance = household.balance.find(
-                (entry) =>
-                    entry.user.toString() === existingMember.user.toString()
-            );
+                    // Check if user is becoming an admin
+                    if (updatedMember.role === "Админ") {
+                        // Add to admins array if not already an admin
+                        if (!household.admins.includes(updatedMember._id)) {
+                            household.admins.push(updatedMember._id);
+                        }
+                    } else if (
+                        existingMember.role === "Админ" &&
+                        updatedMember.role === "Член"
+                    ) {
+                        // Remove from admins array if changing from admin to member
+                        household.admins = household.admins.filter(
+                            (adminId) =>
+                                adminId.toString() !== updatedMember._id
+                        );
+                    }
 
-            if (userBalance) {
-                if (userBalance.sum !== 0) {
-                    throw new AppError(
-                        `Не може да премахвате член, чийто баланс е различен от 0.`,
-                        403
-                    );
+                    existingMember.role = updatedMember.role;
                 }
-                household.balance = household.balance.filter(
+            } else {
+                // Remove from balance array if balance is 0
+                const userBalance = household.balance.find(
                     (entry) =>
-                        entry.user.toString() !== existingMember.user.toString()
+                        entry.user.toString() === existingMember.user.toString()
                 );
-            }
 
-            // Member does not exist in the updated list, remove from household
-            household.members = household.members.filter(
-                (member) =>
-                    member.user.toString() !== existingMember.user.toString()
-            );
-
-            // Remove from admins array if applicable
-            if (existingMember.role === "Админ") {
-                household.admins = household.admins.filter(
-                    (adminId) =>
-                        adminId.toString() !== existingMember.user.toString()
-                );
-            }
-
-            if (existingMember.role === "Дете") {
-                // Check if the user has a non-zero allowance sum
-                const userAllowance = household.allowances.find(
-                    (entry) => entry.user.toString() === existingMember.user.toString()
-                );
-                if (userAllowance && userAllowance.sum !== 0) {
-                    throw new AppError(
-                        "Не може да премахнете потребител, чиято сумата на джобни не е 0.",
-                        403
+                if (userBalance) {
+                    if (userBalance.sum !== 0) {
+                        throw new AppError(
+                            `Не може да премахвате член, чийто баланс е различен от 0.`,
+                            403
+                        );
+                    }
+                    household.balance = household.balance.filter(
+                        (entry) =>
+                            entry.user.toString() !==
+                            existingMember.user.toString()
                     );
                 }
 
-                // Remove the user's allowance entry if it exists and is zero
-                household.allowances = household.allowances.filter(
-                    (entry) => entry.user.toString() !== existingMember.user.toString()
+                // Member does not exist in the updated list, remove from household
+                household.members = household.members.filter(
+                    (member) =>
+                        member.user.toString() !==
+                        existingMember.user.toString()
                 );
-            }
 
-            // Remove householdId from user's households array
-            await User.findByIdAndUpdate(existingMember.user, {
-                $pull: { households: householdId },
-            });
+                // Remove from admins array if applicable
+                if (existingMember.role === "Админ") {
+                    household.admins = household.admins.filter(
+                        (adminId) =>
+                            adminId.toString() !==
+                            existingMember.user.toString()
+                    );
+                }
 
-            // Create notification for the user
-            const notification = new Notification({
-                userId: existingMember.user,
-                message: `Бяхте премахнати от домакинството ${household.name}`,
-                household: household._id,
-            });
+                if (existingMember.role === "Дете") {
+                    // Check if the user has a non-zero allowance sum
+                    const userAllowance = household.allowances.find(
+                        (entry) =>
+                            entry.user.toString() ===
+                            existingMember.user.toString()
+                    );
+                    if (userAllowance && userAllowance.sum !== 0) {
+                        throw new AppError(
+                            "Не може да премахнете потребител, чиято сумата на джобни не е 0.",
+                            403
+                        );
+                    }
 
-            const savedNotification = await notification.save();
+                    // Remove the user's allowance entry if it exists and is zero
+                    household.allowances = household.allowances.filter(
+                        (entry) =>
+                            entry.user.toString() !==
+                            existingMember.user.toString()
+                    );
+                }
 
-            // Send notification to the user if they have an active connection
-            sendNotificationToUser(existingMember.user, savedNotification);
+                // Remove householdId from user's households array
+                await User.findByIdAndUpdate(existingMember.user, {
+                    $pull: { households: householdId },
+                }).session(session);
 
-            for (const member of household.members) {
+                // Create notification for the user
                 const notification = new Notification({
-                    userId: member.user,
-                    message: `Потребител беше премахнат от домакинството ${household.name}`,
+                    userId: existingMember.user,
+                    message: `Бяхте премахнати от домакинството ${household.name}`,
                     household: household._id,
                 });
-    
-                const savedNotification = await notification.save();
-    
-                sendNotificationToUser(member.user, savedNotification);
+
+                const savedNotification = await notification.save({ session });
+
+                // Send notification to the user if they have an active connection
+                sendNotificationToUser(existingMember.user, savedNotification);
+
+                for (const member of household.members) {
+                    const notification = new Notification({
+                        userId: member.user,
+                        message: `Потребител беше премахнат от домакинството ${household.name}`,
+                        household: household._id,
+                    });
+
+                    const savedNotification = await notification.save({
+                        session,
+                    });
+
+                    sendNotificationToUser(member.user, savedNotification);
+                }
             }
         }
-    }
 
-    // Create invitations for new members
-    if (newMembers.length > 0) {
-        // Check for duplicate emails in members
-        const uniqueEmails = new Set();
-        for (const member of newMembers) {
-            if (uniqueEmails.has(member.email)) {
-                throw new AppError(
-                    `Имейлът се среща повече от 1 път: ${member.email}`,
-                    400
-                );
+        // Create invitations for new members
+        if (newMembers.length > 0) {
+            // Check for duplicate emails in members
+            const uniqueEmails = new Set();
+            for (const member of newMembers) {
+                if (uniqueEmails.has(member.email)) {
+                    throw new AppError(
+                        `Имейлът се среща повече от 1 път: ${member.email}`,
+                        400
+                    );
+                }
+                uniqueEmails.add(member.email);
             }
-            uniqueEmails.add(member.email);
-        }
-        // Fetch new member users by their emails
-        const memberUsers = await User.find({
-            email: { $in: Array.from(uniqueEmails) },
-        }).select("_id email");
+            // Fetch new member users by their emails
+            const memberUsers = await User.find({
+                email: { $in: Array.from(uniqueEmails) },
+            })
+                .select("_id email")
+                .session(session);
 
-        if (memberUsers.length !== uniqueEmails.size) {
-            throw new AppError("1 или повече имейла не бяха намерени", 400);
-        }
+            if (memberUsers.length !== uniqueEmails.size) {
+                throw new AppError("1 или повече имейла не бяха намерени", 400);
+            }
 
-        // Extract _id values from memberUsers
-        const memberUserIds = memberUsers.map((user) => user._id.toString());
-
-        // Check if any memberUserIds are already in household.members
-        const existingMemberIds = household.members.map((member) =>
-            member.user.toString()
-        );
-
-        // Check if any memberUserIds are already in existingMemberIds
-        const duplicates = memberUserIds.filter((userId) =>
-            existingMemberIds.includes(userId)
-        );
-
-        if (duplicates.length > 0) {
-            throw new AppError(
-                `Един или повече потребители вече са членове на домакинството.`,
-                400
-            );
-        }
-
-        // Save the household to the database
-        await household.save();
-
-        // Create invitations for each member
-        for (const member of newMembers) {
-            const currentUser = memberUsers.find(
-                (user) => user.email === member.email
+            // Extract _id values from memberUsers
+            const memberUserIds = memberUsers.map((user) =>
+                user._id.toString()
             );
 
-            // Check if an invitation already exists for this user and household
-            const existingInvitation = await HouseholdInvitation.findOne({
-                user: currentUser._id,
-                household: householdId,
-            });
+            // Check if any memberUserIds are already in household.members
+            const existingMemberIds = household.members.map((member) =>
+                member.user.toString()
+            );
 
-            if (existingInvitation) {
+            // Check if any memberUserIds are already in existingMemberIds
+            const duplicates = memberUserIds.filter((userId) =>
+                existingMemberIds.includes(userId)
+            );
+
+            if (duplicates.length > 0) {
                 throw new AppError(
-                    `Един или повече потребители вече имат покана за присъединяване към домакинството.`,
+                    `Един или повече потребители вече са членове на домакинството.`,
                     400
                 );
             }
 
-            const invitation = new HouseholdInvitation({
-                user: currentUser._id,
-                household: householdId,
-                role: member.role,
-                creator: adminUser._id,
-            });
+            // Save the household to the database
+            await household.save({ session });
 
-            await invitation.save();
+            // Create invitations for each member
+            for (const member of newMembers) {
+                const currentUser = memberUsers.find(
+                    (user) => user.email === member.email
+                );
 
-            // Create notification for the user
-            const notification = new Notification({
-                userId: currentUser._id,
-                message: `Имате нова покана за присъединяване към домакинство: ${household.name}`,
-                resourceType: "HouseholdInvitation",
-                resourceId: invitation._id,
-                household: householdId,
-            });
+                // Check if an invitation already exists for this user and household
+                const existingInvitation = await HouseholdInvitation.findOne({
+                    user: currentUser._id,
+                    household: householdId,
+                }).session(session);
 
-            const savedNotification = await notification.save();
+                if (existingInvitation) {
+                    throw new AppError(
+                        `Един или повече потребители вече имат покана за присъединяване към домакинството.`,
+                        400
+                    );
+                }
 
-            // Send notification to the user if they have an active connection
-            sendNotificationToUser(currentUser._id, savedNotification);
+                const invitation = new HouseholdInvitation({
+                    user: currentUser._id,
+                    household: householdId,
+                    role: member.role,
+                    creator: adminUser._id,
+                });
+
+                await invitation.save({ session });
+
+                // Create notification for the user
+                const notification = new Notification({
+                    userId: currentUser._id,
+                    message: `Имате нова покана за присъединяване към домакинство: ${household.name}`,
+                    resourceType: "HouseholdInvitation",
+                    resourceId: invitation._id,
+                    household: householdId,
+                });
+
+                const savedNotification = await notification.save({ session });
+
+                // Send notification to the user if they have an active connection
+                sendNotificationToUser(currentUser._id, savedNotification);
+            }
+        } else {
+            // Save the household to the database
+            await household.save({ session });
         }
-    } else {
-        // Save the household to the database
-        await household.save();
+
+        await session.commitTransaction();
+        session.endSession();
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
     }
 };
 
