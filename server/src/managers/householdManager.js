@@ -721,6 +721,20 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
             });
 
             await invitation.save();
+
+            // Create notification for the user
+            const notification = new Notification({
+                userId: currentUser._id,
+                message: `Имате нова покана за присъединяване към домакинство: ${household.name}`,
+                resourceType: "HouseholdInvitation",
+                resourceId: invitation._id,
+                household: householdId,
+            });
+
+            const savedNotification = await notification.save();
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(currentUser._id, savedNotification);
         }
     } else {
         // Save the household to the database
