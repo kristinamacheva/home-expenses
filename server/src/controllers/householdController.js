@@ -3,6 +3,7 @@ const householdManager = require("../managers/householdManager");
 const getHousehold = require("../middlewares/householdMiddleware");
 const paidExpenseController = require("./paidExpenseController");
 const paymentController = require("./paymentController");
+const allowanceController = require("./allowanceController");
 const categoryController = require("./categoryController");
 const {
     createValidator,
@@ -103,6 +104,19 @@ router.get("/:householdId/payees", async (req, res, next) => {
     }
 });
 
+router.get("/:householdId/allowance", async (req, res, next) => {
+    const householdId = req.householdId;
+    const userId = req.userId;
+
+    try {
+        const allowance = await householdManager.getAllowanceForUser(userId, householdId);
+
+        res.status(200).json(allowance);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.put("/:householdId", updateValidator, async (req, res, next) => {
     const errors = validationResult(req);
 
@@ -178,6 +192,7 @@ router.put("/:householdId/restore", async (req, res, next) => {
 
 router.use("/:householdId/paidExpenses", paidExpenseController);
 router.use("/:householdId/payments", paymentController);
+router.use("/:householdId/allowances", allowanceController);
 router.use("/:householdId/categories", categoryController);
 
 module.exports = router;
