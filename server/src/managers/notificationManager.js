@@ -2,14 +2,22 @@ const Notification = require("../models/Notification");
 const mongoose = require("mongoose");
 
 exports.getAllNotRead = async (userId) => {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
+    // Fetch the last 20 notifications for the user
     const notifications = await Notification.find({
         userId: new mongoose.Types.ObjectId(userId),
-        timestamp: { $gte: sevenDaysAgo },
-        isRead: false, 
-    }).sort({ timestamp: -1 }); // sort by latest first
+    })
+        .sort({ timestamp: -1 }) // sort by latest first
+        .limit(20);
+
+    // If there are more than 20 notifications, delete the older ones
+    if (notifications.length === 20) {
+        const lastNotificationDate = notifications[19].timestamp;
+
+        await Notification.deleteMany({
+            userId: new mongoose.Types.ObjectId(userId),
+            timestamp: { $lt: lastNotificationDate },
+        });
+    }
 
     return notifications;
 };
