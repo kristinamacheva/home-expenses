@@ -25,6 +25,7 @@ import Path from "../../paths";
 import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 import Statistics from "../statistics/Statistics";
 import CategoryList from "../category-list/CategoryList";
+import AllowanceList from "../allowance-list/AllowanceList";
 
 export default function HouseholdDetails() {
     // TODO: load all details here and pass as props or make seperate requests
@@ -117,6 +118,11 @@ export default function HouseholdDetails() {
                                 <Tab>Категории</Tab>
                             </>
                         )}
+                        {currentUserRole === "Дете" && (
+                            <>
+                                <Tab>Джобни</Tab>
+                            </>
+                        )}
                         <Tab>Членове</Tab>
                     </TabList>
                 </Box>
@@ -185,6 +191,11 @@ export default function HouseholdDetails() {
                     {currentUserRole !== "Дете" && (
                         <TabPanel>
                             <CategoryList isAdmin={isAdmin} />
+                        </TabPanel>
+                    )}
+                    {currentUserRole === "Дете" && (
+                        <TabPanel>
+                            <AllowanceList />
                         </TabPanel>
                     )}
                     <TabPanel>
