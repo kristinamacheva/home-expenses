@@ -95,7 +95,7 @@ export default function PaymentDetails({
             .then((result) => {
                 toast({
                     title: "Плащането е одобрено.",
-                    description: "Плащането беше одобрен успешно.",
+                    description: "Плащането беше одобрено успешно.",
                     status: "success",
                     duration: 5000,
                     isClosable: true,
