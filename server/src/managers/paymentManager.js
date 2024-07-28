@@ -1,9 +1,11 @@
 const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
+const Notification = require("../models/Notification");
 const { AppError } = require("../utils/AppError");
 const { default: mongoose } = require("mongoose");
 const Payment = require("../models/Payment");
+const { sendNotificationToUser } = require("../config/socket");
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -130,7 +132,7 @@ exports.getOneWithBalance = async (paymentId) => {
     // Define aggregation pipeline to find balances for payer and payee within the household
     const aggregationPipeline = [
         {
-            $match: { _id: new ObjectId(householdId) }
+            $match: { _id: new ObjectId(householdId) },
         },
         {
             $project: {
@@ -141,11 +143,16 @@ exports.getOneWithBalance = async (paymentId) => {
                             $filter: {
                                 input: "$balance",
                                 as: "balance",
-                                cond: { $eq: ["$$balance.user", new ObjectId(payerId)] }
-                            }
+                                cond: {
+                                    $eq: [
+                                        "$$balance.user",
+                                        new ObjectId(payerId),
+                                    ],
+                                },
+                            },
                         },
-                        0
-                    ]
+                        0,
+                    ],
                 },
                 payeeBalance: {
                     // get the first element from the filtered balance array
@@ -154,14 +161,19 @@ exports.getOneWithBalance = async (paymentId) => {
                             $filter: {
                                 input: "$balance",
                                 as: "balance",
-                                cond: { $eq: ["$$balance.user", new ObjectId(payeeId)] }
-                            }
+                                cond: {
+                                    $eq: [
+                                        "$$balance.user",
+                                        new ObjectId(payeeId),
+                                    ],
+                                },
+                            },
                         },
-                        0
-                    ]
-                }
-            }
-        }
+                        0,
+                    ],
+                },
+            },
+        },
     ];
 
     // Perform aggregation on Household collection
@@ -183,7 +195,10 @@ exports.getOneWithBalance = async (paymentId) => {
 
     // Check if balance type has changed
     if (payerBalance.type !== "-" || payeeBalance.type !== "+") {
-        throw new AppError("Има промени в баланса. Не може да се осъществи плащане.", 400);
+        throw new AppError(
+            "Има промени в баланса. Не може да се осъществи плащане.",
+            400
+        );
     }
 
     // Calculate final balance sums considering the balance type
@@ -194,10 +209,9 @@ exports.getOneWithBalance = async (paymentId) => {
     return {
         ...payment,
         payerBalanceSum,
-        payeeBalanceSum
+        payeeBalanceSum,
     };
 };
-
 
 exports.getOneDetails = async (paymentId, userId) => {
     const payment = await Payment.findById(paymentId)
@@ -271,6 +285,20 @@ exports.create = async (paymentData) => {
 
     // Save the payment to the database
     await newPayment.save();
+
+    // Create notification for the payee
+    const notification = new Notification({
+        userId: payee,
+        message: `Създадено е ново плащане за Вас в домакинство ${paymentHousehold.name}`,
+        household: paymentHousehold._id,
+        resourceType: "Payment",
+        resourceId: newPayment._id,
+    });
+
+    const savedNotification = await notification.save();
+
+    // Send notification to the user if they have an active connection
+    sendNotificationToUser(payee, savedNotification);
 
     return newPayment;
 };
@@ -349,6 +377,20 @@ exports.accept = async (userId, paymentId) => {
     await household.save();
     await payment.save();
 
+    // Create notification for the payer
+    const notification = new Notification({
+        userId: payment.payer,
+        message: `Одобрено е създадено от Вас плащане в домакинство ${household.name}`,
+        household: household._id,
+        resourceType: "Payment",
+        resourceId: payment._id,
+    });
+
+    const savedNotification = await notification.save();
+
+    // Send notification to the user if they have an active connection
+    sendNotificationToUser(payment.payer, savedNotification);
+
     return payment;
 };
 
@@ -380,6 +422,20 @@ exports.reject = async (userId, paymentId, text) => {
 
     // Save the updated payment to the database
     await payment.save();
+
+    // Create notification for the payer
+    const notification = new Notification({
+        userId: payment.payer,
+        message: `Отхвърлено е създадено от Вас плащане.`,
+        household: payment.household,
+        resourceType: "Payment",
+        resourceId: payment._id,
+    });
+
+    const savedNotification = await notification.save();
+
+    // Send notification to the user if they have an active connection
+    sendNotificationToUser(payment.payer, savedNotification);
 };
 
 exports.addComment = async (userId, paymentId, text) => {
