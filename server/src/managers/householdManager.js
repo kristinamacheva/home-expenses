@@ -642,10 +642,52 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
                 );
             }
 
+            if (existingMember.role === "Дете") {
+                // Check if the user has a non-zero allowance sum
+                const userAllowance = household.allowances.find(
+                    (entry) => entry.user.toString() === existingMember.user.toString()
+                );
+                if (userAllowance && userAllowance.sum !== 0) {
+                    throw new AppError(
+                        "Не може да премахнете потребител, чиято сумата на джобни не е 0.",
+                        403
+                    );
+                }
+
+                // Remove the user's allowance entry if it exists and is zero
+                household.allowances = household.allowances.filter(
+                    (entry) => entry.user.toString() !== existingMember.user.toString()
+                );
+            }
+
             // Remove householdId from user's households array
             await User.findByIdAndUpdate(existingMember.user, {
                 $pull: { households: householdId },
             });
+
+            // Create notification for the user
+            const notification = new Notification({
+                userId: existingMember.user,
+                message: `Бяхте премахнати от домакинството ${household.name}`,
+                household: household._id,
+            });
+
+            const savedNotification = await notification.save();
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(existingMember.user, savedNotification);
+
+            for (const member of household.members) {
+                const notification = new Notification({
+                    userId: member.user,
+                    message: `Потребител беше премахнат от домакинството ${household.name}`,
+                    household: household._id,
+                });
+    
+                const savedNotification = await notification.save();
+    
+                sendNotificationToUser(member.user, savedNotification);
+            }
         }
     }
 
