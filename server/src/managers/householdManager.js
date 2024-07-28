@@ -527,7 +527,8 @@ exports.create = async (householdData) => {
                 userId: currentUser._id,
                 message: `Имате нова покана за присъединяване към домакинство: ${name}`,
                 resourceType: "HouseholdInvitation",
-                resourceId: invitation._id, // Use the invitation._id here
+                resourceId: invitation._id, 
+                household: newHousehold._id,
             });
 
             const savedNotification = await notification.save({ session });
@@ -853,8 +854,7 @@ exports.archive = async (userId, householdId) => {
         const notification = new Notification({
             userId: member.user,
             message: `Домакинството ${household.name} беше архивирано`,
-            resourceType: "Household",
-            resourceId: household._id,
+            household: household._id,
         });
 
         const savedNotification = await notification.save();
@@ -897,8 +897,7 @@ exports.restore = async (userId, householdId) => {
         const notification = new Notification({
             userId: member.user,
             message: `Домакинството ${household.name} беше възстановено`,
-            resourceType: "Household",
-            resourceId: household._id,
+            household: household._id,
         });
 
         const savedNotification = await notification.save();
