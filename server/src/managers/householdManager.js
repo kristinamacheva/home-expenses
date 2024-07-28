@@ -407,6 +407,22 @@ exports.getOnePayees = async (householdId) => {
     return [];
 };
 
+exports.getAllowanceForUser = async (userId, householdId) => {
+    const household = await Household.findById(householdId).lean();
+
+    // Find the allowance entry for the user
+    const allowanceEntry = household.allowances.find((allowance) =>
+        allowance.user.equals(userId)
+    );
+
+    if (!allowanceEntry) {
+        throw new AppError("Потребителят няма налични джобни", 404);
+    }
+
+    // Return the sum of the user's allowances
+    return allowanceEntry.sum;
+};
+
 exports.create = async (householdData) => {
     const session = await mongoose.startSession();
 
@@ -861,7 +877,10 @@ exports.restore = async (userId, householdId) => {
 
     // Ensure the household is currently archived
     if (!household.archived) {
-        throw new AppError("Домакинството не е архивирано и не може да бъде възстановено.", 400);
+        throw new AppError(
+            "Домакинството не е архивирано и не може да бъде възстановено.",
+            400
+        );
     }
 
     // Restore the household (unarchive it)
