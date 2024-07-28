@@ -642,6 +642,23 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
                     }
 
                     existingMember.role = updatedMember.role;
+
+                    // Create notification for the user
+                    const notification = new Notification({
+                        userId: existingMember.user,
+                        message: `Ролята Ви в домакинство ${household.name} беше променена на ${updatedMember.role}`,
+                        household: household._id,
+                    });
+
+                    const savedNotification = await notification.save({
+                        session,
+                    });
+
+                    // Send notification to the user if they have an active connection
+                    sendNotificationToUser(
+                        existingMember.user,
+                        savedNotification
+                    );
                 }
             } else {
                 // Remove from balance array if balance is 0
