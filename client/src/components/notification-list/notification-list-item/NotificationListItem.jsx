@@ -10,9 +10,12 @@ import { FaEye, FaRegTrashCan } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import PaidExpenseDetails from "../../paid-expense-list/paid-expense-list-item/paid-expense-details/PaidExpenseDetails";
 import PaymentDetails from "../../balance-list/payment-list-item/payment-details/PaymentDetails";
+import { useContext } from "react";
+import NotificationContext from "../../../contexts/notificationContext";
 
 export default function NotificationListItem({ notification }) {
     const navigate = useNavigate();
+    const { deleteNotification } = useContext(NotificationContext);
 
     const {
         isOpen: isPaidExpenseDetailsModalOpen,
@@ -91,7 +94,7 @@ export default function NotificationListItem({ notification }) {
                         icon={<FaRegTrashCan fontSize="20px" />}
                         variant="ghost"
                         color="themePurple.800"
-                        // onClick={}
+                        onClick={() => deleteNotification(notification._id)}
                     />
                 </HStack>
             </Card>

@@ -73,10 +73,41 @@ export const NotificationProvider = ({ children }) => {
         });
     };
 
-    const values = {
-        notifications,
+    const deleteNotification = async (notificationId) => {
+        try {
+            await notificationService.remove(notificationId);
+            setNotifications((prevNotifications) =>
+                prevNotifications.filter(
+                    (notification) => notification._id !== notificationId
+                )
+            );
+            toast({
+                title: "Успешно изтрихте известието",
+                status: "success",
+                duration: 6000,
+                isClosable: true,
+                position: "bottom",
+            });
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message || "Неуспешно изтриване на известието",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
+        }
     };
 
+    const values = {
+        notifications,
+        deleteNotification,
+    };
+    
     return (
         <NotificationContext.Provider value={values}>
             {children}

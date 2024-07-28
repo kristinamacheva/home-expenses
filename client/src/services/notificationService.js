@@ -7,3 +7,7 @@ export const getAll = async () => {
 
     return result;
 };
+
+export const remove = async (notificationId) => {
+    const result = await request.remove(`${baseUrl}/${notificationId}`);
+};
