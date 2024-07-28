@@ -45,9 +45,7 @@ export const getOneMembersDetails = async (householdId) => {
 };
 
 export const getOnePayees = async (householdId) => {
-    const result = await request.get(
-        `${baseUrl}/${householdId}/payees`
-    );
+    const result = await request.get(`${baseUrl}/${householdId}/payees`);
     return result;
 };
 
@@ -55,6 +53,11 @@ export const getOneWithMemberEmails = async (householdId) => {
     const result = await request.get(
         `${baseUrl}/${householdId}/members?details=email`
     );
+    return result;
+};
+
+export const getOneChildAllowance = async (householdId) => {
+    const result = await request.get(`${baseUrl}/${householdId}/allowance`);
     return result;
 };
 
