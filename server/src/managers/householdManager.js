@@ -527,7 +527,7 @@ exports.create = async (householdData) => {
                 userId: currentUser._id,
                 message: `Имате нова покана за присъединяване към домакинство: ${name}`,
                 resourceType: "HouseholdInvitation",
-                resourceId: invitation._id, 
+                resourceId: invitation._id,
                 household: newHousehold._id,
             });
 
@@ -775,6 +775,22 @@ exports.leave = async (userId, householdId) => {
 
             // Remove the user's balance entry if it exists and is zero
             household.balance = household.balance.filter(
+                (entry) => entry.user.toString() !== userId
+            );
+        } else {
+            // Check if the user has a non-zero allowance sum
+            const userAllowance = household.allowances.find(
+                (entry) => entry.user.toString() === userId
+            );
+            if (userAllowance && userAllowance.sum !== 0) {
+                throw new AppError(
+                    "Не може да напуснете домакинството, ако сумата на джобните ви не е 0.",
+                    403
+                );
+            }
+
+            // Remove the user's allowance entry if it exists and is zero
+            household.allowances = household.allowances.filter(
                 (entry) => entry.user.toString() !== userId
             );
         }
