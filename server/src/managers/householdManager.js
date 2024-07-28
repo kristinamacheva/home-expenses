@@ -596,6 +596,34 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
                         );
                     }
 
+                    if (existingMember.role === "Дете") {
+                        // Check if the user has a non-zero allowance sum
+                        const userAllowance = household.allowances.find(
+                            (entry) =>
+                                entry.user.toString() ===
+                                existingMember.user.toString()
+                        );
+                        if (userAllowance && userAllowance.sum !== 0) {
+                            throw new AppError(
+                                "Не може да промените ролята на потребител, чиято сумата на джобни не е 0.",
+                                403
+                            );
+                        }
+
+                        // Remove the user's allowance entry if it exists and is zero
+                        household.allowances = household.allowances.filter(
+                            (entry) =>
+                                entry.user.toString() !==
+                                existingMember.user.toString()
+                        );
+
+                        household.balance.push({
+                            user: existingMember.user,
+                            sum: 0,
+                            type: "+",
+                        });
+                    }
+
                     // Check if user is becoming an admin
                     if (updatedMember.role === "Админ") {
                         // Add to admins array if not already an admin
