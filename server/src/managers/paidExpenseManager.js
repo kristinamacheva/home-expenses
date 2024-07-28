@@ -538,6 +538,7 @@ exports.create = async (paidExpenseData) => {
 
     // Check for pending payments for the creator
     const pendingPayments = await Payment.find({
+        household: household,
         payee: creator,
         paymentStatus: "За одобрение",
     });
