@@ -100,8 +100,12 @@ export default function PaymentDetails({
                     duration: 5000,
                     isClosable: true,
                 });
-                fetchBalances();
-                fetchPayments();
+                if (fetchBalances) {
+                    fetchBalances();
+                }
+                if (fetchPayments) {
+                    fetchPayments();
+                }
                 onCloseForm();
             })
             .catch((error) => {
@@ -132,8 +136,12 @@ export default function PaymentDetails({
                     duration: 5000,
                     isClosable: true,
                 });
-                fetchBalances();
-                fetchPayments();
+                if (fetchBalances) {
+                    fetchBalances();
+                }
+                if (fetchPayments) {
+                    fetchPayments();
+                }
                 onCloseForm();
             })
             .catch((error) => {

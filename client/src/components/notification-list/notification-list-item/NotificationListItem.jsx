@@ -1,35 +1,29 @@
 import {
     Stack,
-    Button,
-    Heading,
-    AvatarGroup,
-    Avatar,
-    Badge,
-    Box,
     Card,
     IconButton,
     HStack,
     useDisclosure,
-    useToast,
     Text,
 } from "@chakra-ui/react";
-import { FaEye, FaPen, FaRegTrashCan } from "react-icons/fa6";
-import { FaSignOutAlt } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import AuthContext from "../../../contexts/authContext";
-import * as notificationService from "../../../services/notificationService";
+import { FaEye, FaRegTrashCan } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 import PaidExpenseDetails from "../../paid-expense-list/paid-expense-list-item/paid-expense-details/PaidExpenseDetails";
+import PaymentDetails from "../../balance-list/payment-list-item/payment-details/PaymentDetails";
 
 export default function NotificationListItem({ notification }) {
     const navigate = useNavigate();
-    // const { userId, logoutHandler } = useContext(AuthContext);
-    // const toast = useToast();
 
     const {
         isOpen: isPaidExpenseDetailsModalOpen,
         onOpen: onOpenPaidExpenseDetailsModal,
         onClose: onClosePaidExpenseDetailsModal,
+    } = useDisclosure();
+
+    const {
+        isOpen: isPaymentDetailsModalOpen,
+        onOpen: onOpenPaymentDetailsModal,
+        onClose: onClosePaymentDetailsModal,
     } = useDisclosure();
 
     // Handler to navigate based on notification type
@@ -40,6 +34,9 @@ export default function NotificationListItem({ notification }) {
                 break;
             case "PaidExpense":
                 onOpenPaidExpenseDetailsModal();
+                break;
+            case "Payment":
+                onOpenPaymentDetailsModal();
                 break;
             default:
                 navigate(`/households/${notification.household}`);
@@ -55,16 +52,12 @@ export default function NotificationListItem({ notification }) {
                 mx="4"
                 my="1"
                 boxShadow="md"
-                // borderRadius="lg"
                 background="white"
                 spacing="4"
                 direction={{ base: "column", md: "row" }}
                 justifyContent="space-between"
             >
-                <Stack
-                    direction="column"
-                    spacing="1"
-                >
+                <Stack direction="column" spacing="1">
                     <Text>{notification.message}</Text>
                     <Text fontSize="xs" color="gray.500">
                         {new Date(notification.timestamp)
@@ -107,6 +100,14 @@ export default function NotificationListItem({ notification }) {
                     isOpen={isPaidExpenseDetailsModalOpen}
                     onClose={onClosePaidExpenseDetailsModal}
                     paidExpenseId={notification.resourceId}
+                    householdId={notification.household}
+                />
+            )}
+            {isPaymentDetailsModalOpen && (
+                <PaymentDetails
+                    isOpen={isPaymentDetailsModalOpen}
+                    onClose={onClosePaymentDetailsModal}
+                    paymentId={notification.resourceId}
                     householdId={notification.household}
                 />
             )}
