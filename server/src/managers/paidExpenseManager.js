@@ -6,6 +6,7 @@ const { AppError } = require("../utils/AppError");
 const { default: mongoose } = require("mongoose");
 const { sendNotificationToUser } = require("../config/socket");
 const Notification = require("../models/Notification");
+const Allowance = require("../models/Allowance");
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -708,99 +709,131 @@ exports.create = async (paidExpenseData) => {
 };
 
 const updateBalance = async (householdId, expenseId, childId, categoryId) => {
-    const expenseHousehold = await Household.findById(householdId);
-    const expense = await PaidExpense.findById(expenseId);
-    const existingCategory = await Category.findById(categoryId);
+    const session = await mongoose.startSession();
 
-    // Update the household balance based on the new balance of the expense
-    expense.balance.forEach(async (newEntry) => {
-        const existingEntry = expenseHousehold.balance.find((entry) =>
-            entry.user.equals(newEntry.user)
+    try {
+        session.startTransaction();
+
+        const expenseHousehold = await Household.findById(householdId).session(
+            session
+        );
+        const expense = await PaidExpense.findById(expenseId).session(session);
+        const existingCategory = await Category.findById(categoryId).session(
+            session
         );
 
-        // Determine the current sum considering the current type
-        let currentSumInCents =
-            existingEntry.type === "+"
-                ? Math.round(existingEntry.sum * 100)
-                : -Math.round(existingEntry.sum * 100);
-
-        // Update the sum based on the type of operation
-        if (newEntry.type === "+") {
-            currentSumInCents += Math.round(newEntry.sum * 100);
-        } else {
-            currentSumInCents -= Math.round(newEntry.sum * 100);
-        }
-
-        // Update the type based on the sum and ensure the sum is always positive
-        if (currentSumInCents >= 0) {
-            existingEntry.sum = Number((currentSumInCents / 100).toFixed(2));
-            existingEntry.type = "+";
-        } else {
-            existingEntry.sum = Number(
-                (Math.abs(currentSumInCents) / 100).toFixed(2)
+        // Update the household balance based on the new balance of the expense
+        for (const newEntry of expense.balance) {
+            const existingEntry = expenseHousehold.balance.find((entry) =>
+                entry.user.equals(newEntry.user)
             );
-            existingEntry.type = "-";
+
+            // Determine the current sum considering the current type
+            let currentSumInCents =
+                existingEntry.type === "+"
+                    ? Math.round(existingEntry.sum * 100)
+                    : -Math.round(existingEntry.sum * 100);
+
+            // Update the sum based on the type of operation
+            if (newEntry.type === "+") {
+                currentSumInCents += Math.round(newEntry.sum * 100);
+            } else {
+                currentSumInCents -= Math.round(newEntry.sum * 100);
+            }
+
+            // Update the type based on the sum and ensure the sum is always positive
+            if (currentSumInCents >= 0) {
+                existingEntry.sum = Number(
+                    (currentSumInCents / 100).toFixed(2)
+                );
+                existingEntry.type = "+";
+            } else {
+                existingEntry.sum = Number(
+                    (Math.abs(currentSumInCents) / 100).toFixed(2)
+                );
+                existingEntry.type = "-";
+            }
+
+            // Create and send notifications for all members
+            const message = `Има промени по баланса в домакинство: ${expenseHousehold.name}`;
+
+            const notification = new Notification({
+                userId: newEntry.user,
+                message: message,
+                household: expenseHousehold._id,
+            });
+
+            const savedNotification = await notification.save({ session });
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(newEntry.user, savedNotification);
         }
 
-        // Create and send notifications for all members
-        const message = `Има промени по баланса в домакинство: ${expenseHousehold.name}`;
-
-        const notification = new Notification({
-            userId: newEntry.user,
-            message: message,
-            household: expenseHousehold._id,
-        });
-
-        const savedNotification = await notification.save();
-
-        // Send notification to the user if they have an active connection
-        sendNotificationToUser(newEntry.user, savedNotification);
-    });
-
-    // If the category title is "Джобни", update the child's allowance
-    if (existingCategory.title === "Джобни") {
-        // Verify if the child still has the role "Дете" in the household
-        const childMember = expenseHousehold.members.find(
-            (member) => member.user.equals(childId) && member.role === "Дете"
-        );
-
-        if (!childMember) {
-            throw new AppError(
-                "Посоченото дете вече не е член на домакинството или няма ролята 'Дете'",
-                404
+        // If the category title is "Джобни", update the child's allowance
+        if (existingCategory.title === "Джобни") {
+            // Verify if the child still has the role "Дете" in the household
+            const childMember = expenseHousehold.members.find(
+                (member) =>
+                    member.user.equals(childId) && member.role === "Дете"
             );
+
+            if (!childMember) {
+                throw new AppError(
+                    "Посоченото дете вече не е член на домакинството или няма ролята 'Дете'",
+                    404
+                );
+            }
+
+            // Add the expense sum to the child's allowances in the household
+            const expenseAmountInCents = Math.round(expense.amount * 100);
+
+            const childAllowance = expenseHousehold.allowances.find(
+                (allowance) => allowance.user.equals(childId)
+            );
+
+            childAllowance.sum = Number(
+                (
+                    (Math.round(childAllowance.sum * 100) +
+                        expenseAmountInCents) /
+                    100
+                ).toFixed(2)
+            );
+
+            // Create a new Allowance document for the child
+            const newAllowance = new Allowance({
+                child: childId,
+                household: householdId,
+                amount: expense.amount,
+            });
+
+            await newAllowance.save({ session });
+
+            // Create and send notifications for child
+            const message = `Налична е нова сума за джобни в домакинство: ${expenseHousehold.name}`;
+
+            const notification = new Notification({
+                userId: childId,
+                message: message,
+                resourceType: "Allowance",
+                resourceId: newAllowance._id,
+                household: expenseHousehold._id,
+            });
+
+            const savedNotification = await notification.save({ session });
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(childId, savedNotification);
         }
 
-        // Add the expense sum to the child's allowances
-        const childAllowance = expenseHousehold.allowances.find((allowance) =>
-            allowance.user.equals(childId)
-        );
+        await expenseHousehold.save({ session });
 
-        const expenseAmountInCents = Math.round(expense.amount * 100);
-
-        childAllowance.sum = Number(
-            (
-                (Math.round(childAllowance.sum * 100) + expenseAmountInCents) /
-                100
-            ).toFixed(2)
-        );
-
-        // Create and send notifications for child
-        const message = `Налична е нова сума за джобни в домакинство: ${expenseHousehold.name}`;
-
-        const notification = new Notification({
-            userId: childId,
-            message: message,
-            household: expenseHousehold._id,
-        });
-
-        const savedNotification = await notification.save();
-
-        // Send notification to the user if they have an active connection
-        sendNotificationToUser(childId, savedNotification);
+        await session.commitTransaction();
+        session.endSession();
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
     }
-
-    await expenseHousehold.save();
 };
 
 exports.accept = async (userId, paidExpenseId) => {
