@@ -13,3 +13,7 @@ exports.getAllNotRead = async (userId) => {
 
     return notifications;
 };
+
+exports.delete = async (notificationId) => {
+    await Notification.findByIdAndDelete(notificationId);
+};
