@@ -35,6 +35,7 @@ export default function HouseholdDetails() {
     const { logoutHandler, userId } = useContext(AuthContext);
     const [isAdmin, setIsAdmin] = useState(false);
     const toast = useToast();
+    const navigate = useNavigate();
 
     const { householdId } = useParams();
 
@@ -49,6 +50,21 @@ export default function HouseholdDetails() {
                 setIsAdmin(result.admins.includes(userId));
 
                 setIsLoading(false);
+
+                // Redirect if the user is not a member of the household
+                const currentUserMember = result.members.find(
+                    (member) => member._id === userId
+                );
+                if (!currentUserMember) {
+                    toast({
+                        title: "Не сте член на това домакинство.",
+                        status: "warning",
+                        duration: 3000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                    navigate("/households"); 
+                }
             })
             .catch((error) => {
                 if (error.status === 401) {
