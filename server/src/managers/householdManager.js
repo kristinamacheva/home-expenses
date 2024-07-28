@@ -815,6 +815,20 @@ exports.leave = async (userId, householdId) => {
             { session }
         );
 
+        for (const member of household.members) {
+            // Create notification for the user
+            const notification = new Notification({
+                userId: member.user,
+                message: `Потребител напусна домакинството ${household.name}`,
+                household: household._id,
+            });
+
+            const savedNotification = await notification.save({ session });
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(member.user, savedNotification);
+        }
+
         await session.commitTransaction();
         session.endSession();
 
