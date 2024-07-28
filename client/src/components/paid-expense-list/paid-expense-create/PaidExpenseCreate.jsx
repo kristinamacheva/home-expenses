@@ -380,7 +380,7 @@ export default function PaidExpenseCreate({
             } else {
                 toast({
                     title: "Грешка.",
-                    description: "Възникна грешка при създаването на разхода",
+                    description: error.message || "Възникна грешка при създаването на разхода",
                     status: "error",
                     duration: 5000,
                     isClosable: true,

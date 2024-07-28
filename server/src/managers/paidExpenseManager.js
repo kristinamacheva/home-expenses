@@ -1,6 +1,7 @@
 const Household = require("../models/Household");
 const User = require("../models/User");
 const PaidExpense = require("../models/PaidExpense");
+const Payment = require("../models/Payment");
 const Category = require("../models/Category");
 const { AppError } = require("../utils/AppError");
 const { default: mongoose } = require("mongoose");
@@ -534,6 +535,19 @@ exports.create = async (paidExpenseData) => {
         household,
         child,
     } = paidExpenseData;
+
+    // Check for pending payments for the creator
+    const pendingPayments = await Payment.find({
+        payee: creator,
+        paymentStatus: "За одобрение",
+    });
+
+    if (pendingPayments.length > 0) {
+        throw new AppError(
+            "Не може да създадете нов разход преди да одобрите всички плащания.",
+            403
+        );
+    }
 
     // Fetch the household by ID
     const expenseHousehold = await Household.findById(household);
