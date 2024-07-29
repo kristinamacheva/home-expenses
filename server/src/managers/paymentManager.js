@@ -288,7 +288,7 @@ exports.create = async (paymentData) => {
 
     // Create notification for the payee
     const notification = new Notification({
-        userId: payee,
+        user: payee,
         message: `Създадено е ново плащане за Вас в домакинство ${paymentHousehold.name}`,
         household: paymentHousehold._id,
         resourceType: "Payment",
@@ -379,7 +379,7 @@ exports.accept = async (userId, paymentId) => {
 
     // Create notification for the payer
     const notification = new Notification({
-        userId: payment.payer,
+        user: payment.payer,
         message: `Одобрено е създадено от Вас плащане в домакинство ${household.name}`,
         household: household._id,
         resourceType: "Payment",
@@ -425,7 +425,7 @@ exports.reject = async (userId, paymentId, text) => {
 
     // Create notification for the payer
     const notification = new Notification({
-        userId: payment.payer,
+        user: payment.payer,
         message: `Отхвърлено е създадено от Вас плащане.`,
         household: payment.household,
         resourceType: "Payment",

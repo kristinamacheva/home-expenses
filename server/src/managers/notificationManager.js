@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 exports.getAllNotRead = async (userId) => {
     // Fetch the last 20 notifications for the user
     const notifications = await Notification.find({
-        userId: new mongoose.Types.ObjectId(userId),
+        user: new mongoose.Types.ObjectId(userId),
     })
         .sort({ timestamp: -1 }) // sort by latest first
         .limit(20);
@@ -14,7 +14,7 @@ exports.getAllNotRead = async (userId) => {
         const lastNotificationDate = notifications[19].timestamp;
 
         await Notification.deleteMany({
-            userId: new mongoose.Types.ObjectId(userId),
+            user: new mongoose.Types.ObjectId(userId),
             timestamp: { $lt: lastNotificationDate },
         });
     }

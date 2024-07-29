@@ -706,7 +706,7 @@ exports.create = async (paidExpenseData) => {
     Array.from(uniqueUserIds).map(async (userId) => {
         if (userId !== creator.toString()) {
             const notification = new Notification({
-                userId: userId,
+                user: userId,
                 message: message,
                 resourceType: "PaidExpense",
                 resourceId: newPaidExpense._id,
@@ -773,7 +773,7 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
             const message = `Има промени по баланса в домакинство: ${expenseHousehold.name}`;
 
             const notification = new Notification({
-                userId: newEntry.user,
+                user: newEntry.user,
                 message: message,
                 household: expenseHousehold._id,
             });
@@ -827,7 +827,7 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
             const message = `Налична е нова сума за джобни в домакинство: ${expenseHousehold.name}`;
 
             const notification = new Notification({
-                userId: childId,
+                user: childId,
                 message: message,
                 resourceType: "Allowance",
                 resourceId: newAllowance._id,

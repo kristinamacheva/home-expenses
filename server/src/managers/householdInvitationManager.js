@@ -92,7 +92,7 @@ exports.accept = async (userId, invitationId) => {
         for (const member of household.members) {
             if (member.user.toString() !== userId) {
                 const notification = new Notification({
-                    userId: member.user,
+                    user: member.user,
                     message: message,
                     household: household._id,
                 });

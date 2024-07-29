@@ -524,7 +524,7 @@ exports.create = async (householdData) => {
 
             // Create notification for the user
             const notification = new Notification({
-                userId: currentUser._id,
+                user: currentUser._id,
                 message: `Имате нова покана за присъединяване към домакинство: ${name}`,
                 resourceType: "HouseholdInvitation",
                 resourceId: invitation._id,
@@ -645,7 +645,7 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
 
                     // Create notification for the user
                     const notification = new Notification({
-                        userId: existingMember.user,
+                        user: existingMember.user,
                         message: `Ролята Ви в домакинство ${household.name} беше променена на ${updatedMember.role}`,
                         household: household._id,
                     });
@@ -726,7 +726,7 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
 
                 // Create notification for the user
                 const notification = new Notification({
-                    userId: existingMember.user,
+                    user: existingMember.user,
                     message: `Бяхте премахнати от домакинството ${household.name}`,
                     household: household._id,
                 });
@@ -738,7 +738,7 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
 
                 for (const member of household.members) {
                     const notification = new Notification({
-                        userId: member.user,
+                        user: member.user,
                         message: `Потребител беше премахнат от домакинството ${household.name}`,
                         household: household._id,
                     });
@@ -831,7 +831,7 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
 
                 // Create notification for the user
                 const notification = new Notification({
-                    userId: currentUser._id,
+                    user: currentUser._id,
                     message: `Имате нова покана за присъединяване към домакинство: ${household.name}`,
                     resourceType: "HouseholdInvitation",
                     resourceId: invitation._id,
@@ -947,7 +947,7 @@ exports.leave = async (userId, householdId) => {
         for (const member of household.members) {
             // Create notification for the user
             const notification = new Notification({
-                userId: member.user,
+                user: member.user,
                 message: `Потребител напусна домакинството ${household.name}`,
                 household: household._id,
             });
@@ -1011,7 +1011,7 @@ exports.archive = async (userId, householdId) => {
 
         // Create notification for the user
         const notification = new Notification({
-            userId: member.user,
+            user: member.user,
             message: `Домакинството ${household.name} беше архивирано`,
             household: household._id,
         });
@@ -1054,7 +1054,7 @@ exports.restore = async (userId, householdId) => {
 
         // Create notification for the user
         const notification = new Notification({
-            userId: member.user,
+            user: member.user,
             message: `Домакинството ${household.name} беше възстановено`,
             household: household._id,
         });
