@@ -22,9 +22,10 @@ import {
 } from "@chakra-ui/react";
 import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
 import { MdGroupAdd } from "react-icons/md";
-import { FaHouse, FaPeopleRoof, FaChildren } from "react-icons/fa6";
+import { FaHouse, FaPeopleRoof } from "react-icons/fa6";
 import Path from "../../paths";
 import AuthContext from "../../contexts/authContext";
+import NotificationContext from "../../contexts/notificationContext";
 
 const LinkItems = [
     { name: "Начало", icon: FaHouse, to: Path.Home },
@@ -101,7 +102,8 @@ const NavItem = ({ icon, children, to, ...rest }) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }) => {
-    const { userId, name, avatar, avatarColor } = useContext(AuthContext);
+    const { name, avatar, avatarColor } = useContext(AuthContext);
+    const { unreadCount } = useContext(NotificationContext);
 
     return (
         <Flex
@@ -144,8 +146,23 @@ const MobileNav = ({ onOpen, ...rest }) => {
                     to={Path.Notifications}
                     size="lg"
                     variant="ghost"
-                    aria-label="open menu"
-                    icon={<FiBell />}
+                    aria-label="open notifications"
+                    icon={
+                        <Box position="relative">
+                            <FiBell />
+                            {unreadCount > 0 && (
+                                <Box
+                                    position="absolute"
+                                    top="-1"
+                                    right="-1"
+                                    width="2"
+                                    height="2"
+                                    borderRadius="full"
+                                    bg="green.500"
+                                />
+                            )}
+                        </Box>
+                    }
                     color={useColorModeValue("white")}
                     _hover={{
                         color: useColorModeValue("green.800"),

@@ -8,6 +8,10 @@ export const getAll = async () => {
     return result;
 };
 
+export const markAllAsRead = async () => {
+    await request.put(`${baseUrl}/markAllAsRead`);
+};
+
 export const remove = async (notificationId) => {
-    const result = await request.remove(`${baseUrl}/${notificationId}`);
+    await request.remove(`${baseUrl}/${notificationId}`);
 };

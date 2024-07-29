@@ -1,18 +1,16 @@
-import { useContext } from "react";
-import {
-    HStack,
-    Heading,
-    Stack,
-    Card,
-    useToast,
-} from "@chakra-ui/react";
+import { useContext, useEffect } from "react";
+import { HStack, Heading, Stack, Card, useToast } from "@chakra-ui/react";
 
-import AuthContext from "../../contexts/authContext";
 import NotificationListItem from "./notification-list-item/NotificationListItem";
 import NotificationContext from "../../contexts/notificationContext";
 
 export default function NotificationList() {
-    const { notifications } = useContext(NotificationContext);
+    const { notifications, markAllNotificationsAsRead } =
+        useContext(NotificationContext);
+
+    useEffect(() => {
+        markAllNotificationsAsRead();
+    }, []);
 
     return (
         <>
