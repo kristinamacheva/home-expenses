@@ -14,6 +14,18 @@ router.get("/", async (req, res, next) => {
     }
 });
 
+router.put("/markAllAsRead", async (req, res, next) => {
+    const userId = req.userId;
+
+    try {
+        await notificationManager.markAllAsRead(userId);
+
+        res.status(204).end();
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.use("/:notificationId", getNotification);
 
 router.delete("/:notificationId", async (req, res, next) => {

@@ -22,6 +22,13 @@ exports.getAllNotRead = async (userId) => {
     return notifications;
 };
 
+exports.markAllAsRead = async (userId) => {
+    await Notification.updateMany(
+        { user: userId, isRead: false },
+        { isRead: true }
+    );
+};
+
 exports.delete = async (notificationId) => {
     await Notification.findByIdAndDelete(notificationId);
 };
