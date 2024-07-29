@@ -108,6 +108,62 @@ module.exports.createValidator = [
         .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
 ];
 
+module.exports.updateValidator = [
+    body("title")
+        .trim()
+        .notEmpty()
+        .withMessage("Заглавието не може да бъде празно"),
+
+    body("amount")
+        .toFloat()
+        .isFloat({ gt: 0 })
+        .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
+
+    body("date").isISO8601().toDate().withMessage("Невалидна дата"),
+
+    body("paidSplitType")
+        .trim()
+        .notEmpty()
+        .withMessage("Методът на разпределяне за плащане е задължителен")
+        .bail()
+        .isIn(["Единично", "Поравно", "Ръчно"])
+        .withMessage("Невалиден метод на разпределяне за плащане"),
+
+    body("paid")
+        .isArray({ min: 1 })
+        .withMessage("Платците трябва да бъдат определени"),
+
+    body("paid.*._id")
+        .trim()
+        .notEmpty()
+        .withMessage("Платецът трябва да има валидно ID"),
+
+    body("paid.*.sum")
+        .toFloat()
+        .isFloat({ gt: 0 })
+        .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
+
+    body("owedSplitType")
+        .trim()
+        .notEmpty()
+        .withMessage("Методът на разпределяне на задължение е задължителен")
+        .bail()
+        .isIn(["Поравно", "Процентно", "Ръчно"])
+        .withMessage("Невалиден метод на разпределяне на задължение"),
+
+    body("owed")
+        .isArray({ min: 1 })
+        .withMessage("Дължимите суми трябва да бъдат определени"),
+    body("owed.*._id")
+        .trim()
+        .notEmpty()
+        .withMessage("Длъжникът трябва да има валидно ID"),
+    body("owed.*.sum")
+        .toFloat()
+        .isFloat({ gt: 0 })
+        .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
+];
+
 module.exports.statisticsValidator = [
     query("startDate")
         .isISO8601()
