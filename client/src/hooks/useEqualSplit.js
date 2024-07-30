@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 
-export default function useEqualSplit(totalAmount, members, onUpdate) {
+export default function useEqualSplit(
+    totalAmount,
+    members,
+    onUpdate,
+    isSimplified = true
+) {
     const [equalSplit, setEqualSplit] = useState([]);
 
     const calculateEqualSplit = () => {
@@ -19,20 +24,28 @@ export default function useEqualSplit(totalAmount, members, onUpdate) {
 
         const updatedMembers = members.map((member) => ({
             ...member,
-            sum: Number((
-                (amountPerPersonInCents + (remainderInCents-- > 0 ? 1 : 0)) /
-                100
-            ).toFixed(2)),
-        }));
-
-        // Create an array of objects with only `id` and `sum` properties
-        const simplifiedMembers = updatedMembers.map((member) => ({
-            _id: member._id,
-            sum: member.sum,
+            sum: Number(
+                (
+                    (amountPerPersonInCents +
+                        (remainderInCents-- > 0 ? 1 : 0)) /
+                    100
+                ).toFixed(2)
+            ),
         }));
 
         setEqualSplit(updatedMembers);
-        onUpdate(simplifiedMembers);
+
+        if (isSimplified) {
+            // Create an array of objects with only `id` and `sum` properties
+            const simplifiedMembers = updatedMembers.map((member) => ({
+                _id: member._id,
+                sum: member.sum,
+            }));
+
+            onUpdate(simplifiedMembers);
+        } else {
+            onUpdate(updatedMembers);
+        }
     };
 
     useEffect(() => {
