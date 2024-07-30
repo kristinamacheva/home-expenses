@@ -95,6 +95,13 @@ export const addComment = async (householdId, paidExpenseId, text) => {
     return result;
 };
 
+export const edit = async (householdId, paidExpenseId, paidExpenseData) => {
+    const url = baseUrl(householdId);
+    const result = await request.put(`${url}/${paidExpenseId}`, paidExpenseData);
+
+    return result;
+};
+
 export const remove = async (householdId, paidExpenseId) => {
     const url = baseUrl(householdId);
     const result = await request.remove(`${url}/${paidExpenseId}`);
