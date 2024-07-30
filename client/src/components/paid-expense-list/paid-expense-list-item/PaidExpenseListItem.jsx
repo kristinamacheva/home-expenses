@@ -18,6 +18,7 @@ import { Link, useParams } from "react-router-dom";
 import AuthContext from "../../../contexts/authContext";
 import PaidExpenseDetails from "./paid-expense-details/PaidExpenseDetails";
 import * as paidExpenseService from "../../../services/paidExpenseService";
+import PaidExpenseEdit from "./paid-expense-edit/PaidExpenseEdit";
 
 // TODO: send only necessary data here
 export default function PaidExpenseListItem({
@@ -44,6 +45,12 @@ export default function PaidExpenseListItem({
         onClose: onCloseDetailsModal,
     } = useDisclosure();
 
+    const {
+        isOpen: isEditModalOpen,
+        onOpen: onOpenEditModal,
+        onClose: onCloseEditModal,
+    } = useDisclosure();
+
     const paidExpenseDeleteHandler = async (_id) => {
         const paidExpenseId = _id;
 
@@ -64,7 +71,9 @@ export default function PaidExpenseListItem({
                 logoutHandler();
             } else {
                 toast({
-                    title: error.message || "Неуспешно изтриване на платения разход",
+                    title:
+                        error.message ||
+                        "Неуспешно изтриване на платения разход",
                     status: "error",
                     duration: 6000,
                     isClosable: true,
@@ -187,27 +196,29 @@ export default function PaidExpenseListItem({
                             variant="ghost"
                             color="themePurple.800"
                         />
-                        {((userId === creator || isAdmin) && expenseStatus === "Отхвърлен") && (
-                            <>
-                                <IconButton
-                                    aria-label="Редактирайте"
-                                    title="Редактирайте"
-                                    icon={<FaPen fontSize="20px" />}
-                                    variant="ghost"
-                                    color="themePurple.800"
-                                />
-                                <IconButton
-                                    aria-label="Изтрийте"
-                                    title="Изтрийте"
-                                    icon={<FaRegTrashCan fontSize="20px" />}
-                                    variant="ghost"
-                                    color="themePurple.800"
-                                    onClick={() =>
-                                        paidExpenseDeleteHandler(_id)
-                                    }
-                                />
-                            </>
-                        )}
+                        {(userId === creator || isAdmin) &&
+                            expenseStatus === "Отхвърлен" && (
+                                <>
+                                    <IconButton
+                                        aria-label="Редактирайте"
+                                        title="Редактирайте"
+                                        icon={<FaPen fontSize="20px" />}
+                                        variant="ghost"
+                                        color="themePurple.800"
+                                        onClick={onOpenEditModal}
+                                    />
+                                    <IconButton
+                                        aria-label="Изтрийте"
+                                        title="Изтрийте"
+                                        icon={<FaRegTrashCan fontSize="20px" />}
+                                        variant="ghost"
+                                        color="themePurple.800"
+                                        onClick={() =>
+                                            paidExpenseDeleteHandler(_id)
+                                        }
+                                    />
+                                </>
+                            )}
                     </HStack>
                 </Stack>
             </Card>
@@ -215,6 +226,15 @@ export default function PaidExpenseListItem({
                 <PaidExpenseDetails
                     isOpen={isDetailsModalOpen}
                     onClose={onCloseDetailsModal}
+                    paidExpenseId={_id}
+                    householdId={householdId}
+                    fetchPaidExpenses={fetchPaidExpenses}
+                />
+            )}
+            {isEditModalOpen && (
+                <PaidExpenseEdit
+                    isOpen={isEditModalOpen}
+                    onClose={onCloseEditModal}
                     paidExpenseId={_id}
                     householdId={householdId}
                     fetchPaidExpenses={fetchPaidExpenses}
