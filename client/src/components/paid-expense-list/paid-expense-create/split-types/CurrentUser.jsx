@@ -12,7 +12,7 @@ export default function CurrentUser({ amount, onUpdate }) {
     return (
         <Card
             p="4"
-            width="47%"
+            width={{ base: "100%", md: "47%" }}
             display="flex"
             direction="row"
             alignItems="center"
