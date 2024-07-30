@@ -7,6 +7,7 @@ const {
     getValidator,
     createValidator,
     statisticsValidator,
+    updateValidator,
 } = require("../validators/paidExpenseValidator");
 const { AppError } = require("../utils/AppError");
 
@@ -198,6 +199,74 @@ router.get("/:paidExpenseId", async (req, res, next) => {
         }
 
         res.status(200).json(paidExpense);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.put("/:paidExpenseId", updateValidator, async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => ({
+            field: err.path,
+            message: err.msg,
+        }));
+
+        return next(
+            new AppError("Данните са некоректни", 400, formattedErrors)
+        );
+    }
+
+    const paidExpenseId = req.paidExpenseId;
+    const userId = req.userId;
+
+    const {
+        title,
+        category,
+        amount,
+        date,
+        paidSplitType,
+        paid,
+        owedSplitType,
+        owed,
+        child,
+    } = req.body;
+
+    const parsedPaid = paid
+        .map((entry) => ({
+            user: entry._id,
+            sum: Number(entry.sum.toFixed(2)),
+        }))
+        .filter((entry) => entry.sum !== 0);
+
+    const parsedOwed = owed
+        .map((entry) => ({
+            user: entry._id,
+            sum: Number(entry.sum.toFixed(2)),
+        }))
+        .filter((entry) => entry.sum !== 0);
+
+    const parsedAmount = Number(amount.toFixed(2));
+
+    const paidExpenseData = {
+        title,
+        category,
+        creator: req.userId,
+        amount: parsedAmount,
+        date,
+        paidSplitType,
+        paid: parsedPaid,
+        owedSplitType,
+        owed: parsedOwed,
+        household: req.householdId,
+        child,
+    };
+
+    try {
+        const updatedPaidExpense = await paidExpenseManager.update(userId, paidExpenseId, paidExpenseData);
+
+        res.status(204).end();
     } catch (error) {
         next(error);
     }
