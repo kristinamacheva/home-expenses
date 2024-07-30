@@ -723,6 +723,214 @@ exports.create = async (paidExpenseData) => {
     return newPaidExpense;
 };
 
+exports.update = async (userId, paidExpenseId, paidExpenseData) => {
+    const {
+        title,
+        category: inputCategory,
+        amount,
+        date,
+        paidSplitType,
+        paid,
+        owedSplitType,
+        owed,
+        household,
+        child,
+    } = paidExpenseData;
+
+    // Fetch the existing expense to check for existence and permissions
+    const existingExpense = await PaidExpense.findById(paidExpenseId);
+
+    // Fetch the household to check membership and roles
+    const expenseHousehold = await Household.findById(household);
+
+    // Check if the user is an admin
+    const isAdmin = expenseHousehold.admins.some(
+        (admin) => admin.toString() === userId.toString()
+    );
+
+    // Check if the user is the creator or an admin of the household
+    if (existingExpense.creator.toString() !== userId && !isAdmin) {
+        throw new AppError("Нямате право да редактирате този разход", 403);
+    }
+
+    // Check if the paid expense status is "Отхвърлен"
+    if (existingExpense.expenseStatus !== "Отхвърлен") {
+        throw new AppError(
+            "Само платени разходи със статус 'Отхвърлен' могат да бъдат редактирани",
+            400
+        );
+    }
+
+    // Check if paid or owed arrays have changed
+    const paidChanged =
+        JSON.stringify(existingExpense.paid) !== JSON.stringify(paid);
+    const owedChanged =
+        JSON.stringify(existingExpense.owed) !== JSON.stringify(owed);
+
+    let userApprovals;
+
+    // Perform validations if paid or owed have changed
+    if (paidChanged || owedChanged) {
+        // Extract member IDs from the household
+        const householdMemberIds = expenseHousehold.members.map((member) =>
+            member.user.toString()
+        );
+
+        // Collect all unique user IDs from paid and owed arrays
+        const uniqueUserIds = new Set([
+            ...paid.map((p) => p.user),
+            ...owed.map((o) => o.user),
+        ]);
+
+        // Check if all users are members of the household
+        for (const userId of uniqueUserIds) {
+            if (!householdMemberIds.includes(userId)) {
+                throw new AppError(
+                    `Потребител с ID ${userId} не е член на домакинството`,
+                    403
+                );
+            }
+        }
+
+        userApprovals = Array.from(uniqueUserIds).map((currentUserId) => ({
+            user: currentUserId,
+            status: currentUserId === userId ? "Одобрен" : "За одобрение",
+        }));
+
+        // Calculate the total paid and owed sums in cents
+        const totalPaid = paid.reduce(
+            (sum, entry) => sum + Math.round(entry.sum * 100),
+            0
+        );
+        const totalOwed = owed.reduce(
+            (sum, entry) => sum + Math.round(entry.sum * 100),
+            0
+        );
+        const amountInCents = Math.round(amount * 100);
+
+        // Check if the total paid and owed amounts match
+        if (totalPaid !== totalOwed) {
+            throw new AppError("Платените и дължимите суми не съвпадат", 400);
+        }
+
+        // Check if the total amount matches the sum of paid and owed amounts
+        if (totalPaid !== amountInCents) {
+            throw new AppError(
+                "Общата сума на платените и дължимите суми не съвпада с указаната сума",
+                400
+            );
+        }
+
+        // Calculate the balance array
+        const balance = Array.from(uniqueUserIds).map((userId) => {
+            const paidEntry = paid.find((p) => p.user === userId);
+            const owedEntry = owed.find((o) => o.user === userId);
+
+            const paidSumInCents = paidEntry
+                ? Math.round(paidEntry.sum * 100)
+                : 0;
+            const owedSumInCents = owedEntry
+                ? Math.round(owedEntry.sum * 100)
+                : 0;
+            const balanceSumInCents = Math.abs(paidSumInCents - owedSumInCents);
+            const balanceType = paidSumInCents >= owedSumInCents ? "+" : "-";
+
+            return {
+                user: userId,
+                sum: Number((balanceSumInCents / 100).toFixed(2)),
+                type: balanceType,
+            };
+        });
+
+        existingExpense.balance = balance;
+    } else {
+        // If neither paid nor owed has changed, use the existing userApprovals
+        // and mark the status for the creator as "Одобрен"
+        userApprovals = existingExpense.userApprovals.map((approval) => ({
+            user: approval.user,
+            status:
+                approval.user.toString() === userId
+                    ? "Одобрен"
+                    : "За одобрение",
+        }));
+    }
+    // Check if the category has changed and validate if needed
+    let category = existingExpense.category.toString(); // Keep existing category by default
+    if (inputCategory && inputCategory !== category) {
+        // Check if the provided category ID exists
+        const existingCategory = await Category.findById(inputCategory);
+        if (!existingCategory) {
+            throw new AppError("Посочената категория не съществува", 404);
+        }
+
+        category = inputCategory;
+
+        // Check if the category title is "Джобни" and if the child field is valid
+        if (existingCategory.title === "Джобни") {
+            if (!child) {
+                throw new AppError(
+                    "Не е посочено дете за категория 'Джобни'",
+                    400
+                );
+            }
+
+            // Check if the child ID exists and has the role "Дете"
+            const childMember = expenseHousehold.members.find(
+                (member) =>
+                    member.user.toString() === child && member.role === "Дете"
+            );
+
+            if (!childMember) {
+                throw new AppError(
+                    "Посоченото дете не е член на домакинството или няма ролята 'Дете'",
+                    404
+                );
+            }
+        }
+    }
+
+    // Update the expense with new data
+    existingExpense.title = title;
+    existingExpense.category = category;
+    existingExpense.amount = amount;
+    existingExpense.date = date;
+    existingExpense.paidSplitType = paidSplitType;
+    existingExpense.paid = paidChanged ? paid : existingExpense.paid;
+    existingExpense.owedSplitType = owedSplitType;
+    existingExpense.owed = owedChanged ? owed : existingExpense.owed;
+    existingExpense.household = household;
+    if (child) {
+        existingExpense.child = child;
+    } else {
+        existingExpense.child = undefined; // Remove child if not provided
+    }
+
+    existingExpense.expenseStatus = "За одобрение";
+    existingExpense.userApprovals = userApprovals;
+
+    await existingExpense.save();
+
+    expenseHousehold.members.map(async (member) => {
+        if (member.user.toString() !== userId && member.role !== "Дете") {
+            // Create and send notifications for all members
+            const message = `Редактиран е разход в домакинство: ${expenseHousehold.name}`;
+
+            const notification = new Notification({
+                user: member.user,
+                message: message,
+                household: expenseHousehold._id,
+                resourceType: "PaidExpense",
+                resourceId: existingExpense._id,
+            });
+
+            const savedNotification = await notification.save();
+
+            // Send notification to the user if they have an active connection
+            sendNotificationToUser(member.user, savedNotification);
+        }
+    });
+};
+
 const updateBalance = async (householdId, expenseId, childId, categoryId) => {
     const session = await mongoose.startSession();
 
