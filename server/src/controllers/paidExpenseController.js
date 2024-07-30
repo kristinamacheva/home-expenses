@@ -5,6 +5,7 @@ const getPaidExpense = require("../middlewares/paidExpenseMiddleware");
 const { validationResult } = require("express-validator");
 const {
     getValidator,
+    createValidator,
     statisticsValidator,
 } = require("../validators/paidExpenseValidator");
 const { AppError } = require("../utils/AppError");
@@ -56,7 +57,20 @@ router.get("/", getValidator, async (req, res, next) => {
     }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", createValidator, async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => ({
+            field: err.path,
+            message: err.msg,
+        }));
+
+        return next(
+            new AppError("Данните са некоректни", 400, formattedErrors)
+        );
+    }
+
     const {
         title,
         category,
@@ -66,6 +80,7 @@ router.post("/", async (req, res, next) => {
         paid,
         owedSplitType,
         owed,
+        child,
     } = req.body;
 
     const parsedPaid = paid
@@ -96,6 +111,7 @@ router.post("/", async (req, res, next) => {
             owedSplitType,
             owed: parsedOwed,
             household: req.householdId,
+            child,
         });
 
         res.status(201).json(newPaidExpense);
@@ -163,7 +179,6 @@ router.use("/:paidExpenseId", getPaidExpense);
 router.get("/:paidExpenseId", async (req, res, next) => {
     const paidExpenseId = req.paidExpenseId;
     const userId = req.userId;
-    const { details } = req.query;
     const { details, editable } = req.query;
 
     try {
@@ -174,7 +189,9 @@ router.get("/:paidExpenseId", async (req, res, next) => {
                 userId
             );
         } else if (editable === "true") {
-            paidExpense = await paidExpenseManager.getEditableFields(paidExpenseId);
+            paidExpense = await paidExpenseManager.getEditableFields(
+                paidExpenseId
+            );
         } else {
             // Handle default case
             paidExpense = await paidExpenseManager.getOne(paidExpenseId);
