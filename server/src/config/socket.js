@@ -1,6 +1,10 @@
 const socketIO = require("socket.io");
 const http = require("http");
 const socketAuthMiddleware = require("../middlewares/socketAuthMiddleware");
+const Household = require("../models/Household");
+const Message = require("../models/Message");
+const User = require("../models/User");
+const cloudinary = require("cloudinary").v2;
 
 let io;
 
@@ -28,12 +32,90 @@ function initializeSocket(app) {
     io.on("connection", (socket) => {
         console.log(`User connected: ${socket.userId}`);
 
-        // Join a room named after the userId
+        // User joins their personal notification room
         socket.join(socket.userId);
-        console.log(`User joined room: ${socket.userId}`);
+        console.log(`User joined personal room: ${socket.userId}`);
+
+        // Join a household chat room
+        socket.on("joinHouseholdChat", async ({ householdId }) => {
+            const household = await Household.findById(householdId);
+            if (
+                !household ||
+                !household.members.some(
+                    (m) => m.user.toString() === socket.userId
+                )
+            ) {
+                socket.emit("error", "Не сте член на домакинството.");
+                return;
+            }
+
+            const room = `household_${householdId}`;
+            socket.join(room);
+            console.log(
+                `User ${socket.userId} joined household chat room: ${room}`
+            );
+        });
+
+        // Handle sending messages
+        socket.on("sendMessage", async ({ householdId, messageData }) => {
+            try {
+                if (!messageData.text.trim() && !messageData.img) {
+                    return;
+                }
+
+                const senderId = socket.userId;
+                // Fetch user details from database
+                const sender = await User.findById(senderId, {
+                    name: 1,
+                    avatar: 1,
+                    avatarColor: 1,
+                });
+
+                if (!sender) throw new Error("Потребителят не е намерен");
+
+                // Create new message
+                const newMessage = new Message({
+                    household: householdId,
+                    sender: senderId,
+                });
+
+                if (messageData.text) {
+                    newMessage.text = messageData.text;
+                }
+                
+                if (messageData.img) {
+                    const uploadedResponse = await cloudinary.uploader.upload(messageData.img);
+                    newMessage.img = uploadedResponse.secure_url;
+                }
+
+                await newMessage.save();
+
+                // Prepare data to emit to clients
+                const messageToEmit = {
+                    _id: newMessage._id,
+                    text: newMessage.text,
+                    createdAt: newMessage.createdAt,
+                    sender: {
+                        _id: sender._id,
+                        name: sender.name,
+                        avatar: sender.avatar,
+                        avatarColor: sender.avatarColor,
+                    },
+                    img: newMessage.img,
+                };
+
+                // Emit the message to all clients in the room
+                io.to(`household_${householdId}`).emit(
+                    "receiveMessage",
+                    messageToEmit
+                );
+            } catch (error) {
+                console.error("Error sending message:", error);
+                socket.emit("error", "Failed to send message");
+            }
+        });
 
         socket.on("disconnect", () => {
-            socket.leave(socket.userId);
             console.log(`User disconnected: ${socket.userId}`);
         });
     });
