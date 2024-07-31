@@ -3,7 +3,7 @@ import { useState } from "react";
 import Resizer from "react-image-file-resizer";
 
 // maximum allowed size for avatar images (in bytes)
-const MAX_SIZE_AVATAR = 200 * 1024; // 200 KB
+const MAX_SIZE_AVATAR = 800 * 1024; // 800 KB
 
 export default function useImagePreview(keepOriginalImg = false) {
     const [imgUrl, setImgUrl] = useState(null);
