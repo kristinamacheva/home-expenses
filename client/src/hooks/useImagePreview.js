@@ -1,11 +1,11 @@
 import { useToast } from "@chakra-ui/react";
 import { useState } from "react";
-import Resizer from 'react-image-file-resizer';
+import Resizer from "react-image-file-resizer";
 
 // maximum allowed size for avatar images (in bytes)
-const MAX_SIZE_AVATAR = 100 * 1024; // 100 KB
+const MAX_SIZE_AVATAR = 200 * 1024; // 200 KB
 
-export default function useImagePreview() {
+export default function useImagePreview(keepOriginalImg = false) {
     const [imgUrl, setImgUrl] = useState(null);
     const toast = useToast();
 
@@ -13,18 +13,15 @@ export default function useImagePreview() {
         const file = e.target.files[0];
 
         if (file && file.type.startsWith("image/")) {
-            try {
-                // Resize the image while maintaining aspect ratio
-                const resizedImage = await resizeFile(file);
-
-                if (resizedImage.size <= MAX_SIZE_AVATAR) {
+            if (keepOriginalImg) {
+                if (file.size <= MAX_SIZE_AVATAR) {
                     const reader = new FileReader();
 
                     reader.onloadend = () => {
                         setImgUrl(reader.result);
                     };
 
-                    reader.readAsDataURL(resizedImage);
+                    reader.readAsDataURL(file);
                 } else {
                     toast({
                         title: "Избраният файл е твърде голям",
@@ -35,16 +32,40 @@ export default function useImagePreview() {
                     });
                     setImgUrl(null);
                 }
-            } catch (error) {
-                console.error("Error resizing the image", error);
-                toast({
-                    title: "Грешка при обработка на изображението",
-                    status: "error",
-                    duration: 6000,
-                    isClosable: true,
-                    position: "bottom",
-                });
-                setImgUrl(null);
+            } else {
+                try {
+                    // Resize the image while maintaining aspect ratio
+                    const resizedImage = await resizeFile(file);
+
+                    if (resizedImage.size <= MAX_SIZE_AVATAR) {
+                        const reader = new FileReader();
+
+                        reader.onloadend = () => {
+                            setImgUrl(reader.result);
+                        };
+
+                        reader.readAsDataURL(resizedImage);
+                    } else {
+                        toast({
+                            title: "Избраният файл е твърде голям",
+                            status: "error",
+                            duration: 6000,
+                            isClosable: true,
+                            position: "bottom",
+                        });
+                        setImgUrl(null);
+                    }
+                } catch (error) {
+                    console.error("Error resizing the image", error);
+                    toast({
+                        title: "Грешка при обработка на изображението",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                    setImgUrl(null);
+                }
             }
         } else {
             toast({
