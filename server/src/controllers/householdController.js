@@ -5,6 +5,7 @@ const paidExpenseController = require("./paidExpenseController");
 const paymentController = require("./paymentController");
 const allowanceController = require("./allowanceController");
 const categoryController = require("./categoryController");
+const messageController = require("./messageController");
 const {
     createValidator,
     updateValidator,
@@ -194,32 +195,6 @@ router.use("/:householdId/paidExpenses", paidExpenseController);
 router.use("/:householdId/payments", paymentController);
 router.use("/:householdId/allowances", allowanceController);
 router.use("/:householdId/categories", categoryController);
+router.use("/:householdId/messages", messageController);
 
 module.exports = router;
-
-// router.get('/', async (req, res, next) => {
-//     const userId = req.userId
-
-//     try {
-//         const households = await householdManager.getAllWithUsers(userId);
-//         res.status(200).json(households);
-//     } catch (error) {
-//         next(error);
-//     }
-// });
-
-// TODO
-// router.delete('/:householdId', async (req, res) => {
-//     const householdId = req.householdId;
-
-//     await householdManager.delete(householdId);
-//     // TODO: result
-//     res.status(204).end();
-// });
-
-// router.get('/:householdId/reduced', async (req, res) => {
-//     const householdId = req.householdId;
-
-//     const household = await householdManager.getOneReducedData(householdId);
-//     res.json(household);
-// });
