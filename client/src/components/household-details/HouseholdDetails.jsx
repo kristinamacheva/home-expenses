@@ -26,6 +26,7 @@ import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 import Statistics from "../statistics/Statistics";
 import CategoryList from "../category-list/CategoryList";
 import AllowanceList from "../allowance-list/AllowanceList";
+import HouseholdChat from "../household-chat/HouseholdChat";
 
 export default function HouseholdDetails() {
     // TODO: load all details here and pass as props or make seperate requests
@@ -140,6 +141,7 @@ export default function HouseholdDetails() {
                             </>
                         )}
                         <Tab>Членове</Tab>
+                        <Tab>Чат</Tab>
                     </TabList>
                 </Box>
 
@@ -216,6 +218,9 @@ export default function HouseholdDetails() {
                     )}
                     <TabPanel>
                         <MemberList />
+                    </TabPanel>
+                    <TabPanel>
+                        <HouseholdChat />
                     </TabPanel>
                 </TabPanels>
             </Tabs>
