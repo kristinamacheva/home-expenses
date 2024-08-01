@@ -104,7 +104,33 @@ export default function HouseholdDetails() {
 
     return (
         <>
-            <Card background="white" p="2" boxShadow="xs">
+            <Card
+                background="white"
+                p="2"
+                boxShadow="xs"
+                position="relative" // Allow overlay to be positioned absolutely
+                _after={
+                    household.archived
+                        ? {
+                              content: `" "`,
+                              position: "absolute",
+                              top: "0",
+                              left: "0",
+                              width: "100%",
+                              height: "100%",
+                              backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+                              color: "white",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "lg",
+                              fontWeight: "bold",
+                              borderRadius: "md",
+                              zIndex: 1,
+                          }
+                        : {}
+                }
+            >
                 <HStack mx={4} my={2} alignItems="center" flexWrap="wrap">
                     <Heading as="h1" size="lg" color="themePurple.800" mr="2">
                         {household.name}
