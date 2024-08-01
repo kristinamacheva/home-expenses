@@ -21,6 +21,7 @@ export default function HouseholdChat() {
     const [hasMoreMessages, setHasMoreMessages] = useState(true);
     const [initialScrollDone, setInitialScrollDone] = useState(false);
     const messageEndRef = useRef(null);
+    const [isChatDisabled, setIsChatDisabled] = useState(false);
 
     const { householdId } = useParams();
     const { logoutHandler, userId, socket } = useContext(AuthContext);
@@ -35,9 +36,21 @@ export default function HouseholdChat() {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
 
+        socket.on("chat_error", (error) => {
+            toast({
+                title: "Грешка",
+                description: error,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            setIsChatDisabled(true);
+        });
+
         // Cleanup on unmount
         return () => {
             socket.off("receiveMessage");
+            socket.off("chat_error");
         };
     }, [householdId, socket]);
 
@@ -115,10 +128,6 @@ export default function HouseholdChat() {
         messages,
     ]);
 
-    const handleMessageSent = (message) => {
-        setMessages((prev) => [...prev, message]);
-    };
-
     return (
         <Flex
             flex="70"
@@ -183,7 +192,7 @@ export default function HouseholdChat() {
                 <div ref={messageEndRef}></div>
             </Flex>
 
-            <MessageInput handleMessageSent={handleMessageSent} />
+            <MessageInput isChatDisabled={isChatDisabled} />
         </Flex>
     );
 }

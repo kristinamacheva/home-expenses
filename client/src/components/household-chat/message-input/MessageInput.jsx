@@ -19,15 +19,15 @@ import useImagePreview from "../../../hooks/useImagePreview";
 import AuthContext from "../../../contexts/authContext";
 import { useParams } from "react-router-dom";
 
-export default function MessageInput({ handleMessageSent }) {
+export default function MessageInput({ isChatDisabled }) {
     const imageRef = useRef(null);
     const [messageText, setMessageText] = useState("");
     const { handleImageChange, imgUrl, setImage } = useImagePreview(true);
     const { socket } = useContext(AuthContext);
     const { onClose } = useDisclosure();
-    
+
     const { householdId } = useParams();
-    
+
     const handleSendMessage = (e) => {
         e.preventDefault();
 
@@ -57,10 +57,11 @@ export default function MessageInput({ handleMessageSent }) {
                         placeholder="Напишете съобщение..."
                         onChange={(e) => setMessageText(e.target.value)}
                         value={messageText}
+                        disabled={isChatDisabled} // Disable input
                     />
                     <InputRightElement
                         onClick={handleSendMessage}
-                        cursor={"pointer"}
+                        cursor={isChatDisabled ? "not-allowed" : "pointer"}
                     >
                         <IoSendSharp />
                     </InputRightElement>
@@ -70,12 +71,14 @@ export default function MessageInput({ handleMessageSent }) {
                 <BsFillImageFill
                     size={20}
                     onClick={() => imageRef.current.click()}
+                    disabled={isChatDisabled} // Disable image upload
                 />
                 <Input
                     type={"file"}
                     hidden
                     ref={imageRef}
                     onChange={handleImageChange}
+                    disabled={isChatDisabled} // Disable file input
                 />
             </Flex>
             <Modal
@@ -96,7 +99,9 @@ export default function MessageInput({ handleMessageSent }) {
                         <Flex justifyContent={"flex-end"} my={2}>
                             <IoSendSharp
                                 size={24}
-                                cursor={"pointer"}
+                                cursor={
+                                    isChatDisabled ? "not-allowed" : "pointer"
+                                }
                                 onClick={handleSendMessage}
                             />
                         </Flex>
