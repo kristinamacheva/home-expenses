@@ -47,6 +47,7 @@ exports.getAll = async (userId, householdId, page, limit) => {
                     avatar: "$senderDetails.avatar",
                     avatarColor: "$senderDetails.avatarColor",
                 },
+                createdAt: 1,
             },
         },
     ];
