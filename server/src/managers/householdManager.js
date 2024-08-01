@@ -1011,6 +1011,9 @@ exports.archive = async (userId, householdId) => {
     household.archived = true;
     await household.save();
 
+    // Delete all notifications associated with the household
+    await Notification.deleteMany({ household: householdId });
+
     // Send notifications to all members except the current user
     for (const member of household.members) {
         if (member.user.equals(userId)) {
