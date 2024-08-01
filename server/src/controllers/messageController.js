@@ -8,11 +8,17 @@ const getMessage = require("../middlewares/messageMiddleware");
 router.get("/", async (req, res, next) => {
     const householdId = req.householdId;
     const userId = req.userId;
+    const lastMessageId = req.query.lastMessageId;
 
     try {
-        const messages = await messageManager.getAll(userId, householdId);
-        res.status(200).json(messages);
+        // Fetch messages before the lastMessageId, if provided
+        const messages = await messageManager.getAll(
+            userId,
+            householdId,
+            lastMessageId
+        );
 
+        res.status(200).json(messages);
     } catch (error) {
         next(error);
     }
