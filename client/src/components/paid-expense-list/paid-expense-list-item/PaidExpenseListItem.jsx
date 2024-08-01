@@ -33,6 +33,7 @@ export default function PaidExpenseListItem({
     fetchPaidExpenses,
     onRemove,
     isAdmin,
+    archived,
 }) {
     const { householdId } = useParams();
     const toast = useToast();
@@ -116,8 +117,6 @@ export default function PaidExpenseListItem({
                 mx="0.2em"
                 my="1"
                 boxShadow="md"
-                // borderRadius="lg"
-                // borderTop="4px solid #676F9D"
                 background="white"
                 spacing={{ base: "1", md: "4" }}
                 direction={{ base: "column", md: "row" }}
@@ -197,7 +196,7 @@ export default function PaidExpenseListItem({
                             color="themePurple.800"
                         />
                         {(userId === creator || isAdmin) &&
-                            expenseStatus === "Отхвърлен" && (
+                            expenseStatus === "Отхвърлен" && !archived && (
                                 <>
                                     <IconButton
                                         aria-label="Редактирайте"
@@ -229,6 +228,7 @@ export default function PaidExpenseListItem({
                     paidExpenseId={_id}
                     householdId={householdId}
                     fetchPaidExpenses={fetchPaidExpenses}
+                    archived={archived}
                 />
             )}
             {isEditModalOpen && (

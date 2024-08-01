@@ -31,6 +31,7 @@ export default function PaymentListItem({
     fetchPayments,
     fetchBalances,
     onRemove,
+    archived,
 }) {
     const { householdId } = useParams();
 
@@ -186,12 +187,13 @@ export default function PaymentListItem({
                             aria-label="Детайли"
                             title="Детайли"
                             onClick={onOpenDetailsModal}
+                            archived={archived}
                             icon={<FaEye fontSize="20px" />}
                             variant="ghost"
                             color="themePurple.800"
                         />
                         {userId === payer._id &&
-                            paymentStatus === "Отхвърлен" && (
+                            paymentStatus === "Отхвърлен" && !archived && (
                                 <>
                                     <IconButton
                                         aria-label="Редактирайте"
@@ -224,6 +226,7 @@ export default function PaymentListItem({
                     householdId={householdId}
                     fetchPayments={fetchPayments}
                     fetchBalances={fetchBalances}
+                    archived={archived}
                 />
             )}
             {isEditModalOpen && (

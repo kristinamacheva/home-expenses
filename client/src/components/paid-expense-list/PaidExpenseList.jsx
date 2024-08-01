@@ -31,7 +31,7 @@ const initialSearchValues = {
     rejected: true,
 };
 
-export default function PaidExpenseList({ isAdmin }) {
+export default function PaidExpenseList({ isAdmin, archived }) {
     const [paidExpenses, setPaidExpenses] = useState([]);
     const [householdCategories, setHouseholdCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -200,7 +200,7 @@ export default function PaidExpenseList({ isAdmin }) {
     return (
         <>
             <Flex justify="flex-end" mb="3" mx="1">
-                <Button variant="primary" onClick={onOpenCreateModal}>
+                <Button variant="primary" onClick={onOpenCreateModal} isDisabled={archived}>
                     + Създаване
                 </Button>
             </Flex>
@@ -316,6 +316,7 @@ export default function PaidExpenseList({ isAdmin }) {
                             fetchPaidExpenses={fetchPaidExpenses}
                             onRemove={removePaidExpenseFromState}
                             isAdmin={isAdmin}
+                            archived={archived}
                         />
                     ))
                 ) : (

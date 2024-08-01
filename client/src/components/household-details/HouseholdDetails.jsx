@@ -64,7 +64,7 @@ export default function HouseholdDetails() {
                         isClosable: true,
                         position: "bottom",
                     });
-                    navigate("/households"); 
+                    navigate("/households");
                 }
             })
             .catch((error) => {
@@ -148,7 +148,7 @@ export default function HouseholdDetails() {
                 <TabPanels>
                     {currentUserRole !== "Дете" && (
                         <TabPanel>
-                            <BalanceList />
+                            <BalanceList archived={household.archived} />
                         </TabPanel>
                     )}
                     {currentUserRole !== "Дете" && (
@@ -189,7 +189,10 @@ export default function HouseholdDetails() {
                                 </TabList>
                                 <TabPanels>
                                     <TabPanel px="2" pt="2">
-                                        <PaidExpenseList isAdmin={isAdmin} />
+                                        <PaidExpenseList
+                                            isAdmin={isAdmin}
+                                            archived={household.archived}
+                                        />
                                     </TabPanel>
                                     <TabPanel px="2">
                                         <p>Неплатени</p>
@@ -208,7 +211,10 @@ export default function HouseholdDetails() {
                     )}
                     {currentUserRole !== "Дете" && (
                         <TabPanel>
-                            <CategoryList isAdmin={isAdmin} />
+                            <CategoryList
+                                isAdmin={isAdmin}
+                                archived={household.archived}
+                            />
                         </TabPanel>
                     )}
                     {currentUserRole === "Дете" && (

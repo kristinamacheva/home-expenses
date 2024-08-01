@@ -27,7 +27,7 @@ const initialSearchValues = {
     rejected: true,
 };
 
-export default function BalanceList() {
+export default function BalanceList({ archived }) {
     const [balances, setBalances] = useState([]);
     const [payments, setPayments] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -309,6 +309,7 @@ export default function BalanceList() {
                                 fetchPayments={fetchPayments}
                                 fetchBalances={fetchBalances}
                                 onRemove={removePaymentFromState}
+                                archived={archived}
                             />
                         ))
                     ) : (

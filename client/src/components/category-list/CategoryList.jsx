@@ -15,7 +15,7 @@ import AuthContext from "../../contexts/authContext";
 import CategoryCreate from "./category-create/CategoryCreate";
 import CategoryListItem from "./category-list-item/CategoryListItem";
 
-export default function CategoryList({ isAdmin }) {
+export default function CategoryList({ isAdmin, archived }) {
     const [categories, setCategories] = useState([]);
     const { logoutHandler } = useContext(AuthContext);
     const [isLoading, setIsLoading] = useState(false);
@@ -122,7 +122,7 @@ export default function CategoryList({ isAdmin }) {
     return (
         <>
             <Flex justify="flex-end" mb="3" mx="1">
-                <Button variant="primary" onClick={onOpenCreateModal}>
+                <Button variant="primary" onClick={onOpenCreateModal} isDisabled={archived}>
                     + Създаване
                 </Button>
             </Flex>
@@ -134,6 +134,7 @@ export default function CategoryList({ isAdmin }) {
                         fetchCategories={fetchCategories}
                         isAdmin={isAdmin}
                         onRemove={removeCategoryFromState}
+                        archived={archived}
                     />
                 ))}
             </Stack>

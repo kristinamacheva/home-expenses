@@ -40,6 +40,7 @@ export default function PaidExpenseDetails({
     paidExpenseId,
     householdId,
     fetchPaidExpenses,
+    archived,
 }) {
     const [isLoading, setIsLoading] = useState(true);
     const [paidExpenseDetails, setPaidExpenseDetails] = useState({});
@@ -130,7 +131,7 @@ export default function PaidExpenseDetails({
                     isClosable: true,
                 });
 
-                if (fetchPaidExpenses) {     
+                if (fetchPaidExpenses) {
                     fetchPaidExpenses();
                 }
 
@@ -166,10 +167,10 @@ export default function PaidExpenseDetails({
                     isClosable: true,
                 });
 
-                if (fetchPaidExpenses) {     
+                if (fetchPaidExpenses) {
                     fetchPaidExpenses();
                 }
-                
+
                 onCloseForm();
             })
             .catch((error) => {
@@ -233,7 +234,8 @@ export default function PaidExpenseDetails({
     // Determine if buttons should be shown
     const showButtons =
         paidExpenseDetails.expenseStatus === "За одобрение" &&
-        approvalStatus === "За одобрение";
+        approvalStatus === "За одобрение" &&
+        !archived;
 
     return (
         <>
@@ -538,6 +540,7 @@ export default function PaidExpenseDetails({
                                 paidExpenseId={paidExpenseId}
                                 comments={paidExpenseDetails.comments}
                                 updateComments={updateComments}
+                                archived={archived}
                             />
                         </Stack>
                     </ModalFooter>

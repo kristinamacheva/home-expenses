@@ -22,6 +22,7 @@ export default function CategoryListItem({
     fetchCategories,
     isAdmin,
     onRemove,
+    archived,
 }) {
     const { householdId } = useParams();
     const toast = useToast();
@@ -121,7 +122,7 @@ export default function CategoryListItem({
                         justifyContent="flex-end"
                     >
                         {(userId === category.creator?._id || isAdmin) &&
-                            category.predefined === false && (
+                            category.predefined === false && !archived && (
                                 <>
                                     <IconButton
                                         aria-label="Редактирайте"

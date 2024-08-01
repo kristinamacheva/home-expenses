@@ -33,6 +33,7 @@ export default function PaymentDetails({
     householdId,
     fetchPayments,
     fetchBalances,
+    archived,
 }) {
     const [isLoading, setIsLoading] = useState(true);
     const [paymentDetails, setPaymentDetails] = useState({});
@@ -175,7 +176,8 @@ export default function PaymentDetails({
     // Determine if buttons should be shown
     const showButtons =
         paymentDetails.paymentStatus === "За одобрение" &&
-        paymentDetails.payee._id === userId;
+        paymentDetails.payee._id === userId &&
+        !archived;
 
     return (
         <>
@@ -329,6 +331,7 @@ export default function PaymentDetails({
                                 paymentId={paymentId}
                                 comments={paymentDetails.comments}
                                 updateComments={updateComments}
+                                archived={archived}
                             />
                         </Stack>
                     </ModalFooter>
