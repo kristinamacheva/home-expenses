@@ -17,8 +17,11 @@ import AuthContext from "../../../contexts/authContext";
 
 export default function Message({ ownMessage, message }) {
     const [imgLoaded, setImgLoaded] = useState(false);
+    const [showCreatedAt, setShowCreatedAt] = useState(false);
     const { logoutHandler, userId } = useContext(AuthContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const toggleCreatedAt = () => setShowCreatedAt((prev) => !prev);
 
     return (
         <>
@@ -26,17 +29,40 @@ export default function Message({ ownMessage, message }) {
                 <Flex gap={2} alignSelf={"flex-end"}>
                     <Stack direction="column">
                         {message.text && (
-                            <Text
-                                fontSize={14}
-                                color={"white"}
-                                bg={"themePurple.800"}
-                                maxW={{ base: "350px", md: "450px" }}
-                                px={3}
-                                py={1}
-                                borderRadius={"md"}
+                            <div
+                                onClick={toggleCreatedAt}
+                                style={{ cursor: "pointer" }}
                             >
-                                {message.text}
-                            </Text>
+                                <Text
+                                    fontSize={14}
+                                    color={"white"}
+                                    bg={"themePurple.800"}
+                                    maxW={{ base: "350px", md: "450px" }}
+                                    px={3}
+                                    py={1}
+                                    borderRadius={"md"}
+                                >
+                                    {message.text}
+                                </Text>
+                                {showCreatedAt && (
+                                    <Text
+                                        fontSize={12}
+                                        color={"gray.500"}
+                                        mt={1}
+                                    >
+                                        {new Date(message.createdAt)
+                                            .toLocaleString("bg-BG", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })
+                                            .replace(" в", "")}{" "}
+                                        ч.
+                                    </Text>
+                                )}
+                            </div>
                         )}
                         {message.img && !imgLoaded && (
                             <Flex mt={5} w={"200px"}>
@@ -50,7 +76,6 @@ export default function Message({ ownMessage, message }) {
                                 <Skeleton w={"200px"} h={"200px"} />
                             </Flex>
                         )}
-
                         {message.img && imgLoaded && (
                             <Image
                                 mt={1}
@@ -59,11 +84,10 @@ export default function Message({ ownMessage, message }) {
                                 alt="Message image"
                                 borderRadius={4}
                                 cursor="pointer"
-                                onClick={onOpen} // Open modal on click
+                                onClick={onOpen}
                             />
                         )}
                     </Stack>
-
                     <Avatar
                         src={message.sender.avatar}
                         name={message.sender.name}
@@ -79,20 +103,42 @@ export default function Message({ ownMessage, message }) {
                         background={message.sender.avatarColor}
                         size="sm"
                     />
-
                     <Stack direction="column">
                         {message.text && (
-                            <Text
-                                maxW={{ base: "350px", md: "450px" }}
-                                bg={"gray.300"}
-                                px={3}
-                                py={1}
-                                fontSize={14}
-                                borderRadius={"md"}
-                                color={"black"}
+                            <div
+                                onClick={toggleCreatedAt}
+                                style={{ cursor: "pointer" }}
                             >
-                                {message.text}
-                            </Text>
+                                <Text
+                                    maxW={{ base: "350px", md: "450px" }}
+                                    bg={"gray.300"}
+                                    px={3}
+                                    py={1}
+                                    fontSize={14}
+                                    borderRadius={"md"}
+                                    color={"black"}
+                                >
+                                    {message.text}
+                                </Text>
+                                {showCreatedAt && (
+                                    <Text
+                                        fontSize={12}
+                                        color={"gray.500"}
+                                        mt={1}
+                                    >
+                                        {new Date(message.createdAt)
+                                            .toLocaleString("bg-BG", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })
+                                            .replace(" в", "")}{" "}
+                                        ч.
+                                    </Text>
+                                )}
+                            </div>
                         )}
                         {message.img && !imgLoaded && (
                             <Flex mt={5} w={"200px"}>
@@ -106,7 +152,6 @@ export default function Message({ ownMessage, message }) {
                                 <Skeleton w={"200px"} h={"200px"} />
                             </Flex>
                         )}
-
                         {message.img && imgLoaded && (
                             <Image
                                 mt={1}
@@ -115,7 +160,7 @@ export default function Message({ ownMessage, message }) {
                                 alt="Message image"
                                 borderRadius={4}
                                 cursor="pointer"
-                                onClick={onOpen} // Open modal on click
+                                onClick={onOpen}
                             />
                         )}
                     </Stack>
