@@ -565,6 +565,11 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
             session
         );
 
+        // Check if the household is archived
+        if (household.archived) {
+            throw new AppError(`Домакинството е архивирано`, 403);
+        }
+
         if (!household.admins.includes(adminUser._id)) {
             throw new AppError(
                 "Потребителят не е администратор на това домакинство.",

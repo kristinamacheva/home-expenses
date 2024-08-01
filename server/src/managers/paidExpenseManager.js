@@ -553,6 +553,11 @@ exports.create = async (paidExpenseData) => {
     // Fetch the household by ID
     const expenseHousehold = await Household.findById(household);
 
+    // Check if the household is archived
+    if (expenseHousehold.archived) {
+        throw new AppError(`Домакинството е архивирано`, 403);
+    }
+
     // Check if there is only one member in the household
     if (expenseHousehold.members.length === 1) {
         throw new AppError(
@@ -742,6 +747,11 @@ exports.update = async (userId, paidExpenseId, paidExpenseData) => {
 
     // Fetch the household to check membership and roles
     const expenseHousehold = await Household.findById(household);
+
+    // Check if the household is archived
+    if (expenseHousehold.archived) {
+        throw new AppError(`Домакинството е архивирано`, 403);
+    }
 
     // Check if the user is an admin
     const isAdmin = expenseHousehold.admins.some(
@@ -1185,6 +1195,11 @@ exports.delete = async (userId, paidExpenseId) => {
     if (userId.toString() !== creatorId) {
         const household = await Household.findById(householdId);
 
+        // Check if the household is archived
+        if (household.archived) {
+            throw new AppError(`Домакинството е архивирано`, 403);
+        }
+
         const isAdmin = household.admins.some(
             (admin) => admin.toString() === userId.toString()
         );
@@ -1208,20 +1223,3 @@ exports.delete = async (userId, paidExpenseId) => {
     // Delete the existing paid expense from the database
     await PaidExpense.findByIdAndDelete(paidExpenseId);
 };
-
-// exports.update = (paidExpenseId, paidExpenseData) =>
-//     PaidExpense.findByIdAndUpdate(paidExpenseId, paidExpenseData);
-
-// exports.delete = (paidExpenseId) =>
-//     PaidExpense.findByIdAndDelete(paidExpenseId);
-
-// exports.getAllComments = async (paidExpenseId) => {
-//     const paidExpense = await PaidExpense.findById(paidExpenseId)
-//         .populate({
-//             path: "comments.user",
-//             select: "name avatar avatarColor",
-//         })
-//         .lean();
-
-//     return paidExpense.comments;
-// };

@@ -111,11 +111,6 @@ exports.getOne = (paymentId) =>
         .populate("payee", "_id name avatar avatarColor")
         .lean();
 
-// exports.getOne = (paymentId) =>
-//     Payment.findById(paymentId)
-//         .select("_id payer payee amount date paymentStatus")
-//         .lean();
-
 // TODO: test
 exports.getOneWithBalance = async (paymentId) => {
     // Retrieve payment details including household
@@ -229,6 +224,11 @@ exports.create = async (paymentData) => {
     // Fetch the household by ID
     const paymentHousehold = await Household.findById(household);
 
+    // Check if the household is archived
+    if (paymentHousehold.archived) {
+        throw new AppError(`Домакинството е архивирано`, 403);
+    }
+
     // Check if payer and payee are members of the household
     const householdMemberIds = paymentHousehold.members.map((member) =>
         member.user.toString()
@@ -321,6 +321,11 @@ exports.accept = async (userId, paymentId) => {
 
     // Fetch the household by ID
     const household = await Household.findById(payment.household);
+
+    // Check if the household is archived
+    if (household.archived) {
+        throw new AppError(`Домакинството е архивирано`, 403);
+    }
 
     // Get payer and payee balance
     const payerBalance = household.balance.find((entry) =>
@@ -485,6 +490,11 @@ exports.update = async (paymentData) => {
     const paymentHousehold = await Household.findById(
         existingPayment.household
     );
+
+    // Check if the household is archived
+    if (paymentHousehold.archived) {
+        throw new AppError(`Домакинството е архивирано`, 403);
+    }
 
     // Retrieve payee ID from the existing payment
     const payeeId = existingPayment.payee.toString();

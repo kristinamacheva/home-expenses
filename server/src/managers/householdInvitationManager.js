@@ -42,6 +42,11 @@ exports.accept = async (userId, invitationId) => {
             throw new AppError("Домакинството не е намерено", 404);
         }
 
+        // Check if the household is archived
+        if (household.archived) {
+            throw new AppError(`Домакинството е архивирано`, 403);
+        }
+
         const role = invitation.role;
 
         // Add user to the household members

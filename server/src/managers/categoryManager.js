@@ -88,6 +88,11 @@ exports.create = async (categoryData) => {
             throw new AppError(`Платецът не е член на домакинството`, 403);
         }
 
+        // Check if the household is archived
+        if (householdExists.archived) {
+            throw new AppError(`Домакинството е архивирано`, 403);
+        }
+
         // Create and save the new category
         const newCategory = new Category({
             title,
@@ -129,6 +134,11 @@ exports.update = async (categoryData) => {
         existingCategory.household
     );
 
+    // Check if the household is archived
+    if (categoryHousehold.archived) {
+        throw new AppError(`Домакинството е архивирано`, 403);
+    }
+
     // Check if the user is the creator of the category
     const isCreator = existingCategory.creator.toString() === userId.toString();
 
@@ -167,6 +177,11 @@ exports.delete = async (userId, categoryId) => {
         const categoryHousehold = await Household.findById(
             existingCategory.household
         ).session(session);
+
+        // Check if the household is archived
+        if (categoryHousehold.archived) {
+            throw new AppError(`Домакинството е архивирано`, 403);
+        }
 
         // Check if the user is the creator of the category
         const isCreator =
