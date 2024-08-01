@@ -8,6 +8,37 @@ const cloudinary = require("cloudinary").v2;
 
 let io;
 
+async function validateHousehold(socket, householdId) {
+    try {
+        const household = await Household.findById(householdId);
+        if (!household) {
+            socket.emit("error", "Домакинството не е намерено.");
+            return { isValid: false };
+        }
+
+        if (household.archived) {
+            socket.emit("error", "Домакинството е архивирано.");
+            return { isValid: false };
+        }
+
+        if (
+            !household.members.some((m) => m.user.toString() === socket.userId)
+        ) {
+            socket.emit("error", "Не сте член на домакинството.");
+            return { isValid: false };
+        }
+
+        return { isValid: true, household };
+    } catch (error) {
+        console.error("Error validating household:", error);
+        socket.emit(
+            "error",
+            "Възникна грешка при проверката на домакинството."
+        );
+        return { isValid: false };
+    }
+}
+
 function initializeSocket(app) {
     // Create an HTTP server instance that can be used by both Express and Socket.io
     const server = http.createServer(app);
@@ -38,16 +69,11 @@ function initializeSocket(app) {
 
         // Join a household chat room
         socket.on("joinHouseholdChat", async ({ householdId }) => {
-            const household = await Household.findById(householdId);
-            if (
-                !household ||
-                !household.members.some(
-                    (m) => m.user.toString() === socket.userId
-                )
-            ) {
-                socket.emit("error", "Не сте член на домакинството.");
-                return;
-            }
+            const { isValid, household } = await validateHousehold(
+                socket,
+                householdId
+            );
+            if (!isValid) return;
 
             const room = `household_${householdId}`;
             socket.join(room);
@@ -60,8 +86,14 @@ function initializeSocket(app) {
         socket.on("sendMessage", async ({ householdId, messageData }) => {
             try {
                 if (!messageData.text.trim() && !messageData.img) {
-                    return;
+                    return; // Ignore empty messages
                 }
+
+                const { isValid, household } = await validateHousehold(
+                    socket,
+                    householdId
+                );
+                if (!isValid) return;
 
                 const senderId = socket.userId;
                 // Fetch user details from database
@@ -82,9 +114,11 @@ function initializeSocket(app) {
                 if (messageData.text) {
                     newMessage.text = messageData.text;
                 }
-                
+
                 if (messageData.img) {
-                    const uploadedResponse = await cloudinary.uploader.upload(messageData.img);
+                    const uploadedResponse = await cloudinary.uploader.upload(
+                        messageData.img
+                    );
                     newMessage.img = uploadedResponse.secure_url;
                 }
 
