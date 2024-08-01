@@ -18,7 +18,15 @@ const messageSchema = new mongoose.Schema(
         img: {
             type: String,
         },
-        // resourceType: {
+        resourceType: {
+            type: String,
+            enum: ['PaidExpense', 'Payment'],
+        },
+        resourceId: {
+            type: mongoose.Types.ObjectId,
+            refPath: 'resourceType', // Dynamic reference
+        },
+    },
     { timestamps: true }
 );
 
