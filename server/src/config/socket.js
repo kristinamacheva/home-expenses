@@ -12,19 +12,19 @@ async function validateHousehold(socket, householdId) {
     try {
         const household = await Household.findById(householdId);
         if (!household) {
-            socket.emit("error", "Домакинството не е намерено.");
+            socket.emit("chat_error", "Домакинството не е намерено.");
             return { isValid: false };
         }
 
         if (household.archived) {
-            socket.emit("error", "Домакинството е архивирано.");
+            socket.emit("chat_error", "Домакинството е архивирано.");
             return { isValid: false };
         }
 
         if (
             !household.members.some((m) => m.user.toString() === socket.userId)
         ) {
-            socket.emit("error", "Не сте член на домакинството.");
+            socket.emit("chat_error", "Не сте член на домакинството.");
             return { isValid: false };
         }
 
@@ -32,7 +32,7 @@ async function validateHousehold(socket, householdId) {
     } catch (error) {
         console.error("Error validating household:", error);
         socket.emit(
-            "error",
+            "chat_error",
             "Възникна грешка при проверката на домакинството."
         );
         return { isValid: false };
