@@ -12,7 +12,7 @@ const getPaidExpense = async (req, res, next) => {
         const paidExpense = await PaidExpense.findById(paidExpenseId);
 
         if (!paidExpense) {
-            return res.status(404).json({ message: 'Paid expense not found' });
+            return res.status(404).json({ message: 'Разходът не е намерен' });
         }
 
         req.paidExpenseId = paidExpenseId;

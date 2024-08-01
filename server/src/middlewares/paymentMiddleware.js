@@ -12,7 +12,7 @@ const getPayment = async (req, res, next) => {
         const payment = await Payment.findById(paymentId);
 
         if (!payment) {
-            return res.status(404).json({ message: 'Payment not found' });
+            return res.status(404).json({ message: 'Плащането не е намерено' });
         }
 
         req.paymentId = paymentId;
