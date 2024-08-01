@@ -1,5 +1,11 @@
-import { Flex, Skeleton, SkeletonCircle, useToast } from "@chakra-ui/react";
-import { useContext, useEffect, useRef, useState } from "react";
+import {
+    Flex,
+    Skeleton,
+    SkeletonCircle,
+    useToast,
+    Button,
+} from "@chakra-ui/react";
+import { useContext, useEffect, useRef, useState, useCallback } from "react";
 import * as messageService from "../../services/messageService";
 import AuthContext from "../../contexts/authContext";
 import styles from "./household-chat.module.css";
@@ -10,10 +16,13 @@ import { useParams } from "react-router-dom";
 export default function HouseholdChat() {
     const [loadingMessages, setLoadingMessages] = useState(true);
     const [messages, setMessages] = useState([]);
+    const [isFetchingOlderMessages, setIsFetchingOlderMessages] =
+        useState(false);
+    const [hasMoreMessages, setHasMoreMessages] = useState(true);
+    const [initialScrollDone, setInitialScrollDone] = useState(false);
     const messageEndRef = useRef(null);
 
     const { householdId } = useParams();
-
     const { logoutHandler, userId, socket } = useContext(AuthContext);
     const toast = useToast();
 
@@ -33,17 +42,20 @@ export default function HouseholdChat() {
     }, [householdId, socket]);
 
     useEffect(() => {
-        messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+        if (!initialScrollDone && messages.length > 0) {
+            messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            setInitialScrollDone(true);
+        }
+    }, [messages, initialScrollDone]);
 
     useEffect(() => {
         setLoadingMessages(true);
-
         messageService
             .getAll(householdId)
             .then((result) => {
                 setMessages(result);
                 setLoadingMessages(false);
+                setHasMoreMessages(result.length > 0); // Check if there are more messages to load
             })
             .catch((error) => {
                 if (error.status === 401) {
@@ -61,7 +73,47 @@ export default function HouseholdChat() {
                     setLoadingMessages(false);
                 }
             });
-    }, []);
+    }, [householdId, logoutHandler, toast]);
+
+    const fetchOlderMessages = useCallback(async () => {
+        if (loadingMessages || isFetchingOlderMessages || !hasMoreMessages)
+            return;
+
+        setIsFetchingOlderMessages(true);
+
+        try {
+            const lastMessageId = messages[0]?._id;
+            const olderMessages = await messageService.getAll(
+                householdId,
+                lastMessageId
+            );
+
+            setMessages((prevMessages) => [...olderMessages, ...prevMessages]);
+            setHasMoreMessages(olderMessages.length > 0); // Update if more messages exist
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: "Грешка.",
+                    description:
+                        error.message ||
+                        "Неуспешно зареждане на по-стари съобщения.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        } finally {
+            setIsFetchingOlderMessages(false);
+        }
+    }, [
+        loadingMessages,
+        isFetchingOlderMessages,
+        hasMoreMessages,
+        householdId,
+        messages,
+    ]);
 
     const handleMessageSent = (message) => {
         setMessages((prev) => [...prev, message]);
@@ -76,7 +128,6 @@ export default function HouseholdChat() {
             flexDirection={"column"}
             className={styles.chat}
         >
-            {/* Display Skeleton while loading chat */}
             <Flex
                 flexDir={"column"}
                 gap={4}
@@ -105,24 +156,31 @@ export default function HouseholdChat() {
                         </Flex>
                     ))}
 
-                {!loadingMessages &&
-                    messages.map((message) => (
-                        <Flex
-                            key={message._id}
-                            direction={"column"}
-                            ref={
-                                messages.length - 1 ===
-                                messages.indexOf(message)
-                                    ? messageEndRef
-                                    : null
-                            }
-                        >
-                            <Message
-                                message={message}
-                                ownMessage={userId === message.sender._id}
-                            />
-                        </Flex>
-                    ))}
+                {!loadingMessages && (
+                    <>
+                        {hasMoreMessages && (
+                            <Button
+                                onClick={fetchOlderMessages}
+                                isLoading={isFetchingOlderMessages}
+                                mb={4}
+                                py={1}
+                                px={3}
+                                alignSelf="center"
+                            >
+                                Заредете още
+                            </Button>
+                        )}
+                        {messages.map((message) => (
+                            <Flex key={message._id} direction={"column"}>
+                                <Message
+                                    message={message}
+                                    ownMessage={userId === message.sender._id}
+                                />
+                            </Flex>
+                        ))}
+                    </>
+                )}
+                <div ref={messageEndRef}></div>
             </Flex>
 
             <MessageInput handleMessageSent={handleMessageSent} />
