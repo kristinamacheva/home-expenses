@@ -2,6 +2,8 @@ const socketIO = require("socket.io");
 const http = require("http");
 const socketAuthMiddleware = require("../middlewares/socketAuthMiddleware");
 const Household = require("../models/Household");
+const Payment = require("../models/Payment");
+const PaidExpense = require("../models/PaidExpense");
 const Message = require("../models/Message");
 const User = require("../models/User");
 const cloudinary = require("cloudinary").v2;
@@ -85,7 +87,11 @@ function initializeSocket(app) {
         // Handle sending messages
         socket.on("sendMessage", async ({ householdId, messageData }) => {
             try {
-                if (!messageData.text.trim() && !messageData.img) {
+                if (
+                    !messageData.text?.trim() &&
+                    !messageData.img &&
+                    !messageData.resourceType
+                ) {
                     return; // Ignore empty messages
                 }
 
@@ -122,6 +128,44 @@ function initializeSocket(app) {
                     newMessage.img = uploadedResponse.secure_url;
                 }
 
+                // Check if the resource exists and belongs to the household
+                if (messageData.resourceType && messageData.resourceId) {
+                    const validResourceTypes = ["paidExpense", "payment"];
+                    if (validResourceTypes.includes(messageData.resourceType)) {
+                        let resourceModel;
+                        switch (messageData.resourceType) {
+                            case "paidExpense":
+                                resourceModel = PaidExpense;
+                                messageData.resourceType = "PaidExpense";
+                                break;
+                            case "payment":
+                                resourceModel = Payment;
+                                messageData.resourceType = "Payment";
+                                break;
+                            default:
+                                throw new Error("Невалиден тип на ресурс");
+                        }
+
+                        const resource = await resourceModel.findById(
+                            messageData.resourceId
+                        );
+
+                        if (
+                            !resource ||
+                            !resource.household.equals(householdId)
+                        ) {
+                            throw new Error(
+                                "Ресурсът не е намерен или не принадлежи към домакинството"
+                            );
+                        }
+
+                        newMessage.resourceType = messageData.resourceType;
+                        newMessage.resourceId = messageData.resourceId;
+                    } else {
+                        throw new Error("Невалиден ресурс");
+                    }
+                }
+
                 await newMessage.save();
 
                 // Prepare data to emit to clients
@@ -129,6 +173,7 @@ function initializeSocket(app) {
                     _id: newMessage._id,
                     text: newMessage.text,
                     createdAt: newMessage.createdAt,
+                    household: householdId,
                     sender: {
                         _id: sender._id,
                         name: sender.name,
@@ -136,6 +181,8 @@ function initializeSocket(app) {
                         avatarColor: sender.avatarColor,
                     },
                     img: newMessage.img,
+                    resourceType: newMessage.resourceType,
+                    resourceId: newMessage.resourceId,
                 };
 
                 // Emit the message to all clients in the room
