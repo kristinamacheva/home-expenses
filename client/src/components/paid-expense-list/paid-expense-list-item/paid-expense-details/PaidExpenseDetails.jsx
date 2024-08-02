@@ -27,8 +27,10 @@ import {
     VStack,
     useToast,
     useDisclosure,
+    IconButton,
 } from "@chakra-ui/react";
 
+import { FaPaperclip } from "react-icons/fa6";
 import * as paidExpenseService from "../../../../services/paidExpenseService";
 import Comments from "./comments/Comments";
 import AuthContext from "../../../../contexts/authContext";
@@ -197,6 +199,30 @@ export default function PaidExpenseDetails({
         }));
     };
 
+    const copyLinkHandler = () => {
+        const link = `households/${householdId}/paidExpense/${paidExpenseId}`;
+        navigator.clipboard
+            .writeText(link)
+            .then(() => {
+                toast({
+                    title: "Линкът е копиран.",
+                    description: "Линкът към разхода беше копиран.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            })
+            .catch((error) => {
+                toast({
+                    title: "Грешка.",
+                    description: "Неуспешно копиране на линка.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            });
+    };
+
     const onCloseForm = () => {
         onClose();
     };
@@ -278,6 +304,7 @@ export default function PaidExpenseDetails({
                                             <Heading as="h3" size="md">
                                                 {paidExpenseDetails.title}
                                             </Heading>
+
                                             <Box display="inline-block">
                                                 <Badge
                                                     variant="subtle"
@@ -292,6 +319,17 @@ export default function PaidExpenseDetails({
                                                     }
                                                 </Badge>
                                             </Box>
+                                            <IconButton
+                                                aria-label="Копирайте"
+                                                title="Копирайте"
+                                                onClick={copyLinkHandler}
+                                                icon={
+                                                    <FaPaperclip fontSize="12px" />
+                                                }
+                                                variant="ghost"
+                                                color="themePurple.800"
+                                                size="xs"
+                                            />
                                         </Stack>
 
                                         <Box display="inline-block">

@@ -19,12 +19,14 @@ import {
     Avatar,
     useToast,
     useDisclosure,
+    IconButton,
 } from "@chakra-ui/react";
 
 import * as paymentService from "../../../../services/paymentService";
 import Comments from "./comments/Comments";
 import AuthContext from "../../../../contexts/authContext";
 import PaymentReject from "./payment-reject/PaymentReject";
+import { FaPaperclip } from "react-icons/fa6";
 
 export default function PaymentDetails({
     isOpen,
@@ -169,6 +171,30 @@ export default function PaymentDetails({
         }));
     };
 
+    const copyLinkHandler = () => {
+        const link = `households/${householdId}/payment/${paymentId}`;
+        navigator.clipboard
+            .writeText(link)
+            .then(() => {
+                toast({
+                    title: "Линкът е копиран.",
+                    description: "Линкът към плащането беше копиран.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            })
+            .catch((error) => {
+                toast({
+                    title: "Грешка.",
+                    description: "Неуспешно копиране на линка.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            });
+    };
+
     const onCloseForm = () => {
         onClose();
     };
@@ -217,18 +243,33 @@ export default function PaymentDetails({
                                         spacing={{ base: "1", md: "0" }}
                                         mr={{ md: "2" }}
                                     >
-                                        <Box display="inline-block">
-                                            <Badge
-                                                variant="subtle"
-                                                background={`${statusColor}.300`}
-                                                rounded="full"
-                                                px="1.5"
-                                                py="0.2"
-                                                textTransform="none"
-                                            >
-                                                {paymentDetails.paymentStatus}
-                                            </Badge>
-                                        </Box>
+                                        <Stack direction="row">
+                                            <Box display="inline-block">
+                                                <Badge
+                                                    variant="subtle"
+                                                    background={`${statusColor}.300`}
+                                                    rounded="full"
+                                                    px="1.5"
+                                                    py="0.2"
+                                                    textTransform="none"
+                                                >
+                                                    {
+                                                        paymentDetails.paymentStatus
+                                                    }
+                                                </Badge>
+                                            </Box>
+                                            <IconButton
+                                                aria-label="Копирайте"
+                                                title="Копирайте"
+                                                onClick={copyLinkHandler}
+                                                icon={
+                                                    <FaPaperclip fontSize="12px" />
+                                                }
+                                                variant="ghost"
+                                                color="themePurple.800"
+                                                size="xs"
+                                            />
+                                        </Stack>
                                         <Text color={"gray.500"} fontSize="sm">
                                             {new Date(
                                                 paymentDetails.date
