@@ -37,6 +37,13 @@ export const getOneChildMembers = async (householdId) => {
     return result;
 };
 
+export const getOneMembers = async (householdId) => {
+    const result = await request.get(
+        `${baseUrl}/${householdId}/members`
+    );
+    return result;
+};
+
 export const getOneMembersDetails = async (householdId) => {
     const result = await request.get(
         `${baseUrl}/${householdId}/members?details=true`
