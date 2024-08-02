@@ -14,14 +14,39 @@ import {
 } from "@chakra-ui/react";
 import { useContext, useState } from "react";
 import AuthContext from "../../../contexts/authContext";
+import PaidExpenseDetails from "../../paid-expense-list/paid-expense-list-item/paid-expense-details/PaidExpenseDetails";
+import PaymentDetails from "../../balance-list/payment-list-item/payment-details/PaymentDetails";
 
 export default function Message({ ownMessage, message }) {
     const [imgLoaded, setImgLoaded] = useState(false);
     const [showCreatedAt, setShowCreatedAt] = useState(false);
     const { logoutHandler, userId } = useContext(AuthContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const {
+        isOpen: isPaidExpenseDetailsModalOpen,
+        onOpen: onOpenPaidExpenseDetailsModal,
+        onClose: onClosePaidExpenseDetailsModal,
+    } = useDisclosure();
+    const {
+        isOpen: isPaymentDetailsModalOpen,
+        onOpen: onOpenPaymentDetailsModal,
+        onClose: onClosePaymentDetailsModal,
+    } = useDisclosure();
 
     const toggleCreatedAt = () => setShowCreatedAt((prev) => !prev);
+
+    const handleDetailsClick = () => {
+        switch (message.resourceType) {
+            case "PaidExpense":
+                onOpenPaidExpenseDetailsModal();
+                break;
+            case "Payment":
+                onOpenPaymentDetailsModal();
+                break;
+            default:
+                break;
+        }
+    };
 
     return (
         <>
@@ -86,6 +111,23 @@ export default function Message({ ownMessage, message }) {
                                 cursor="pointer"
                                 onClick={onOpen}
                             />
+                        )}
+                        {message.resourceType && message.resourceId && (
+                            <Text
+                                color="blue.500"
+                                bg={"themePurple.200"}
+                                borderRadius={"md"}
+                                onClick={() => handleDetailsClick()}
+                                cursor="pointer"
+                                py={1}
+                                px={2}
+                            >
+                                #
+                                {message.resourceType === "PaidExpense"
+                                    ? "Разход"
+                                    : "Плащане"}{" "}
+                                - {message.resourceId}
+                            </Text>
                         )}
                     </Stack>
                     <Avatar
@@ -163,6 +205,23 @@ export default function Message({ ownMessage, message }) {
                                 onClick={onOpen}
                             />
                         )}
+                        {message.resourceType && message.resourceId && (
+                            <Text
+                                color="blue.500"
+                                bg={"themePurple.200"}
+                                borderRadius={"md"}
+                                onClick={() => handleDetailsClick()}
+                                cursor="pointer"
+                                py={1}
+                                px={2}
+                            >
+                                #
+                                {message.resourceType === "PaidExpense"
+                                    ? "Разход"
+                                    : "Плащане"}{" "}
+                                - {message.resourceId}
+                            </Text>
+                        )}
                     </Stack>
                 </Flex>
             )}
@@ -188,6 +247,22 @@ export default function Message({ ownMessage, message }) {
                     </ModalBody>
                 </ModalContent>
             </Modal>
+            {isPaidExpenseDetailsModalOpen && (
+                <PaidExpenseDetails
+                    isOpen={isPaidExpenseDetailsModalOpen}
+                    onClose={onClosePaidExpenseDetailsModal}
+                    paidExpenseId={message.resourceId}
+                    householdId={message.household}
+                />
+            )}
+            {isPaymentDetailsModalOpen && (
+                <PaymentDetails
+                    isOpen={isPaymentDetailsModalOpen}
+                    onClose={onClosePaymentDetailsModal}
+                    paymentId={message.resourceId}
+                    householdId={message.household}
+                />
+            )}
         </>
     );
 }
