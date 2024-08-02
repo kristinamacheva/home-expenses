@@ -16,21 +16,29 @@ import {
     Stack,
     IconButton,
     useToast,
+    Box,
+    List,
+    ListItem,
 } from "@chakra-ui/react";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { IoSendSharp } from "react-icons/io5";
 import { BsFillImageFill } from "react-icons/bs";
 import { FaLink } from "react-icons/fa6";
 import useImagePreview from "../../../hooks/useImagePreview";
 import AuthContext from "../../../contexts/authContext";
+import * as householdService from "../../../services/householdService";
 import { useParams } from "react-router-dom";
 
 export default function MessageInput({ isChatDisabled }) {
     const imageRef = useRef(null);
     const [messageText, setMessageText] = useState("");
     const [link, setLink] = useState("");
+    const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [showAutocomplete, setShowAutocomplete] = useState(false);
+    const [mentionedUsers, setMentionedUsers] = useState([]);
     const { handleImageChange, imgUrl, setImage } = useImagePreview(true);
-    const { socket } = useContext(AuthContext);
+    const { logoutHandler, userId, socket } = useContext(AuthContext);
     const { onClose } = useDisclosure();
     const {
         isOpen: isSendResourceOpen,
@@ -40,6 +48,52 @@ export default function MessageInput({ isChatDisabled }) {
     const toast = useToast();
 
     const { householdId } = useParams();
+
+    useEffect(() => {
+        householdService
+            .getOneMembers(householdId)
+            .then((result) => {
+                // Filter out the current user from the users list
+                const filteredUsers = result.filter(
+                    (user) => user._id !== userId
+                );
+                setUsers(filteredUsers);
+            })
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title:
+                            error.message ||
+                            "Неуспешно зареждане на потребителите",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
+            });
+    }, [householdId, userId]);
+
+    useEffect(() => {
+        const lastIndex = messageText.lastIndexOf("@");
+        if (lastIndex !== -1) {
+            const query = messageText.slice(lastIndex + 1);
+            if (query) {
+                setFilteredUsers(
+                    users.filter((user) =>
+                        user.name.toLowerCase().includes(query.toLowerCase())
+                    )
+                );
+                setShowAutocomplete(true);
+            } else {
+                setShowAutocomplete(false);
+            }
+        } else {
+            setShowAutocomplete(false);
+        }
+    }, [messageText, users]);
 
     const handleSendMessage = (e) => {
         e.preventDefault();
@@ -53,12 +107,14 @@ export default function MessageInput({ isChatDisabled }) {
         const messageData = {
             text: messageText,
             img: imgUrl,
+            mentionedUsers: mentionedUsers.map((user) => user._id),
         };
 
         socket.emit("sendMessage", { householdId, messageData });
 
         setMessageText("");
         setImage("");
+        setMentionedUsers([]);
     };
 
     const handleOpenSendResource = async () => {
@@ -125,6 +181,22 @@ export default function MessageInput({ isChatDisabled }) {
         onCloseSendResource();
     };
 
+    const handleUserClick = (user) => {
+        const lastIndex = messageText.lastIndexOf("@");
+        const newText = messageText.slice(0, lastIndex) + `@${user.name} `;
+        setMessageText(newText);
+        setShowAutocomplete(false);
+        
+        // Check if the user is already in the mentionedUsers array
+        if (
+            !mentionedUsers.some(
+                (mentionedUser) => mentionedUser._id === user._id
+            )
+        ) {
+            setMentionedUsers([...mentionedUsers, user]);
+        }
+    };
+
     return (
         <Flex gap={2} alignItems={"center"}>
             <form onSubmit={handleSendMessage} style={{ flex: 95 }}>
@@ -136,6 +208,33 @@ export default function MessageInput({ isChatDisabled }) {
                         value={messageText}
                         disabled={isChatDisabled} // Disable input
                     />
+                    {showAutocomplete && (
+                        <Box
+                            position="absolute"
+                            bg="white"
+                            border="1px solid #ccc"
+                            borderRadius="md"
+                            zIndex="10"
+                            bottom="100%"
+                            w="100%" // make the Box width the same as the Input width
+                            maxH="200px"
+                            overflowY="auto"
+                        >
+                            <List>
+                                {filteredUsers.map((user) => (
+                                    <ListItem
+                                        key={user._id}
+                                        onClick={() => handleUserClick(user)}
+                                        cursor="pointer"
+                                        _hover={{ bg: "gray.100" }}
+                                        padding="8px"
+                                    >
+                                        {user.name}
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Box>
+                    )}
                     <InputRightElement
                         onClick={handleSendMessage}
                         cursor={isChatDisabled ? "not-allowed" : "pointer"}
