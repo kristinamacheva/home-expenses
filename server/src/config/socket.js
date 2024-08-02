@@ -3,6 +3,7 @@ const http = require("http");
 const socketAuthMiddleware = require("../middlewares/socketAuthMiddleware");
 const Household = require("../models/Household");
 const Payment = require("../models/Payment");
+const Notification = require("../models/Notification");
 const PaidExpense = require("../models/PaidExpense");
 const Message = require("../models/Message");
 const User = require("../models/User");
@@ -190,6 +191,25 @@ function initializeSocket(app) {
                     "receiveMessage",
                     messageToEmit
                 );
+
+                // Send notifications to mentioned users
+                if (
+                    messageData.mentionedUsers &&
+                    messageData.mentionedUsers.length > 0
+                ) {
+                    messageData.mentionedUsers.forEach(async (userId) => {
+                        const notification = new Notification({
+                            user: userId,
+                            message: `${sender.name} Ви спомена в съобщение.`,
+                            household: householdId,
+                        });
+
+                        const savedNotification = await notification.save();
+
+                        // Send notification to the user if they have an active connection
+                        sendNotificationToUser(userId, savedNotification);
+                    });
+                }
             } catch (error) {
                 console.error("Error sending message:", error);
                 socket.emit("error", "Failed to send message");
