@@ -45,6 +45,9 @@ exports.getAll = async (userId, householdId, lastMessageId = null) => {
                 _id: 1,
                 text: 1,
                 img: 1,
+                household: 1,
+                resourceType: 1,
+                resourceId: 1,
                 sender: {
                     _id: "$senderDetails._id",
                     name: "$senderDetails.name",
