@@ -215,6 +215,24 @@ exports.getOneDetails = async (paymentId, userId) => {
         .populate("comments.user", "_id name avatar avatarColor")
         .lean();
 
+    // Find the household and check the user's role
+    const household = await Household.findById(payment.household).lean();
+
+    const userRole = household.members.find(
+        (member) => member.user.toString() === userId
+    )?.role;
+
+    if (!userRole) {
+        throw new AppError("Потребителят не е част от домакинството", 400);
+    }
+
+    if (userRole === "Дете") {
+        throw new AppError(
+            "Потребителят е с роля 'Дете' и не може да достъпва информация за плащанията",
+            400
+        );
+    }
+
     return payment;
 };
 
