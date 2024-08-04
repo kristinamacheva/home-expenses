@@ -11,6 +11,7 @@ import {
 import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
 import PaymentCreate from "./payment-create/PaymentCreate";
+import ReminderCreate from "./reminder-create/ReminderCreate";
 
 export default function BalanceListItem({ balance, fetchPayments }) {
     const { userId } = useContext(AuthContext);
@@ -18,6 +19,11 @@ export default function BalanceListItem({ balance, fetchPayments }) {
         isOpen: isCreatePaymentModalOpen,
         onOpen: onOpenCreatePaymentModal,
         onClose: onCloseCreatePaymentModal,
+    } = useDisclosure();
+    const {
+        isOpen: isCreateReminderModalOpen,
+        onOpen: onOpenCreateReminderModal,
+        onClose: onCloseCreateReminderModal,
     } = useDisclosure();
 
     let badgeText = "";
@@ -82,7 +88,12 @@ export default function BalanceListItem({ balance, fetchPayments }) {
                 {userId === balance._id &&
                     balance.type === "+" &&
                     balance.sum !== 0 && (
-                        <Button type="primary">Изпратете напомняне</Button>
+                        <Button
+                            type="primary"
+                            onClick={onOpenCreateReminderModal}
+                        >
+                            Изпратете напомняне
+                        </Button>
                     )}
                 {userId === balance._id && balance.type === "-" && (
                     <Button type="primary" onClick={onOpenCreatePaymentModal}>
@@ -95,6 +106,13 @@ export default function BalanceListItem({ balance, fetchPayments }) {
                         onClose={onCloseCreatePaymentModal}
                         balanceSum={balance.sum}
                         fetchPayments={fetchPayments}
+                    />
+                )}
+                {isCreateReminderModalOpen && (
+                    <ReminderCreate
+                        isOpen={isCreateReminderModalOpen}
+                        onClose={onCloseCreateReminderModal}
+                        balanceSum={balance.sum}
                     />
                 )}
             </Stack>
