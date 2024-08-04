@@ -30,7 +30,7 @@ exports.getAll = async (userId) => {
 };
 
 exports.create = async (reminderData) => {
-    const { household, sender, receiver, message, resourceType, resourceId } =
+    let { household, sender, receiver, message, resourceType, resourceId } =
         reminderData;
 
     const reminderHousehold = await Household.findById(household);
@@ -87,7 +87,7 @@ exports.create = async (reminderData) => {
 
             const resource = await resourceModel.findById(resourceId);
 
-            if (!resource || !resource.household.equals(householdId)) {
+            if (!resource || !resource.household.equals(household)) {
                 throw new Error(
                     "Ресурсът не е намерен или не принадлежи към домакинството"
                 );
