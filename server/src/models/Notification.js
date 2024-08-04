@@ -9,7 +9,7 @@ const notificationSchema = new mongoose.Schema({
     message: { type: String, required: true },
     resourceType: {
         type: String,
-        enum: ['PaidExpense', 'Payment', 'Category', 'HouseholdInvitation', 'Allowance'], 
+        enum: ['PaidExpense', 'Payment', 'Category', 'HouseholdInvitation', 'Allowance', 'Reminder'], 
     },
     resourceId: {
         type: mongoose.Types.ObjectId,
