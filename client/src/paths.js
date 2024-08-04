@@ -9,6 +9,7 @@ const Path = {
     Register: '/register',
     Profile: '/profile',
     Notifications: '/notifications',
+    Reminders: '/reminders',
 };
 
 export default Path;

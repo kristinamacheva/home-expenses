@@ -23,6 +23,7 @@ import {
 import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
 import { MdGroupAdd } from "react-icons/md";
 import { FaHouse, FaPeopleRoof } from "react-icons/fa6";
+import { LuClipboardList } from "react-icons/lu";
 import Path from "../../paths";
 import AuthContext from "../../contexts/authContext";
 import NotificationContext from "../../contexts/notificationContext";
@@ -140,16 +141,32 @@ const MobileNav = ({ onOpen, ...rest }) => {
                 Домоводител
             </Text>
 
-            <HStack spacing={{ base: "2", md: "3" }} alignItems={"center"}>
+            <HStack spacing={{ base: "2", md: "2" }} alignItems={"center"}>
+                <IconButton
+                    as={Link}
+                    to={Path.Reminders}
+                    size="xs"
+                    variant="ghost"
+                    aria-label="open reminders"
+                    icon={
+                        <LuClipboardList fontSize="18px"/>
+                    }
+                    color={useColorModeValue("white")}
+                    _hover={{
+                        color: useColorModeValue("green.800"),
+                        bg: useColorModeValue("white"),
+                    }}
+                />
                 <IconButton
                     as={Link}
                     to={Path.Notifications}
-                    size="lg"
+                    size="xs"
                     variant="ghost"
                     aria-label="open notifications"
+                    mr={2}
                     icon={
                         <Box position="relative">
-                            <FiBell />
+                            <FiBell fontSize="18px"/>
                             {unreadCount > 0 && (
                                 <Box
                                     position="absolute"

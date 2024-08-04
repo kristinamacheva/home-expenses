@@ -18,6 +18,7 @@ import GuestGuard from "./components/guards/GuestGuard";
 import HouseholdInvitationList from "./components/household-invitation-list/HouseholdInvitationList";
 import NotificationList from "./components/notification-list/NotificationList";
 import { NotificationProvider } from "./contexts/notificationContext";
+import ReminderList from "./components/reminder-list/ReminderList";
 
 function App() {
     return (
@@ -43,6 +44,10 @@ function App() {
                                 <Route
                                     path={Path.Profile}
                                     element={<ProfileEdit />}
+                                />
+                                <Route
+                                    path={Path.Reminders}
+                                    element={<ReminderList />}
                                 />
                                 <Route
                                     path={Path.Notifications}
