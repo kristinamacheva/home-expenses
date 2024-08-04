@@ -63,6 +63,13 @@ export const getOneDetails = async (householdId, paidExpenseId) => {
     return result;
 };
 
+export const getOneNotApproved = async (householdId, paidExpenseId) => {
+    const url = baseUrl(householdId);
+    const result = await request.get(`${url}/${paidExpenseId}?status=notApproved`);
+
+    return result;
+};
+
 export const getEditableFields = async (householdId, paidExpenseId) => {
     const url = baseUrl(householdId);
     const result = await request.get(`${url}/${paidExpenseId}?editable=true`);
