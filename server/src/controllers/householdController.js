@@ -105,6 +105,18 @@ router.get("/:householdId/payees", async (req, res, next) => {
     }
 });
 
+router.get("/:householdId/payers", async (req, res, next) => {
+    const householdId = req.householdId;
+
+    try {
+        const payers = await householdManager.getOnePayers(householdId);
+
+        res.status(200).json(payers);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.get("/:householdId/allowance", async (req, res, next) => {
     const householdId = req.householdId;
     const userId = req.userId;
