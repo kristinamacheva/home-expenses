@@ -313,9 +313,9 @@ export default function BalanceList({ archived }) {
                             />
                         ))
                     ) : (
-                        <Heading as="h5" size="sm" my={2}>
-                            Няма плащания
-                        </Heading>
+                        <Flex justifyContent="center" alignItems="center">
+                            <Text>Няма налични плащания</Text>
+                        </Flex>
                     )}
                 </Stack>
             </Stack>

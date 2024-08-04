@@ -8,6 +8,8 @@ import {
     Stack,
     Card,
     useToast,
+    Flex,
+    Text,
 } from "@chakra-ui/react";
 
 import * as householdInvitationService from "../../services/householdInvitationService";
@@ -58,13 +60,19 @@ export default function HouseholdInvitationList() {
                     </HStack>
                 </Card>
                 <Stack mt="4">
-                    {invitations.map((invitation) => (
-                        <HouseholdInvitationListItem
-                            key={invitation._id}
-                            {...invitation}
-                            onRemove={removeInvitationFromState}
-                        />
-                    ))}
+                    {Array.isArray(invitations) && invitations.length > 0 ? (
+                        invitations.map((invitation) => (
+                            <HouseholdInvitationListItem
+                                key={invitation._id}
+                                {...invitation}
+                                onRemove={removeInvitationFromState}
+                            />
+                        ))
+                    ) : (
+                        <Flex justifyContent="center" alignItems="center">
+                            <Text>Няма налични покани</Text>
+                        </Flex>
+                    )}
                 </Stack>
             </Stack>
         </>
