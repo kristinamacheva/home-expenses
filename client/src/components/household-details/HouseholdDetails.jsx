@@ -21,7 +21,6 @@ import PaidExpenseList from "../paid-expense-list/PaidExpenseList";
 import MemberList from "../member/member-list/MemberList";
 import BalanceList from "../balance-list/BalanceList";
 import AuthContext from "../../contexts/authContext";
-import Path from "../../paths";
 import HouseholdNotFound from "../household-not-found/HouseholdNotFound";
 import Statistics from "../statistics/Statistics";
 import CategoryList from "../category-list/CategoryList";
@@ -174,7 +173,13 @@ export default function HouseholdDetails() {
                 <TabPanels>
                     {currentUserRole !== "Дете" && (
                         <TabPanel>
-                            <BalanceList archived={household.archived} />
+                            <BalanceList
+                                archived={
+                                    household.archived
+                                        ? household.archived
+                                        : undefined
+                                }
+                            />
                         </TabPanel>
                     )}
                     {currentUserRole !== "Дете" && (
@@ -217,7 +222,11 @@ export default function HouseholdDetails() {
                                     <TabPanel px="2" pt="2">
                                         <PaidExpenseList
                                             isAdmin={isAdmin}
-                                            archived={household.archived}
+                                            archived={
+                                                household.archived
+                                                    ? household.archived
+                                                    : undefined
+                                            }
                                         />
                                     </TabPanel>
                                     <TabPanel px="2">
@@ -239,7 +248,11 @@ export default function HouseholdDetails() {
                         <TabPanel>
                             <CategoryList
                                 isAdmin={isAdmin}
-                                archived={household.archived}
+                                archived={
+                                    household.archived
+                                        ? household.archived
+                                        : undefined
+                                }
                             />
                         </TabPanel>
                     )}
