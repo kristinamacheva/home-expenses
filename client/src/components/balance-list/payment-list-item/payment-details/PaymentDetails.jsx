@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 
 import * as paymentService from "../../../../services/paymentService";
+import * as reminderService from "../../../../services/reminderService";
 import Comments from "./comments/Comments";
 import AuthContext from "../../../../contexts/authContext";
 import PaymentReject from "./payment-reject/PaymentReject";
@@ -40,7 +41,7 @@ export default function PaymentDetails({
     const [isLoading, setIsLoading] = useState(true);
     const [paymentDetails, setPaymentDetails] = useState({});
     const toast = useToast();
-    const { userId, logoutHandler } = useContext(AuthContext);
+    const { userId, logoutHandler, name } = useContext(AuthContext);
     const {
         isOpen: isRejectModalOpen,
         onOpen: onOpenRejectModal,
@@ -164,6 +165,43 @@ export default function PaymentDetails({
             });
     };
 
+    const onCreateReminderClickHandler = async () => {
+        const newReminder = {
+            message: `Имате неодобрено плащане от ${name}.`,
+            household: householdId,
+            receiver: paymentDetails.payee._id,
+            resourceType: "payment",
+            resourceId: paymentDetails._id,
+        };
+
+        try {
+            await reminderService.create(newReminder);
+
+            toast({
+                title: "Напомнянето е изпратено.",
+                description: "Успешно изпратихте напомняне.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+
+            onCloseForm();
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: "Грешка.",
+                    description:
+                        "Възникна грешка при изпращането на напомнянето",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        }
+    };
+
     const updateComments = (updatedComments) => {
         setPaymentDetails((state) => ({
             ...state,
@@ -203,6 +241,11 @@ export default function PaymentDetails({
     const showButtons =
         paymentDetails.paymentStatus === "За одобрение" &&
         paymentDetails.payee._id === userId &&
+        !archived;
+
+    const showReminderButton =
+        paymentDetails.paymentStatus === "За одобрение" &&
+        paymentDetails.payer._id === userId &&
         !archived;
 
     return (
@@ -364,6 +407,22 @@ export default function PaymentDetails({
                                     </Button>
                                     <Button mr={3} onClick={onOpenRejectModal}>
                                         Отхвърлете
+                                    </Button>
+                                </Stack>
+                            )}
+                            {showReminderButton && (
+                                <Stack
+                                    width="100%"
+                                    direction="row"
+                                    justifyContent="end"
+                                    mb="3"
+                                >
+                                    <Button
+                                        variant="primary"
+                                        mr={3}
+                                        onClick={onCreateReminderClickHandler}
+                                    >
+                                        Изпратете напомняне
                                     </Button>
                                 </Stack>
                             )}
