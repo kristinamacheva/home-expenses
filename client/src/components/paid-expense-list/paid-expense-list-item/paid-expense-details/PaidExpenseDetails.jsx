@@ -35,6 +35,7 @@ import * as paidExpenseService from "../../../../services/paidExpenseService";
 import Comments from "./comments/Comments";
 import AuthContext from "../../../../contexts/authContext";
 import PaidExpenseReject from "./paid-expense-reject/PaidExpenseReject";
+import ReminderCreate from "./reminder-create/ReminderCreate";
 
 export default function PaidExpenseDetails({
     isOpen,
@@ -52,6 +53,12 @@ export default function PaidExpenseDetails({
         isOpen: isRejectModalOpen,
         onOpen: onOpenRejectModal,
         onClose: onCloseRejectModal,
+    } = useDisclosure();
+
+    const {
+        isOpen: isCreateReminderModalOpen,
+        onOpen: onOpenCreateReminderModal,
+        onClose: onCloseCreateReminderModal,
     } = useDisclosure();
 
     useEffect(() => {
@@ -261,6 +268,11 @@ export default function PaidExpenseDetails({
     const showButtons =
         paidExpenseDetails.expenseStatus === "За одобрение" &&
         approvalStatus === "За одобрение" &&
+        !archived;
+
+    const showReminderButton =
+        paidExpenseDetails.expenseStatus === "За одобрение" &&
+        paidExpenseDetails.creator._id === userId &&
         !archived;
 
     return (
@@ -573,6 +585,22 @@ export default function PaidExpenseDetails({
                                     </Button>
                                 </Stack>
                             )}
+                            {showReminderButton && (
+                                <Stack
+                                    width="100%"
+                                    direction="row"
+                                    justifyContent="end"
+                                    mb="3"
+                                >
+                                    <Button
+                                        variant="primary"
+                                        mr={3}
+                                        onClick={onOpenCreateReminderModal}
+                                    >
+                                        Изпратете напомняне
+                                    </Button>
+                                </Stack>
+                            )}
                             <Comments
                                 householdId={householdId}
                                 paidExpenseId={paidExpenseId}
@@ -589,6 +617,13 @@ export default function PaidExpenseDetails({
                     isOpen={isRejectModalOpen}
                     onClose={onCloseRejectModal}
                     onRejectClickHandler={onRejectClickHandler}
+                />
+            )}
+            {isCreateReminderModalOpen && (
+                <ReminderCreate
+                    isOpen={isCreateReminderModalOpen}
+                    onClose={onCloseCreateReminderModal}
+                    paidExpenseId={paidExpenseId}
                 />
             )}
         </>
