@@ -539,6 +539,44 @@ exports.getEditableFields = async (paidExpenseId) => {
     return paidExpense[0];
 };
 
+exports.getOneNotApproved = async (paidExpenseId, userId) => {
+    const paidExpense = await PaidExpense.aggregate([
+        {
+            $match: { _id: new ObjectId(paidExpenseId) },
+        },
+        {
+            $unwind: "$userApprovals",
+        },
+        {
+            $match: {
+                "userApprovals.status": "За одобрение",
+            },
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "userApprovals.user",
+                foreignField: "_id",
+                as: "userDetails",
+            },
+        },
+        {
+            $unwind: "$userDetails",
+        },
+        {
+            $project: {
+                _id: "$userDetails._id",
+                name: "$userDetails.name",
+                email: "$userDetails.email",
+                avatar: "$userDetails.avatar",
+                avatarColor: "$userDetails.avatarColor",
+            },
+        },
+    ]);
+
+    return paidExpense;
+};
+
 exports.create = async (paidExpenseData) => {
     const {
         title,

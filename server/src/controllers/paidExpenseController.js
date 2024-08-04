@@ -180,7 +180,7 @@ router.use("/:paidExpenseId", getPaidExpense);
 router.get("/:paidExpenseId", async (req, res, next) => {
     const paidExpenseId = req.paidExpenseId;
     const userId = req.userId;
-    const { details, editable } = req.query;
+    const { details, editable, status } = req.query;
 
     try {
         let paidExpense;
@@ -193,6 +193,10 @@ router.get("/:paidExpenseId", async (req, res, next) => {
             paidExpense = await paidExpenseManager.getEditableFields(
                 paidExpenseId
             );
+        } else if (status === "notApproved") {
+            paidExpense = await paidExpenseManager.getOneNotApproved(
+                paidExpenseId
+            );            
         } else {
             // Handle default case
             paidExpense = await paidExpenseManager.getOne(paidExpenseId);
