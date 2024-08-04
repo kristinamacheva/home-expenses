@@ -41,6 +41,9 @@ export default function NotificationListItem({ notification }) {
             case "Payment":
                 onOpenPaymentDetailsModal();
                 break;
+            case "Reminder":
+                navigate(`/reminders`);
+                break;
             default:
                 navigate(`/households/${notification.household}`);
                 break;
