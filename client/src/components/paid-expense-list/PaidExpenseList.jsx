@@ -200,7 +200,11 @@ export default function PaidExpenseList({ isAdmin, archived }) {
     return (
         <>
             <Flex justify="flex-end" mb="3" mx="1">
-                <Button variant="primary" onClick={onOpenCreateModal} isDisabled={archived}>
+                <Button
+                    variant="primary"
+                    onClick={onOpenCreateModal}
+                    isDisabled={archived}
+                >
                     + Създаване
                 </Button>
             </Flex>
@@ -320,9 +324,9 @@ export default function PaidExpenseList({ isAdmin, archived }) {
                         />
                     ))
                 ) : (
-                    <Heading as="h5" size="sm" my={2}>
-                        Няма платени разходи
-                    </Heading>
+                    <Flex justifyContent="center" alignItems="center">
+                        <Text>Няма налични разходи</Text>
+                    </Flex>
                 )}
             </Stack>
 
