@@ -2,6 +2,7 @@ const router = require("express").Router();
 const householdManager = require("../managers/householdManager");
 const getHousehold = require("../middlewares/householdMiddleware");
 const paidExpenseController = require("./paidExpenseController");
+const childExpenseController = require("./childExpenseController");
 const paymentController = require("./paymentController");
 const allowanceController = require("./allowanceController");
 const categoryController = require("./categoryController");
@@ -204,6 +205,7 @@ router.put("/:householdId/restore", async (req, res, next) => {
 });
 
 router.use("/:householdId/paidExpenses", paidExpenseController);
+router.use("/:householdId/childExpenses", childExpenseController);
 router.use("/:householdId/payments", paymentController);
 router.use("/:householdId/allowances", allowanceController);
 router.use("/:householdId/categories", categoryController);
