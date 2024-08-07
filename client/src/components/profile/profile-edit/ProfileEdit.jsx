@@ -108,7 +108,6 @@ export default function ProfileEdit() {
             newErrors.name = "Името не може да бъде празно";
         }
 
-        // TODO: Email regex?
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!currentUser.email.trim()) {
             newErrors.email = "Имейлът не може да бъде празен";

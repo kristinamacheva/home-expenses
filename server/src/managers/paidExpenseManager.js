@@ -633,7 +633,6 @@ exports.create = async (paidExpenseData) => {
         ...owed.map((o) => o.user),
     ]);
 
-    // TODO: Test
     // Check if all users are members of the household
     for (const userId of uniqueUserIds) {
         if (!householdMemberIds.includes(userId)) {

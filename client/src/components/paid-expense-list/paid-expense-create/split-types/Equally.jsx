@@ -18,7 +18,6 @@ export default function Equally({
     onUpdate,
     showCreatorDeleteButton,
 }) {
-    // TODO: 0 members validation
     const { userId } = useContext(AuthContext);
     const [splitEquallyMembers, setSplitEquallyMembers] = useState([]);
 
@@ -40,7 +39,6 @@ export default function Equally({
         );
 
         setSplitEquallyMembers(updatedMembers);
-        // TODO: notify the parent component
     };
 
     return (

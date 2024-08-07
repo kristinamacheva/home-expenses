@@ -18,7 +18,6 @@ exports.auth = async (req, res, next) => {
                 return res.status(401).json({ message: 'Invalid user ID format' });
             }
 
-            // TODO: req.user = decodedToken or user?
             // Query the database to check if the user exists 
             const user = await User.findById(decodedToken._id);
             if (!user) {

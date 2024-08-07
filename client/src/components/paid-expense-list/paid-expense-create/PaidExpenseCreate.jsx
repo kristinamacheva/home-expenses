@@ -113,7 +113,6 @@ export default function PaidExpenseCreate({
             });
     }, [householdId]);
 
-    // TODO: error?
     const onChange = async (e) => {
         let value = e.target.value;
         setErrors((prevErrors) => ({ ...prevErrors, [e.target.name]: "" }));
@@ -207,8 +206,6 @@ export default function PaidExpenseCreate({
             setPaid(filteredPaidMembers);
         } else {
             setPaid([]);
-            // TODO: put message in array of errors
-            console.log(message);
         }
     };
 
@@ -226,8 +223,6 @@ export default function PaidExpenseCreate({
             setOwed(filteredOwedMembers);
         } else {
             setOwed([]);
-            // TODO: put message in array of errors
-            console.log(message);
         }
     };
 
@@ -241,8 +236,6 @@ export default function PaidExpenseCreate({
             setOwed(filteredOwedMembers);
         } else {
             setOwed([]);
-            // TODO: put message in array of errors
-            console.log(message);
         }
     };
 
@@ -359,8 +352,6 @@ export default function PaidExpenseCreate({
             newPaidExpense.child = selectedChild._id;
         }
 
-        // console.log(newPaidExpense);
-
         try {
             await paidExpenseService.create(householdId, newPaidExpense);
 
@@ -393,7 +384,6 @@ export default function PaidExpenseCreate({
         onClose();
     };
 
-    // TODO: Други потребители, единично опция
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>
             <ModalOverlay />

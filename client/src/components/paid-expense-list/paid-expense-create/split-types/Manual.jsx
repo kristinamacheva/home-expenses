@@ -20,7 +20,6 @@ export default function Manual({
     onUpdate,
     showCreatorDeleteButton,
 }) {
-    // TODO: 0 members validation
     const { userId } = useContext(AuthContext);
     const [splitManualMembers, setSplitManualMembers] = useState([]);
     const [manualAmounts, setManualAmounts] = useState([]);
@@ -41,7 +40,6 @@ export default function Manual({
         handleMessageChange(manualAmounts);
     }, [amount, manualAmounts]);
 
-    // TODO: update state only when the amounts are correct - if not - error
     const handleMessageChange = (newAmounts) => {
         const totalEnteredInCents = newAmounts.reduce(
             (acc, member) => acc + Number(member.sum) * 100,

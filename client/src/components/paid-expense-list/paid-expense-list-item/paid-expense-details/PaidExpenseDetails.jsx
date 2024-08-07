@@ -131,7 +131,6 @@ export default function PaidExpenseDetails({
             .accept(householdId, paidExpenseId)
             .then((result) => {
                 // Handle the success response
-                // console.log("Accepted:", result);
                 toast({
                     title: "Разходът е одобрен.",
                     description: "Разходът беше одобрен успешно.",
@@ -167,7 +166,6 @@ export default function PaidExpenseDetails({
         paidExpenseService
             .reject(householdId, paidExpenseId, text)
             .then((result) => {
-                // console.log("Rejected:", result);
                 toast({
                     title: "Разходът е отхвърлен.",
                     description: "Разходът беше отхвърлен успешно.",

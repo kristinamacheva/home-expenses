@@ -8,19 +8,9 @@ const buildOptions = (data) => {
         };
     }
 
-    // const token = localStorage.getItem('accessToken');
-
-    // if (token) {
-    //     options.headers = {
-    //         ...options.headers,
-    //         'X-Authorization': token
-    //     }
-    // }
-
     return options;
 };
 
-// TODO: credentials
 const request = async (method, url, data) => {
     try {
         const response = await fetch(url, {
@@ -36,14 +26,12 @@ const request = async (method, url, data) => {
 
         const result = await response.json();
 
-        // TODO: refactor?
         if (!response.ok) {
             const error = {
                 status: response.status || 500,
                 message: result.message || "Неуспешна заявка",
                 errors: result.errors || [],
             };
-            // console.log(error);
             throw error;
         }
 

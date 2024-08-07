@@ -1,6 +1,5 @@
 import * as request from "../lib/request";
 
-// TODO: throw errors
 const baseUrl = (householdId) =>
     `http://localhost:5000/households/${householdId}/paidExpenses`;
 
@@ -113,9 +112,3 @@ export const remove = async (householdId, paidExpenseId) => {
     const url = baseUrl(householdId);
     const result = await request.remove(`${url}/${paidExpenseId}`);
 };
-
-// export const edit = async (householdId, householdData) => {
-//     const result = await request.put(`${baseUrl}/${householdId}`, householdData);
-
-//     return result;
-// };

@@ -111,7 +111,6 @@ exports.getOne = (paymentId) =>
         .populate("payee", "_id name avatar avatarColor")
         .lean();
 
-// TODO: test
 exports.getOneWithBalance = async (paymentId) => {
     // Retrieve payment details including household
     const payment = await Payment.findById(paymentId)

@@ -28,7 +28,6 @@ import AllowanceList from "../allowance-list/AllowanceList";
 import HouseholdChat from "../household-chat/HouseholdChat";
 
 export default function HouseholdDetails() {
-    // TODO: load all details here and pass as props or make seperate requests
     const [household, setHousehold] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);

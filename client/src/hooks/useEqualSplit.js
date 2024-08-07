@@ -12,11 +12,6 @@ export default function useEqualSplit(
         const totalAmountInSubunits = Math.round(Number(totalAmount) * 100);
         const numberOfPeople = members.length;
 
-        // if (numberOfPeople === 0) {
-        //     setEqualSplit([]);
-        //     return;
-        // }
-
         const amountPerPersonInCents = Math.floor(
             totalAmountInSubunits / numberOfPeople
         );

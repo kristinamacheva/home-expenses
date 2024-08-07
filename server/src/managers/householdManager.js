@@ -490,9 +490,6 @@ exports.create = async (householdData) => {
 
         // Fetch the admin user by ID
         const adminUser = await User.findById(admin).session(session);
-        // if (!adminUser) {
-        //     throw new AppError("Админът не е намерен", 401);
-        // }
 
         // Check if admin's email is in members array
         const adminEmail = adminUser.email;
@@ -563,7 +560,6 @@ exports.create = async (householdData) => {
         adminUser.households.push(newHousehold._id);
         await adminUser.save({ session });
 
-        //TODO: check if user is already a member
         // Create invitations for each member
         for (const member of members) {
             const currentUser = memberUsers.find(

@@ -196,7 +196,6 @@ export default function PaidExpenseEdit({
             });
     };
 
-    // TODO: error?
     const onChange = async (e) => {
         let value = e.target.value;
         setErrors((prevErrors) => ({ ...prevErrors, [e.target.name]: "" }));
@@ -298,8 +297,6 @@ export default function PaidExpenseEdit({
             setPaid(filteredPaidMembers);
         } else {
             setPaid([]);
-            // TODO: put message in array of errors
-            console.log(message);
         }
     };
 
@@ -317,8 +314,6 @@ export default function PaidExpenseEdit({
             setOwed(filteredOwedMembers);
         } else {
             setOwed([]);
-            // TODO: put message in array of errors
-            console.log(message);
         }
     };
 
@@ -332,8 +327,6 @@ export default function PaidExpenseEdit({
             setOwed(filteredOwedMembers);
         } else {
             setOwed([]);
-            // TODO: put message in array of errors
-            console.log(message);
         }
     };
 
@@ -501,7 +494,6 @@ export default function PaidExpenseEdit({
         onClose();
     };
 
-    // TODO: Други потребители, единично опция
     return (
         <Modal isOpen={isOpen} onClose={onCloseForm}>
             <ModalOverlay />

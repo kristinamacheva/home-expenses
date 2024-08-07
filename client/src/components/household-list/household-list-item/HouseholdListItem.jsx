@@ -119,7 +119,7 @@ export default function HouseholdListItem({ household, fetchHouseholds }) {
 
     const userBalance = household.balance[0];
     const userBalanceSum = userBalance ? userBalance.sum : 0;
-    // TODO: color
+    
     const badgeColorScheme = userBalance
         ? userBalance.type === "-"
             ? "red"

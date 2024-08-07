@@ -1,25 +1,13 @@
 const mongoose = require("mongoose");
 
-// TODO: make users unique in the array
-// TODO: fix _id
 const householdSchema = new mongoose.Schema({
     name: { type: String, required: [true, "Полето име е задължително"] },
     members: [
         {
-            // TODO: type
             user: {
                 type: mongoose.Types.ObjectId,
                 ref: "User",
                 required: [true, "Полето член на домакинство е задължително"],
-                // unique: true,
-                // TODO: validate here?
-                // validate: {
-                //     validator: async function (value) {
-                //         const userExists = await User.exists({ _id: value });
-                //         return userExists;
-                //     },
-                //     message: 'Referenced user does not exist',
-                // },
             },
             role: {
                 type: String,

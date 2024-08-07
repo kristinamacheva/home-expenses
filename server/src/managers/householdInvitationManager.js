@@ -4,8 +4,8 @@ const HouseholdInvitation = require("../models/HouseholdInvitation");
 const Notification = require("../models/Notification");
 const User = require("../models/User");
 const { AppError } = require("../utils/AppError");
+const mongoose = require("mongoose");
 
-// TODO: save info in the document without using populate?
 exports.getAll = async (userId) => {
     const result = await HouseholdInvitation.find({ user: userId })
         .populate("household", "name")
@@ -14,8 +14,6 @@ exports.getAll = async (userId) => {
 
     return result;
 };
-
-const mongoose = require("mongoose");
 
 exports.accept = async (userId, invitationId) => {
     const session = await mongoose.startSession();

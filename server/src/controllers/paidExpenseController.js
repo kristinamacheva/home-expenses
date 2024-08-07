@@ -352,36 +352,4 @@ router.post("/:paidExpenseId/comments", async (req, res, next) => {
     }
 });
 
-// router.get('/:paidExpenseId', async (req, res) => {
-//     // TODO: lean?
-//     const paidExpense = await paidExpenseManager.getOne(req.params.paidExpenseId).lean();
-//     console.log(req.user);
-//     res.json(paidExpense);
-// });
-
-// router.put('/:paidExpenseId', async (req, res) => {
-//     const paidExpense = await paidExpenseManager.update(req.params.paidExpenseId, req.body);
-//     res.json(paidExpense);
-// });
-
-// router.delete('/:paidExpenseId', async (req, res) => {
-//     await paidExpenseManager.delete(req.params.paidExpenseId);
-//     // TODO: result
-//     res.status(204).end();
-// });
-
-// router.get("/:paidExpenseId/comments", async (req, res, next) => {
-//     const paidExpenseId = req.paidExpenseId;
-//     // TODO: validate user is in household
-//     const userId = req.userId;
-
-//     try {
-//         const comments = await paidExpenseManager.getAllComments(paidExpenseId);
-
-//         res.status(200).json(comments);
-//     } catch (error) {
-//         next(error);
-//     }
-// });
-
 module.exports = router;

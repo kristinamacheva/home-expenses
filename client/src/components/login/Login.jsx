@@ -46,7 +46,6 @@ export default function Login() {
     const validateForm = (currentUser) => {
         const newErrors = {};
 
-        // TODO: Email regex?
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!currentUser.email.trim()) {
             newErrors.email = "Имейлът не може да бъде празен";

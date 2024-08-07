@@ -20,7 +20,6 @@ import PaidExpenseDetails from "./paid-expense-details/PaidExpenseDetails";
 import * as paidExpenseService from "../../../services/paidExpenseService";
 import PaidExpenseEdit from "./paid-expense-edit/PaidExpenseEdit";
 
-// TODO: send only necessary data here
 export default function PaidExpenseListItem({
     _id,
     title,
