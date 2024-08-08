@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState, useRef, useCallback } from "react";
 import {
     Button,
+    Card,
     Checkbox,
     Flex,
     FormControl,
@@ -15,6 +16,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import * as childExpenseService from "../../services/childExpenseService";
+import * as householdService from "../../services/householdService";
 import { useParams } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
 import ChildExpenseListItem from "./child-expense-list-item/ChildExpenseListItem";
@@ -28,6 +30,7 @@ const initialSearchValues = {
 
 export default function ChildExpenseList({ archived }) {
     const [childExpenses, setChildExpenses] = useState([]);
+    const [childAllowance, setChildAllowance] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [index, setIndex] = useState(2); // Page index starts at 2
     const [hasMore, setHasMore] = useState(false); // Track if there are more items
@@ -44,8 +47,31 @@ export default function ChildExpenseList({ archived }) {
     } = useDisclosure();
 
     useEffect(() => {
+        getOneChildAllowance();
         fetchChildExpenses();
     }, []);
+
+    const getOneChildAllowance = () => {
+        householdService
+            .getOneChildAllowance(householdId)
+            .then((result) => {
+                setChildAllowance(result);
+            })
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title:
+                            error.message || "Неуспешно зареждане на джобните",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
+            });
+    };
 
     const fetchChildExpenses = useCallback(
         async (reset = false) => {
@@ -156,7 +182,21 @@ export default function ChildExpenseList({ archived }) {
 
     return (
         <>
-            <Flex justify="flex-end" mb="3" mx="1">
+            <Card
+                px="5"
+                py="5"
+                boxShadow="md"
+                background="white"
+                spacing="4"
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+            >
+                <Heading as="h4" size="md">
+                    Налични джобни: {childAllowance} лв.
+                </Heading>
+            </Card>
+            <Flex justify="flex-end" mb="3" mx="1" mt="2">
                 <Button
                     variant="primary"
                     onClick={onOpenCreateModal}
@@ -234,6 +274,7 @@ export default function ChildExpenseList({ archived }) {
                     isOpen={isCreateModalOpen}
                     onClose={onCloseCreateModal}
                     fetchChildExpenses={fetchChildExpenses}
+                    fetchChildAllowance={getOneChildAllowance}
                 />
             )}
         </>

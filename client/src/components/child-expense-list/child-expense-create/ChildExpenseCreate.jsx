@@ -34,6 +34,7 @@ export default function ChildExpenseCreate({
     isOpen,
     onClose,
     fetchChildExpenses,
+    fetchChildAllowance,
 }) {
     const { logoutHandler } = useContext(AuthContext);
     const { householdId } = useParams();
@@ -107,9 +108,6 @@ export default function ChildExpenseCreate({
             date: values.date,
         };
 
-        console.log(newChildExpense);
-        
-
         try {
             await childExpenseService.create(householdId, newChildExpense);
 
@@ -122,6 +120,7 @@ export default function ChildExpenseCreate({
             });
 
             fetchChildExpenses(true);
+            fetchChildAllowance();
             onCloseForm();
         } catch (error) {
             if (error.status === 401) {
