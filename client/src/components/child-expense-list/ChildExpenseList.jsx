@@ -196,7 +196,7 @@ export default function ChildExpenseList({ archived }) {
                     Налични джобни: {childAllowance} лв.
                 </Heading>
             </Card>
-            <Flex justify="flex-end" mb="3" mx="1" mt="2">
+            <Flex justify="flex-end" mb="3" mx="1" mt="4">
                 <Button
                     variant="primary"
                     onClick={onOpenCreateModal}
