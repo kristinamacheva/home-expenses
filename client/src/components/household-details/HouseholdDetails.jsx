@@ -27,6 +27,7 @@ import CategoryList from "../category-list/CategoryList";
 import AllowanceList from "../allowance-list/AllowanceList";
 import HouseholdChat from "../household-chat/HouseholdChat";
 import ChildExpenseList from "../child-expense-list/ChildExpenseList";
+import ChildWishlist from "../child-wishlist/ChildWishlist";
 
 export default function HouseholdDetails() {
     const [household, setHousehold] = useState({});
@@ -164,6 +165,7 @@ export default function HouseholdDetails() {
                             <>
                                 <Tab>Джобни</Tab>
                                 <Tab>Разходи</Tab>
+                                <Tab>Желания</Tab>
                             </>
                         )}
                         <Tab>Членове</Tab>
@@ -265,6 +267,17 @@ export default function HouseholdDetails() {
                     {currentUserRole === "Дете" && (
                         <TabPanel>
                             <ChildExpenseList
+                                archived={
+                                    household.archived
+                                        ? household.archived
+                                        : undefined
+                                }
+                            />
+                        </TabPanel>
+                    )}
+                    {currentUserRole === "Дете" && (
+                        <TabPanel>
+                            <ChildWishlist
                                 archived={
                                     household.archived
                                         ? household.archived
