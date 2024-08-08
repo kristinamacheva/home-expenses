@@ -1247,14 +1247,14 @@ exports.delete = async (userId, paidExpenseId) => {
     const creatorId = existingPaidExpense.creator.toString();
     const householdId = existingPaidExpense.household.toString();
 
+    const household = await Household.findById(householdId);
+
+    // Check if the household is archived
+    if (household.archived) {
+        throw new AppError(`Домакинството е архивирано`, 403);
+    }
+
     if (userId.toString() !== creatorId) {
-        const household = await Household.findById(householdId);
-
-        // Check if the household is archived
-        if (household.archived) {
-            throw new AppError(`Домакинството е архивирано`, 403);
-        }
-
         const isAdmin = household.admins.some(
             (admin) => admin.toString() === userId.toString()
         );
