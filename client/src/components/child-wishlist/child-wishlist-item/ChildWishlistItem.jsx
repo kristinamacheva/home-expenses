@@ -31,6 +31,7 @@ export default function ChildWishlistItem({
     childAllowance,
     getAllowanceForUser,
     archived,
+    childId = null,
 }) {
     const { householdId } = useParams();
     const toast = useToast();
@@ -44,6 +45,10 @@ export default function ChildWishlistItem({
     } = useDisclosure();
 
     const childWishlistItemDeleteHandler = async (_id) => {
+        if (childId) {
+            return;
+        }
+
         const childWishlistItemId = _id;
 
         try {
@@ -77,6 +82,10 @@ export default function ChildWishlistItem({
     };
 
     const purchaseClickHandler = async (_id) => {
+        if (childId) {
+            return;
+        }
+
         const childWishlistItemId = _id;
 
         try {
@@ -126,13 +135,24 @@ export default function ChildWishlistItem({
     if (!purchased) {
         if (amount <= childAllowance) {
             badgeColor = "green";
-            badgeText = "Може да закупите";
+            if (childId) {
+                badgeText = "Може да закупи";
+            } else {
+                badgeText = "Може да закупите";
+            }
         } else {
             badgeColor = "red";
-            badgeText = `Не ви достигат ${(
-                (amount * 100 - childAllowance * 100) /
-                100
-            ).toFixed(2)} лв.`;
+            if (childId) {
+                badgeText = `Не му достигат ${(
+                    (amount * 100 - childAllowance * 100) /
+                    100
+                ).toFixed(2)} лв.`;
+            } else {
+                badgeText = `Не Ви достигат ${(
+                    (amount * 100 - childAllowance * 100) /
+                    100
+                ).toFixed(2)} лв.`;
+            }
         }
     }
 
@@ -199,7 +219,7 @@ export default function ChildWishlistItem({
                             color="themePurple.800"
                             mb="-1"
                         >
-                            {amount} лв.
+                            {amount.toFixed(2)} лв.
                         </Text>
                         {!purchased && (
                             <Box display="inline-block">
@@ -217,7 +237,7 @@ export default function ChildWishlistItem({
                         w={["auto", "auto", "120px"]}
                         justifyContent="flex-end"
                     >
-                        {!purchased && !archived && (
+                        {!purchased && !archived && !childId && (
                             <>
                                 {amount <= childAllowance && (
                                     <IconButton
@@ -244,7 +264,7 @@ export default function ChildWishlistItem({
                             </>
                         )}
 
-                        {!archived && (
+                        {!archived && !childId && (
                             <IconButton
                                 aria-label="Изтрийте"
                                 title="Изтрийте"
@@ -259,7 +279,7 @@ export default function ChildWishlistItem({
                     </HStack>
                 </Stack>
             </Card>
-            {isEditModalOpen && (
+            {isEditModalOpen && !childId && (
                 <ChildWishlistItemEdit
                     isOpen={isEditModalOpen}
                     onClose={onCloseEditModal}

@@ -27,7 +27,7 @@ const initialSearchValues = {
     notPurchased: true,
 };
 
-export default function ChildWishlist({ isAdmin, archived }) {
+export default function ChildWishlist({ archived, childId = null }) {
     const [childAllowance, setChildAllowance] = useState([]);
     const [childWishlistItems, setChildWishlistItems] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -48,11 +48,11 @@ export default function ChildWishlist({ isAdmin, archived }) {
     useEffect(() => {
         getOneChildAllowance();
         fetchChildWishlistItems();
-    }, []);
+    }, [childId, householdId]);
 
     const getOneChildAllowance = () => {
         householdService
-            .getOneChildAllowance(householdId)
+            .getOneChildAllowance(householdId, childId || undefined)
             .then((result) => {
                 setChildAllowance(result);
             })
@@ -87,6 +87,7 @@ export default function ChildWishlist({ isAdmin, archived }) {
                     await childWishlistItemService.getAll(
                         householdId,
                         1,
+                        childId || undefined, // Pass the childId only if it's truthy
                         updatedSearchValues
                     );
 
@@ -111,7 +112,7 @@ export default function ChildWishlist({ isAdmin, archived }) {
 
             setIsLoading(false);
         },
-        [householdId, searchValues]
+        [householdId, childId, searchValues]
     );
 
     const fetchMoreChildWishlistItems = useCallback(async () => {
@@ -124,6 +125,7 @@ export default function ChildWishlist({ isAdmin, archived }) {
                 await childWishlistItemService.getAll(
                     householdId,
                     index,
+                    childId || undefined, // Pass the childId only if it's truthy
                     searchValues
                 );
             setChildWishlistItems((state) => [...state, ...data]);
@@ -168,6 +170,10 @@ export default function ChildWishlist({ isAdmin, archived }) {
     }, [fetchMoreChildWishlistItems]);
 
     const removeChildWishlistItemFromState = (childWishlistItemId) => {
+        if (childId) {
+            return;
+        }
+
         setChildWishlistItems((prevChildWishlistItem) =>
             prevChildWishlistItem.filter(
                 (childWishlistItem) =>
@@ -207,13 +213,15 @@ export default function ChildWishlist({ isAdmin, archived }) {
                 </Heading>
             </Card>
             <Flex justify="flex-end" mb="3" mx="1" mt="2">
-                <Button
-                    variant="primary"
-                    onClick={onOpenCreateModal}
-                    isDisabled={archived}
-                >
-                    + Създаване
-                </Button>
+                {!childId && (
+                    <Button
+                        variant="primary"
+                        onClick={onOpenCreateModal}
+                        isDisabled={archived}
+                    >
+                        + Създаване
+                    </Button>
+                )}
             </Flex>
             <form onSubmit={onSubmit}>
                 <Text fontWeight="bold" fontSize="lg">
@@ -288,6 +296,7 @@ export default function ChildWishlist({ isAdmin, archived }) {
                             onRemove={removeChildWishlistItemFromState}
                             childAllowance={childAllowance}
                             archived={archived}
+                            childId={childId}
                         />
                     ))
                 ) : (
@@ -300,7 +309,7 @@ export default function ChildWishlist({ isAdmin, archived }) {
             <Stack ref={loaderRef} p="2">
                 {isLoading && <Spinner />}
             </Stack>
-            {isCreateModalOpen && (
+            {isCreateModalOpen && !childId && (
                 <ChildWishlistItemCreate
                     isOpen={isCreateModalOpen}
                     onClose={onCloseCreateModal}
