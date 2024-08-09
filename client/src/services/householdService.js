@@ -22,9 +22,7 @@ export const getOneChildMembers = async (householdId) => {
 };
 
 export const getOneMembers = async (householdId) => {
-    const result = await request.get(
-        `${baseUrl}/${householdId}/members`
-    );
+    const result = await request.get(`${baseUrl}/${householdId}/members`);
     return result;
 };
 
@@ -52,8 +50,16 @@ export const getOneWithMemberEmails = async (householdId) => {
     return result;
 };
 
-export const getOneChildAllowance = async (householdId) => {
-    const result = await request.get(`${baseUrl}/${householdId}/allowance`);
+export const getOneChildAllowance = async (householdId, childId = null) => {
+    let url = `${baseUrl}/${householdId}/allowance`;
+
+    // Add childId as a query parameter if it exists
+    if (childId) {
+        const queryParams = new URLSearchParams({ childId });
+        url = `${url}?${queryParams.toString()}`;
+    }
+
+    const result = await request.get(url);
     return result;
 };
 
