@@ -28,6 +28,7 @@ router.get("/", getValidator, async (req, res, next) => {
     const userId = req.userId;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const childId = req.query.childId;
 
     const searchParams = {
         title: req.query.title || "",
@@ -36,14 +37,27 @@ router.get("/", getValidator, async (req, res, next) => {
     };
 
     try {
-        const { childWishlistItems, totalCount } =
-            await childWishlistItemManager.getAll(
-                userId,
-                householdId,
-                page,
-                limit,
-                searchParams
-            );
+        let childWishlistItems, totalCount;
+        if (childId) {
+            ({ childWishlistItems, totalCount } =
+                await childWishlistItemManager.getAllSelectedChild(
+                    userId,
+                    childId,
+                    householdId,
+                    page,
+                    limit,
+                    searchParams
+                ));
+        } else {
+            ({ childWishlistItems, totalCount } =
+                await childWishlistItemManager.getAll(
+                    userId,
+                    householdId,
+                    page,
+                    limit,
+                    searchParams
+                ));
+        }
 
         const totalPages = Math.ceil(totalCount / limit);
         const hasMore = page < totalPages;
