@@ -145,8 +145,6 @@ export default function HouseholdDetails() {
                             />
                         ))}
                     </AvatarGroup>
-                    {/* <Spacer />
-                    <Button variant="primary">Редактиране</Button> */}
                 </HStack>
             </Card>
 
