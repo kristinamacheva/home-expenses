@@ -52,6 +52,7 @@ exports.getOneWithMembers = async (householdId) => {
                 name: 1,
                 admins: 1,
                 archived: 1,
+                allowances: 1,
                 members: {
                     $map: {
                         input: "$members",
