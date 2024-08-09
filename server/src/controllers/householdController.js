@@ -122,12 +122,23 @@ router.get("/:householdId/payers", async (req, res, next) => {
 router.get("/:householdId/allowance", async (req, res, next) => {
     const householdId = req.householdId;
     const userId = req.userId;
+    const childId = req.query.childId;
 
     try {
-        const allowance = await householdManager.getAllowanceForUser(
-            userId,
-            householdId
-        );
+        let allowance;
+
+        if (childId) {
+            allowance = await householdManager.getAllowanceForChild(
+                userId,
+                childId,
+                householdId
+            );
+        } else {
+            allowance = await householdManager.getAllowanceForUser(
+                userId,
+                householdId
+            );
+        }
 
         res.status(200).json(allowance);
     } catch (error) {

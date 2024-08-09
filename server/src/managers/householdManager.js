@@ -480,6 +480,35 @@ exports.getAllowanceForUser = async (userId, householdId) => {
     return allowanceEntry.sum;
 };
 
+exports.getAllowanceForChild = async (userId, childId, householdId) => {
+    const household = await Household.findById(householdId).lean();
+
+    // Check if the user is a member of the household with a role different than "Дете"
+    const member = household.members.find((member) =>
+        member.user.equals(userId)
+    );
+
+    if (!member) {
+        throw new AppError("Потребителят не е член на това домакинство", 403);
+    }
+
+    if (member.role === "Дете") {
+        throw new AppError("Нямате право да преглеждате тези данни", 403);
+    }
+
+    // Find the allowance entry for the user
+    const allowanceEntry = household.allowances.find((allowance) =>
+        allowance.user.equals(childId)
+    );
+
+    if (!allowanceEntry) {
+        throw new AppError("Потребителят няма налични джобни", 404);
+    }
+
+    // Return the sum of the user's allowances
+    return allowanceEntry.sum;
+};
+
 exports.create = async (householdData) => {
     const session = await mongoose.startSession();
 
