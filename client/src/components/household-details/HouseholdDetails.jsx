@@ -28,6 +28,7 @@ import AllowanceList from "../allowance-list/AllowanceList";
 import HouseholdChat from "../household-chat/HouseholdChat";
 import ChildExpenseList from "../child-expense-list/ChildExpenseList";
 import ChildWishlist from "../child-wishlist/ChildWishlist";
+import ChildList from "../child-list/ChildList";
 
 export default function HouseholdDetails() {
     const [household, setHousehold] = useState({});
@@ -157,6 +158,9 @@ export default function HouseholdDetails() {
                                 <Tab>Разходи</Tab>
                                 <Tab>Анализ</Tab>
                                 <Tab>Категории</Tab>
+                                {household.allowances?.length > 0 && (
+                                    <Tab>Деца</Tab>
+                                )}
                             </>
                         )}
                         {currentUserRole === "Дете" && (
@@ -257,6 +261,18 @@ export default function HouseholdDetails() {
                             />
                         </TabPanel>
                     )}
+                    {currentUserRole !== "Дете" &&
+                        household.allowances?.length > 0 && (
+                            <TabPanel>
+                                <ChildList
+                                    archived={
+                                        household.archived
+                                            ? household.archived
+                                            : undefined
+                                    }
+                                />
+                            </TabPanel>
+                        )}
                     {currentUserRole === "Дете" && (
                         <TabPanel>
                             <AllowanceList />
