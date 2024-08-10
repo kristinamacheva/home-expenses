@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function useEqualSplit(
-    totalAmount,
-    members,
-    onUpdate,
-    isSimplified = true
-) {
+export default function useEqualSplit(totalAmount, members, onUpdate) {
     const [equalSplit, setEqualSplit] = useState([]);
 
     const calculateEqualSplit = () => {
@@ -30,17 +25,7 @@ export default function useEqualSplit(
 
         setEqualSplit(updatedMembers);
 
-        if (isSimplified) {
-            // Create an array of objects with only `id` and `sum` properties
-            const simplifiedMembers = updatedMembers.map((member) => ({
-                _id: member._id,
-                sum: member.sum,
-            }));
-
-            onUpdate(simplifiedMembers);
-        } else {
-            onUpdate(updatedMembers);
-        }
+        onUpdate(updatedMembers);
     };
 
     useEffect(() => {
