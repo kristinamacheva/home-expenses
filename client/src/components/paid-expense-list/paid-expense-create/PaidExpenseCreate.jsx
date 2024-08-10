@@ -283,6 +283,13 @@ export default function PaidExpenseCreate({
         ) {
             newErrors.paid =
                 "Разходът трябва да се разпредели минимум между двама членове на домакинството";
+        } else {
+            // Check if total sum of paid matches the amount
+            const totalPaid = paid.reduce((sum, payer) => sum + payer.sum, 0);
+            if (totalPaid !== Number(values.amount)) {
+                newErrors.paid =
+                    "Общата сума на платците трябва да бъде равна на сумата";
+            }
         }
 
         if (!values.splittingOption) {
@@ -296,6 +303,13 @@ export default function PaidExpenseCreate({
         } else if (owed.length < 2) {
             newErrors.owed =
                 "Разходът трябва да се разпредели минимум между двама членове на домакинството";
+        } else {
+            // Check if total sum of owed matches the amount
+            const totalOwed = owed.reduce((sum, owee) => sum + owee.sum, 0);
+            if (totalOwed !== Number(values.amount)) {
+                newErrors.owed =
+                    "Общата сума на дължимите суми трябва да бъде равна на сумата";
+            }
         }
 
         const categoryTitle = getCategoryTitleById(values.category);
