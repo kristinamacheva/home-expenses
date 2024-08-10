@@ -29,10 +29,10 @@ import * as householdService from "../../../services/householdService";
 import * as categoryService from "../../../services/categoryService";
 import * as paidExpenseService from "../../../services/paidExpenseService";
 import { useParams } from "react-router-dom";
-import Equally from "./split-types/Equally";
-import Manual from "./split-types/Manual";
-import Percent from "./split-types/Percent";
-import CurrentUser from "./split-types/CurrentUser";
+import Equally from "../../split-types/Equally";
+import Manual from "../../split-types/Manual";
+import Percent from "../../split-types/Percent";
+import CurrentUser from "../../split-types/CurrentUser";
 
 const initialValues = {
     title: "",
@@ -49,7 +49,8 @@ export default function PaidExpenseCreate({
     onClose,
     fetchPaidExpenses,
 }) {
-    const { userId, logoutHandler } = useContext(AuthContext);
+    const { userId, logoutHandler, name, avatar, avatarColor } =
+        useContext(AuthContext);
     const { householdId } = useParams();
 
     const [householdMembers, setHouseholdMembers] = useState([]);
@@ -76,7 +77,16 @@ export default function PaidExpenseCreate({
     useEffect(() => {
         householdService
             .getOneNonChildMembers(householdId)
-            .then((result) => setHouseholdMembers(result))
+            .then((result) => {
+                setHouseholdMembers(result);
+                const initialSums = result.map((member) => ({
+                    ...member,
+                    sum: 0,
+                }));
+
+                setPaid(initialSums);
+                setOwed(initialSums);
+            })
             .catch((error) => {
                 if (error.status === 401) {
                     logoutHandler();
@@ -189,54 +199,35 @@ export default function PaidExpenseCreate({
     };
 
     const handlePaidCurrentUpdate = () => {
-        setPaid([{ _id: userId, sum: values.amount }]);
+        setPaid([
+            {
+                _id: userId,
+                sum: values.amount,
+                name: name,
+                avatar: avatar,
+                avatarColor: avatarColor,
+            },
+        ]);
     };
 
     const handlePaidEquallyUpdate = (splitEquallyMembers) => {
         setPaid(splitEquallyMembers);
     };
 
-    const handlePaidManualUpdate = (paidManualMembers, message) => {
-        // Filter out users with sum === 0
-        const filteredPaidMembers = paidManualMembers.filter(
-            (member) => member.sum !== 0
-        );
-
-        if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setPaid(filteredPaidMembers);
-        } else {
-            setPaid([]);
-        }
+    const handlePaidManualUpdate = (paidManualMembers) => {
+        setPaid(paidManualMembers);
     };
 
     const handleOwedEquallyUpdate = (owedEquallyMembers) => {
         setOwed(owedEquallyMembers);
     };
 
-    const handleOwedPercentUpdate = (owedPercentMembers, message) => {
-        // Filter out users with sum === 0
-        const filteredOwedMembers = owedPercentMembers.filter(
-            (member) => member.sum !== 0
-        );
-
-        if (message === "Общият процент е 100%.") {
-            setOwed(filteredOwedMembers);
-        } else {
-            setOwed([]);
-        }
+    const handleOwedPercentUpdate = (owedPercentMembers) => {
+        setOwed(owedPercentMembers);
     };
 
-    const handleOwedManualUpdate = (owedManualMembers, message) => {
-        // Filter out users with sum === 0
-        const filteredOwedMembers = owedManualMembers.filter(
-            (member) => member.sum !== 0
-        );
-
-        if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setOwed(filteredOwedMembers);
-        } else {
-            setOwed([]);
-        }
+    const handleOwedManualUpdate = (owedManualMembers) => {
+        setOwed(owedManualMembers);
     };
 
     const getCategoryTitleById = (categoryId) => {
@@ -284,6 +275,8 @@ export default function PaidExpenseCreate({
             newErrors.paid = "Методът на разпределяне трябва да бъде избран";
         } else if (paid.length === 0) {
             newErrors.paid = "Платците трябва да бъдат определени";
+        } else if (paid.some((payer) => payer.sum === 0)) {
+            newErrors.paid = "Платците не могат да имат сума, равна на 0";
         } else if (
             values.payersOptionField !== "currentUser" &&
             paid.length < 2
@@ -297,6 +290,9 @@ export default function PaidExpenseCreate({
                 "Методът на разпределяне трябва да бъде избран";
         } else if (owed.length === 0) {
             newErrors.owed = "Дължимите суми трябва да бъдат определени";
+        } else if (owed.some((owee) => owee.sum === 0)) {
+            newErrors.owed =
+                "Членовете на домакинството не могат да имат дължима сума, равна на 0";
         } else if (owed.length < 2) {
             newErrors.owed =
                 "Разходът трябва да се разпредели минимум между двама членове на домакинството";
@@ -335,15 +331,26 @@ export default function PaidExpenseCreate({
                 ? "Процентно"
                 : "Ръчно";
 
+        // Map the `paid` and `owed` arrays to include only `_id` and `sum`
+        const formattedPaid = paid.map((payer) => ({
+            _id: payer._id,
+            sum: payer.sum,
+        }));
+
+        const formattedOwed = owed.map((owee) => ({
+            _id: owee._id,
+            sum: owee.sum,
+        }));
+
         const newPaidExpense = {
             title: values.title,
             category: values.category,
             amount: values.amount,
             date: values.date,
             paidSplitType,
-            paid,
+            paid: formattedPaid,
             owedSplitType,
-            owed,
+            owed: formattedOwed,
         };
 
         // Include child ID only if category is "Джобни"
@@ -371,7 +378,9 @@ export default function PaidExpenseCreate({
             } else {
                 toast({
                     title: "Грешка.",
-                    description: error.message || "Възникна грешка при създаването на разхода",
+                    description:
+                        error.message ||
+                        "Възникна грешка при създаването на разхода",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
@@ -603,6 +612,7 @@ export default function PaidExpenseCreate({
                                         <Equally
                                             amount={values.amount}
                                             members={householdMembers}
+                                            currentMembers={paid}
                                             onUpdate={handlePaidEquallyUpdate}
                                             showCreatorDeleteButton={false}
                                         />
@@ -611,6 +621,7 @@ export default function PaidExpenseCreate({
                                         <Manual
                                             amount={values.amount}
                                             members={householdMembers}
+                                            currentMembers={paid}
                                             onUpdate={handlePaidManualUpdate}
                                             showCreatorDeleteButton={false}
                                         />
@@ -649,6 +660,7 @@ export default function PaidExpenseCreate({
                                 <Equally
                                     amount={values.amount}
                                     members={householdMembers}
+                                    currentMembers={owed}
                                     onUpdate={handleOwedEquallyUpdate}
                                     showCreatorDeleteButton={true}
                                 />
@@ -658,6 +670,7 @@ export default function PaidExpenseCreate({
                                 <Percent
                                     amount={values.amount}
                                     members={householdMembers}
+                                    currentMembers={owed}
                                     onUpdate={handleOwedPercentUpdate}
                                     showCreatorDeleteButton={true}
                                 />
@@ -667,6 +680,7 @@ export default function PaidExpenseCreate({
                                 <Manual
                                     amount={values.amount}
                                     members={householdMembers}
+                                    currentMembers={owed}
                                     onUpdate={handleOwedManualUpdate}
                                     showCreatorDeleteButton={true}
                                 />

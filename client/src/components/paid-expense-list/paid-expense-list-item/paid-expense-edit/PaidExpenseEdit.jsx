@@ -28,11 +28,10 @@ import AuthContext from "../../../../contexts/authContext";
 import * as householdService from "../../../../services/householdService";
 import * as categoryService from "../../../../services/categoryService";
 import * as paidExpenseService from "../../../../services/paidExpenseService";
-import { useParams } from "react-router-dom";
-import Equally from "./split-types/Equally";
-import Manual from "./split-types/Manual";
-import Percent from "./split-types/Percent";
-import CurrentUser from "./split-types/CurrentUser";
+import Equally from "../../../split-types/Equally";
+import Manual from "../../../split-types/Manual";
+import Percent from "../../../split-types/Percent";
+import CurrentUser from "../../../split-types/CurrentUser";
 
 const initialValues = {
     title: "",
@@ -287,47 +286,20 @@ export default function PaidExpenseEdit({
         setPaid(splitEquallyMembers);
     };
 
-    const handlePaidManualUpdate = (paidManualMembers, message) => {
-        // Filter out users with sum === 0
-        const filteredPaidMembers = paidManualMembers.filter(
-            (member) => member.sum !== 0
-        );
-
-        if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setPaid(filteredPaidMembers);
-        } else {
-            setPaid([]);
-        }
+    const handlePaidManualUpdate = (paidManualMembers) => {
+        setPaid(paidManualMembers);
     };
 
     const handleOwedEquallyUpdate = (owedEquallyMembers) => {
         setOwed(owedEquallyMembers);
     };
 
-    const handleOwedPercentUpdate = (owedPercentMembers, message) => {
-        // Filter out users with sum === 0
-        const filteredOwedMembers = owedPercentMembers.filter(
-            (member) => member.sum !== 0
-        );
-
-        if (message === "Общият процент е 100%.") {
-            setOwed(filteredOwedMembers);
-        } else {
-            setOwed([]);
-        }
+    const handleOwedPercentUpdate = (owedPercentMembers) => {
+        setOwed(owedPercentMembers);
     };
 
-    const handleOwedManualUpdate = (owedManualMembers, message) => {
-        // Filter out users with sum === 0
-        const filteredOwedMembers = owedManualMembers.filter(
-            (member) => member.sum !== 0
-        );
-
-        if (message === "Сборът от сумите е равен на сумата на разхода.") {
-            setOwed(filteredOwedMembers);
-        } else {
-            setOwed([]);
-        }
+    const handleOwedManualUpdate = (owedManualMembers) => {
+        setOwed(owedManualMembers);
     };
 
     const getCategoryTitleById = (categoryId) => {
@@ -375,6 +347,8 @@ export default function PaidExpenseEdit({
             newErrors.paid = "Методът на разпределяне трябва да бъде избран";
         } else if (paid.length === 0) {
             newErrors.paid = "Платците трябва да бъдат определени";
+        } else if (paid.some((payer) => payer.sum === 0)) {
+            newErrors.paid = "Платците не могат да имат сума, равна на 0";
         } else if (
             values.payersOptionField !== "currentUser" &&
             paid.length < 2
@@ -388,6 +362,9 @@ export default function PaidExpenseEdit({
                 "Методът на разпределяне трябва да бъде избран";
         } else if (owed.length === 0) {
             newErrors.owed = "Дължимите суми трябва да бъдат определени";
+        } else if (owed.some((owee) => owee.sum === 0)) {
+            newErrors.owed =
+                "Членовете на домакинството не могат да имат дължима сума, равна на 0";
         } else if (owed.length < 2) {
             newErrors.owed =
                 "Разходът трябва да се разпредели минимум между двама членове на домакинството";
@@ -453,8 +430,6 @@ export default function PaidExpenseEdit({
         if (categoryTitle === "Джобни" && selectedChild) {
             updatedPaidExpense.child = selectedChild._id;
         }
-
-        console.log(updatedPaidExpense);
 
         try {
             await paidExpenseService.edit(
