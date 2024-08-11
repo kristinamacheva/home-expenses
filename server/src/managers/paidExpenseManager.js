@@ -1168,6 +1168,20 @@ exports.accept = async (userId, paidExpenseId) => {
         );
     }
 
+    // Check for pending payments for the user
+    const pendingPayments = await Payment.find({
+        household: paidExpense.household,
+        payee: userId,
+        paymentStatus: "За одобрение",
+    });
+
+    if (pendingPayments.length > 0) {
+        throw new AppError(
+            "Не може да одобрите разход преди да одобрите всички плащания.",
+            403
+        );
+    }
+
     // Update status to "Одобрен"
     userApproval.status = "Одобрен";
 
