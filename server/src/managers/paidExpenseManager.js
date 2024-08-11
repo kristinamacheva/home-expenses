@@ -952,6 +952,23 @@ exports.update = async (userId, paidExpenseId, paidExpenseData) => {
                 );
             }
         }
+    } else if (!inputCategory) {
+        // If no category is provided, check if the existing category is not "Uncategorized"
+        const uncategorizedCategory = await Category.findOne({
+            title: "Некатегоризиран",
+        });
+
+        if (uncategorizedCategory) {
+            // Only update the category if the existing one is not "Uncategorized"
+            if (category !== uncategorizedCategory._id.toString()) {
+                category = uncategorizedCategory._id;
+            }
+        } else {
+            throw new AppError(
+                "Категорията 'Некатегоризиран' не е намерена",
+                404
+            );
+        }
     }
 
     // Update the expense with new data
