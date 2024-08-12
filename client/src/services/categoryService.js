@@ -3,8 +3,8 @@ import * as request from "../lib/request";
 const baseUrl = (householdId) =>
     `http://localhost:5000/households/${householdId}/categories`;
 
-export const getAll= async (householdId, page) => {
-    const url = `${baseUrl(householdId)}?page=${page}}`;
+export const getAll = async (householdId) => {
+    const url = `${baseUrl(householdId)}`;
 
     const result = await request.get(url);
     return result;
@@ -17,7 +17,7 @@ export const getAllDetails = async (householdId, page) => {
     return result;
 };
 
-export const getOne= async (householdId, categoryId) => {
+export const getOne = async (householdId, categoryId) => {
     const url = `${baseUrl(householdId)}/${categoryId}`;
 
     const result = await request.get(url);
