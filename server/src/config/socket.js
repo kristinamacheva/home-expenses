@@ -7,6 +7,7 @@ const Notification = require("../models/Notification");
 const PaidExpense = require("../models/PaidExpense");
 const Message = require("../models/Message");
 const User = require("../models/User");
+const ALLOWED_ORIGINS = require("../constants/constants");
 const cloudinary = require("cloudinary").v2;
 
 let io;
@@ -49,11 +50,7 @@ function initializeSocket(app) {
     // Initialize Socket.io on the created HTTP server instance
     io = socketIO(server, {
         cors: {
-            origin: [
-                "http://localhost:5173",
-                "http://localhost:4173",
-                "http://192.168.56.1:4173",
-            ],
+            origin: ALLOWED_ORIGINS,
             methods: ["GET", "POST"],
             credentials: true,
         },

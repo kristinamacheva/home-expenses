@@ -5,6 +5,7 @@ const { auth } = require("../middlewares/authMiddleware");
 const http = require("http"); // Import http module for socket.io
 const socketAuthMiddleware = require("../middlewares/socketAuthMiddleware");
 const { initializeSocket } = require("./socket");
+const ALLOWED_ORIGINS = require("../constants/constants");
 
 function expressConfig(app) {
     // Body Parsing Middleware
@@ -17,19 +18,12 @@ function expressConfig(app) {
     // Middleware to parse JSON bodies
     app.use(express.json({ limit: "300kb" }));
 
-    // Define allowed origins
-    const allowedOrigins = [
-        "http://localhost:5173",
-        "http://localhost:4173",
-        "http://192.168.56.1:4173",
-    ];
-
     // CORS configuration
     app.use(
         cors({
             origin: function (origin, callback) {
                 // Check if the origin is in the list of allowed origins
-                if (!origin || allowedOrigins.includes(origin)) {
+                if (!origin || ALLOWED_ORIGINS.includes(origin)) {
                     callback(null, true); // Allow the request
                 } else {
                     callback(new Error("Not allowed by CORS")); // Block the request
@@ -48,7 +42,7 @@ function expressConfig(app) {
     // Initialize and configure a Socket.io server instance
     const server = initializeSocket(app);
 
-    // Associate it with the Express application (app) to make the server instance accessible 
+    // Associate it with the Express application (app) to make the server instance accessible
     // throughout the Express application
     app.set("server", server);
 }
