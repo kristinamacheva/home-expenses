@@ -1,7 +1,8 @@
+import { API_BASE_URL } from "../constants/constants";
 import * as request from "../lib/request";
 
 const baseUrl = (householdId) =>
-    `http://localhost:5000/households/${householdId}/messages`;
+    `${API_BASE_URL}/households/${householdId}/messages`;
 
 export const getAll = async (householdId, lastMessageId = null) => {
     let url = `${baseUrl(householdId)}`;

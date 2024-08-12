@@ -1,6 +1,7 @@
+import { API_BASE_URL } from "../constants/constants";
 import * as request from "../lib/request";
 
-const baseUrl = "http://localhost:5000/users";
+const baseUrl = `${API_BASE_URL}/users`;
 
 export const login = async ({ email, password }) => {
     const result = await request.post(`${baseUrl}/login`, {
@@ -11,13 +12,19 @@ export const login = async ({ email, password }) => {
     return result;
 };
 
-export const register = async ({ name, email, phone, password, repeatPassword }) => {
+export const register = async ({
+    name,
+    email,
+    phone,
+    password,
+    repeatPassword,
+}) => {
     const result = await request.post(`${baseUrl}/register`, {
         name,
         email,
         phone,
         password,
-        repeatPassword
+        repeatPassword,
     });
 
     return result;
@@ -29,7 +36,15 @@ export const getProfile = async () => {
     return result;
 };
 
-export const update = async ({ avatar, name, email, phone, oldPassword, password, repeatPassword }) => {
+export const update = async ({
+    avatar,
+    name,
+    email,
+    phone,
+    oldPassword,
+    password,
+    repeatPassword,
+}) => {
     const result = await request.put(`${baseUrl}/profile`, {
         avatar,
         name,
@@ -37,9 +52,9 @@ export const update = async ({ avatar, name, email, phone, oldPassword, password
         phone,
         oldPassword,
         password,
-        repeatPassword
+        repeatPassword,
     });
-    
+
     return result;
 };
 
@@ -50,13 +65,17 @@ export const getHouseholds = async () => {
 };
 
 export const getHouseholdsWithExistingBalances = async () => {
-    const result = await request.get(`${baseUrl}/households?filterByBalance=true`);
+    const result = await request.get(
+        `${baseUrl}/households?filterByBalance=true`
+    );
 
     return result;
 };
 
 export const getHouseholdsWithExistingAllowances = async () => {
-    const result = await request.get(`${baseUrl}/households?filterByAllowance=true`);
+    const result = await request.get(
+        `${baseUrl}/households?filterByAllowance=true`
+    );
 
     return result;
 };

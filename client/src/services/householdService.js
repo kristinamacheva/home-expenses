@@ -1,6 +1,7 @@
+import { API_BASE_URL } from "../constants/constants";
 import * as request from "../lib/request";
 
-const baseUrl = "http://localhost:5000/households";
+const baseUrl = `${API_BASE_URL}/households`;
 
 export const getOne = async (householdId) => {
     const result = await request.get(`${baseUrl}/${householdId}`);

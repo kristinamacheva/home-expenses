@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { API_BASE_URL } from "../constants/constants";
 
 const useSocket = (userId) => {
     const [socket, setSocket] = useState(null);
 
-    // If the useEffect dependencies change, React will first call the cleanup function before re-running 
+    // If the useEffect dependencies change, React will first call the cleanup function before re-running
     // the effect.
     useEffect(() => {
         if (userId) {
-            const newSocket = io("http://localhost:5000", {
+            const newSocket = io(API_BASE_URL, {
                 withCredentials: true,
                 reconnection: true,
                 reconnectionAttempts: 5,
