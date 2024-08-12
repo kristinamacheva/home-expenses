@@ -192,11 +192,6 @@ export default function PaidExpenseList({ isAdmin, archived }) {
         fetchPaidExpenses();
     };
 
-    const clearSearchFormHandler = () => {
-        setSearchValues(initialSearchValues);
-        fetchPaidExpenses(true); // Reset and fetch all results
-    };
-
     return (
         <>
             <Flex justify="flex-end" mb="3" mx="1">
