@@ -28,6 +28,7 @@ import AuthContext from "../../../contexts/authContext";
 import * as householdService from "../../../services/householdService";
 import * as categoryService from "../../../services/categoryService";
 import * as paidExpenseService from "../../../services/paidExpenseService";
+import * as expenseTemplateService from "../../../services/expenseTemplateService";
 import { useParams } from "react-router-dom";
 import Equally from "../../split-types/Equally";
 import Manual from "../../split-types/Manual";
@@ -48,6 +49,7 @@ export default function PaidExpenseCreate({
     isOpen,
     onClose,
     fetchPaidExpenses,
+    expenseTemplateId,
 }) {
     const { userId, logoutHandler, name, avatar, avatarColor } =
         useContext(AuthContext);
@@ -79,13 +81,16 @@ export default function PaidExpenseCreate({
             .getOneNonChildMembers(householdId)
             .then((result) => {
                 setHouseholdMembers(result);
-                const initialSums = result.map((member) => ({
-                    ...member,
-                    sum: 0,
-                }));
 
-                setPaid(initialSums);
-                setOwed(initialSums);
+                if (!expenseTemplateId) {
+                    const initialSums = result.map((member) => ({
+                        ...member,
+                        sum: 0,
+                    }));
+
+                    setPaid(initialSums);
+                    setOwed(initialSums);
+                }
             })
             .catch((error) => {
                 if (error.status === 401) {
@@ -121,7 +126,87 @@ export default function PaidExpenseCreate({
                     });
                 }
             });
+
+        if (expenseTemplateId) {
+            fetchExpenseTemplate();
+        }
     }, [householdId]);
+
+    const fetchExpenseTemplate = () => {
+        expenseTemplateService
+            .getEditableFields(householdId, expenseTemplateId)
+            .then(async (expenseTemplate) => {
+                setValues({
+                    ...values,
+                    title: expenseTemplate.title,
+                    amount: expenseTemplate.amount,
+                    category: expenseTemplate.category,
+                    payersOptionField:
+                        expenseTemplate.paidSplitType === ""
+                            ? expenseTemplate.paidSplitType
+                            : expenseTemplate.paidSplitType === "Единично"
+                            ? "currentUser"
+                            : "changedUser",
+                    paidSplitTypeField:
+                        expenseTemplate.paidSplitType === "Поравно"
+                            ? "equally"
+                            : expenseTemplate.paidSplitType === "Ръчно"
+                            ? "manual"
+                            : "",
+                    splittingOption:
+                        expenseTemplate.owedSplitType === ""
+                            ? expenseTemplate.owedSplitType
+                            : expenseTemplate.owedSplitType === "Поравно"
+                            ? "equally"
+                            : expenseTemplate.owedSplitType === "Процентно"
+                            ? "percent"
+                            : "manual",
+                });
+
+                setPaid(expenseTemplate.paid);
+                setOwed(expenseTemplate.owed);
+                
+                if (expenseTemplate.child) {
+                    const childMembersResult =
+                        await householdService.getOneChildMembers(householdId);
+
+                    if (childMembersResult.length > 0) {
+                        setChildMembers(childMembersResult);
+                    } else {
+                        toast({
+                            title: "Грешка при зареждане на децата",
+                            description:
+                                "Няма членове с роля Дете в домакинството",
+                            status: "error",
+                            duration: 6000,
+                            isClosable: true,
+                            position: "bottom",
+                        });
+                    }
+
+                    const child = childMembersResult.find(
+                        (child) => child._id === expenseTemplate.child
+                    );
+                    child ? setSelectedChild(child) : setSelectedChild(null);
+                } else {
+                    setSelectedChild(null);
+                }
+            })
+            .catch((error) => {
+                if (error.status === 401) {
+                    logoutHandler();
+                } else {
+                    toast({
+                        title:
+                            error.message || "Неуспешно зареждане на шаблона",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+                }
+            });
+    };
 
     const onChange = async (e) => {
         let value = e.target.value;
@@ -384,7 +469,10 @@ export default function PaidExpenseCreate({
                 isClosable: true,
             });
 
-            fetchPaidExpenses(true);
+            if (fetchPaidExpenses) {
+                fetchPaidExpenses(true);
+            }
+
             onCloseForm();
         } catch (error) {
             if (error.status === 401) {
