@@ -29,6 +29,7 @@ import HouseholdChat from "../household-chat/HouseholdChat";
 import ChildExpenseList from "../child-expense-list/ChildExpenseList";
 import ChildWishlist from "../child-wishlist/ChildWishlist";
 import ChildList from "../child-list/ChildList";
+import ExpenseTemplateList from "../expense-template-list/ExpenseTemplateList";
 
 export default function HouseholdDetails() {
     const [household, setHousehold] = useState({});
@@ -211,16 +212,7 @@ export default function HouseholdDetails() {
                                             fontSize: "1rem",
                                         }}
                                     >
-                                        Неплатени
-                                    </Tab>
-                                    <Tab
-                                        sx={{
-                                            padding: "0.4rem 0.6rem",
-                                            marginRight: "0.2rem",
-                                            fontSize: "1rem",
-                                        }}
-                                    >
-                                        Периодични
+                                        Шаблони
                                     </Tab>
                                 </TabList>
                                 <TabPanels>
@@ -235,10 +227,13 @@ export default function HouseholdDetails() {
                                         />
                                     </TabPanel>
                                     <TabPanel px="2">
-                                        <p>Неплатени</p>
-                                    </TabPanel>
-                                    <TabPanel px="2">
-                                        <p>Периодични</p>
+                                        <ExpenseTemplateList
+                                            archived={
+                                                household.archived
+                                                    ? household.archived
+                                                    : undefined
+                                            }
+                                        />
                                     </TabPanel>
                                 </TabPanels>
                             </Tabs>
