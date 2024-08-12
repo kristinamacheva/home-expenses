@@ -39,12 +39,6 @@ module.exports.createValidator = [
         .isIn(["Единично", "Поравно", "Ръчно"])
         .withMessage("Невалиден метод на разпределяне за плащане"),
 
-    body("paid.*.sum")
-        .optional({ checkFalsy: true })
-        .toFloat()
-        .isFloat({ gt: 0 })
-        .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
-
     body("owedSplitType")
         .optional({ checkFalsy: true })
         .trim()
@@ -53,12 +47,6 @@ module.exports.createValidator = [
         .bail()
         .isIn(["Поравно", "Процентно", "Ръчно"])
         .withMessage("Невалиден метод на разпределяне на задължение"),
-
-    body("owed.*.sum")
-        .optional({ checkFalsy: true })
-        .toFloat()
-        .isFloat({ gt: 0 })
-        .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
 ];
 
 module.exports.updateValidator = [
@@ -87,12 +75,6 @@ module.exports.updateValidator = [
         .isIn(["Единично", "Поравно", "Ръчно"])
         .withMessage("Невалиден метод на разпределяне за плащане"),
 
-    body("paid.*.sum")
-        .optional({ checkFalsy: true })
-        .toFloat()
-        .isFloat({ gt: 0 })
-        .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
-
     body("owedSplitType")
         .optional({ checkFalsy: true })
         .trim()
@@ -101,10 +83,4 @@ module.exports.updateValidator = [
         .bail()
         .isIn(["Поравно", "Процентно", "Ръчно"])
         .withMessage("Невалиден метод на разпределяне на задължение"),
-
-    body("owed.*.sum")
-        .optional({ checkFalsy: true })
-        .toFloat()
-        .isFloat({ gt: 0 })
-        .withMessage("Сумата трябва да бъде число, по-голямо от 0"),
 ];
