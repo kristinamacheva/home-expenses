@@ -1,11 +1,9 @@
 import {
     Flex,
     useToast,
-    RangeSliderFilledTrack,
     Button,
     useDisclosure,
     Stack,
-    Text,
     Spinner,
 } from "@chakra-ui/react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -113,16 +111,14 @@ export default function CategoryList({ isAdmin, archived }) {
         onClose: onCloseCreateModal,
     } = useDisclosure();
 
-    const removeCategoryFromState = (categoryId) => {
-        setCategories((prevCategories) =>
-            prevCategories.filter((category) => category._id !== categoryId)
-        );
-    };
-
     return (
         <>
             <Flex justify="flex-end" mb="3" mx="1">
-                <Button variant="primary" onClick={onOpenCreateModal} isDisabled={archived}>
+                <Button
+                    variant="primary"
+                    onClick={onOpenCreateModal}
+                    isDisabled={archived}
+                >
                     + Създаване
                 </Button>
             </Flex>
@@ -133,7 +129,6 @@ export default function CategoryList({ isAdmin, archived }) {
                         category={category}
                         fetchCategories={fetchCategories}
                         isAdmin={isAdmin}
-                        onRemove={removeCategoryFromState}
                         archived={archived}
                     />
                 ))}

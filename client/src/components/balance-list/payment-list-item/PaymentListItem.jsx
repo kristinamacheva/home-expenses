@@ -30,7 +30,6 @@ export default function PaymentListItem({
     paymentStatus,
     fetchPayments,
     fetchBalances,
-    onRemove,
     archived,
 }) {
     const { householdId } = useParams();
@@ -64,7 +63,7 @@ export default function PaymentListItem({
                 position: "bottom",
             });
 
-            onRemove(_id);
+            fetchPayments();
         } catch (error) {
             if (error.status === 401) {
                 logoutHandler();

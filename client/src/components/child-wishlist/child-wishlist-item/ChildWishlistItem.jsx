@@ -65,7 +65,7 @@ export default function ChildWishlistItem({
                 position: "bottom",
             });
 
-            onRemove(_id);
+            onRemove();
         } catch (error) {
             if (error.status === 401) {
                 logoutHandler();

@@ -191,13 +191,7 @@ export default function BalanceList({ archived }) {
         e.preventDefault();
         fetchPayments();
     };
-
-    const removePaymentFromState = (paymentId) => {
-        setPayments((prevPayments) =>
-            prevPayments.filter((payment) => payment._id !== paymentId)
-        );
-    };
-
+    
     return (
         <Stack>
             <Stack>
@@ -308,7 +302,6 @@ export default function BalanceList({ archived }) {
                                 {...payment}
                                 fetchPayments={fetchPayments}
                                 fetchBalances={fetchBalances}
-                                onRemove={removePaymentFromState}
                                 archived={archived}
                             />
                         ))

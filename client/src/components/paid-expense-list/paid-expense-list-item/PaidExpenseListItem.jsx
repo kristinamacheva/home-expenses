@@ -30,7 +30,6 @@ export default function PaidExpenseListItem({
     balance,
     expenseStatus,
     fetchPaidExpenses,
-    onRemove,
     isAdmin,
     archived,
 }) {
@@ -65,7 +64,7 @@ export default function PaidExpenseListItem({
                 position: "bottom",
             });
 
-            onRemove(_id);
+            fetchPaidExpenses();
         } catch (error) {
             if (error.status === 401) {
                 logoutHandler();

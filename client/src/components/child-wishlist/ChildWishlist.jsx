@@ -169,17 +169,12 @@ export default function ChildWishlist({ archived, childId = null }) {
         };
     }, [fetchMoreChildWishlistItems]);
 
-    const removeChildWishlistItemFromState = (childWishlistItemId) => {
+    const removeChildWishlistItemFromState = () => {
         if (childId) {
             return;
         }
 
-        setChildWishlistItems((prevChildWishlistItem) =>
-            prevChildWishlistItem.filter(
-                (childWishlistItem) =>
-                    childWishlistItem._id !== childWishlistItemId
-            )
-        );
+        fetchChildWishlistItems();
 
         getOneChildAllowance();
     };

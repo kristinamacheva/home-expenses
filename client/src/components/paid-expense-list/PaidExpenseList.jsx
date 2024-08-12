@@ -172,14 +172,6 @@ export default function PaidExpenseList({ isAdmin, archived }) {
         };
     }, [fetchMorePaidExpenses]);
 
-    const removePaidExpenseFromState = (paidExpenseId) => {
-        setPaidExpenses((prevPaidExpenses) =>
-            prevPaidExpenses.filter(
-                (paidExpense) => paidExpense._id !== paidExpenseId
-            )
-        );
-    };
-
     const onChange = (e) => {
         setSearchValues((state) => ({
             ...state,
@@ -313,7 +305,6 @@ export default function PaidExpenseList({ isAdmin, archived }) {
                             key={paidExpense._id}
                             {...paidExpense}
                             fetchPaidExpenses={fetchPaidExpenses}
-                            onRemove={removePaidExpenseFromState}
                             isAdmin={isAdmin}
                             archived={archived}
                         />

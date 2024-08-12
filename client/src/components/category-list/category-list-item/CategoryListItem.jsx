@@ -21,7 +21,6 @@ export default function CategoryListItem({
     category,
     fetchCategories,
     isAdmin,
-    onRemove,
     archived,
 }) {
     const { householdId } = useParams();
@@ -47,7 +46,7 @@ export default function CategoryListItem({
                 position: "bottom",
             });
 
-            onRemove(categoryId);
+            fetchCategories();
         } catch (error) {
             if (error.status === 401) {
                 logoutHandler();
