@@ -165,7 +165,7 @@ export default function PaidExpenseCreate({
 
                 setPaid(expenseTemplate.paid);
                 setOwed(expenseTemplate.owed);
-                
+
                 if (expenseTemplate.child) {
                     const childMembersResult =
                         await householdService.getOneChildMembers(householdId);
@@ -352,12 +352,12 @@ export default function PaidExpenseCreate({
 
         if (!values.payersOptionField) {
             newErrors.paidSplitType =
-                "Методът на разпределяне трябва да бъде избран";
+                "Методът на разпределение трябва да бъде избран";
         } else if (
             values.payersOptionField !== "currentUser" &&
             !values.paidSplitTypeField
         ) {
-            newErrors.paid = "Методът на разпределяне трябва да бъде избран";
+            newErrors.paid = "Методът на разпределение трябва да бъде избран";
         } else if (paid.length === 0) {
             newErrors.paid = "Платците трябва да бъдат определени";
         } else if (paid.some((payer) => payer.sum === 0)) {
@@ -379,7 +379,7 @@ export default function PaidExpenseCreate({
 
         if (!values.splittingOption) {
             newErrors.owedSplitType =
-                "Методът на разпределяне трябва да бъде избран";
+                "Методът на разпределение трябва да бъде избран";
         } else if (owed.length === 0) {
             newErrors.owed = "Дължимите суми трябва да бъдат определени";
         } else if (owed.some((owee) => owee.sum === 0)) {
@@ -682,7 +682,7 @@ export default function PaidExpenseCreate({
                                             isInvalid={errors.paid}
                                         >
                                             <FormLabel>
-                                                Метод на разпределяне*
+                                                Метод на разпределение (платци)*
                                             </FormLabel>
                                             <Select
                                                 name="paidSplitTypeField"
@@ -736,7 +736,7 @@ export default function PaidExpenseCreate({
                                 mb={4}
                                 isInvalid={errors.owedSplitType}
                             >
-                                <FormLabel>Метод на разпределяне*</FormLabel>
+                                <FormLabel>Метод на разпределение*</FormLabel>
                                 <Select
                                     name="splittingOption"
                                     value={values.splittingOption}
