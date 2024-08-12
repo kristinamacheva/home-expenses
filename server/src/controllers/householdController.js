@@ -3,6 +3,7 @@ const householdManager = require("../managers/householdManager");
 const getHousehold = require("../middlewares/householdMiddleware");
 const paidExpenseController = require("./paidExpenseController");
 const childExpenseController = require("./childExpenseController");
+const expenseTemplateController = require("./expenseTemplateController");
 const childWishlistItemController = require("./childWishlistItemController");
 const paymentController = require("./paymentController");
 const allowanceController = require("./allowanceController");
@@ -220,6 +221,7 @@ router.put("/:householdId/restore", async (req, res, next) => {
 
 router.use("/:householdId/paidExpenses", paidExpenseController);
 router.use("/:householdId/childExpenses", childExpenseController);
+router.use("/:householdId/expenseTemplates", expenseTemplateController);
 router.use("/:householdId/childWishlistItems", childWishlistItemController);
 router.use("/:householdId/payments", paymentController);
 router.use("/:householdId/allowances", allowanceController);
