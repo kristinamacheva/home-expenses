@@ -1206,45 +1206,83 @@ exports.accept = async (userId, paidExpenseId) => {
 };
 
 exports.reject = async (userId, paidExpenseId, text) => {
-    const paidExpense = await PaidExpense.findById(paidExpenseId);
+    const session = await mongoose.startSession();
 
-    // Check if the overall expense status is "За одобрение"
-    if (paidExpense.expenseStatus !== "За одобрение") {
-        throw new AppError(
-            `Статусът на разхода трябва да бъде "За одобрение" за да може да се отхвърли`,
-            400
+    try {
+        session.startTransaction();
+
+        const paidExpense = await PaidExpense.findById(paidExpenseId).session(
+            session
         );
-    }
 
-    const userApproval = paidExpense.userApprovals.find((entry) =>
-        entry.user.equals(userId)
-    );
+        // Check if the overall expense status is "За одобрение"
+        if (paidExpense.expenseStatus !== "За одобрение") {
+            throw new AppError(
+                `Статусът на разхода трябва да бъде "За одобрение" за да може да се отхвърли`,
+                400
+            );
+        }
 
-    if (!userApproval) {
-        throw new AppError(`Потребителят не е намерен`, 400);
-    }
-
-    // Check if the current user approval status is "За одобрение"
-    if (userApproval.status !== "За одобрение") {
-        throw new AppError(
-            `Потребителят не може да потвърди/отхвърли разхода повече от веднъж`,
-            400
+        const userApproval = paidExpense.userApprovals.find((entry) =>
+            entry.user.equals(userId)
         );
+
+        if (!userApproval) {
+            throw new AppError(`Потребителят не е намерен`, 400);
+        }
+
+        // Check if the current user approval status is "За одобрение"
+        if (userApproval.status !== "За одобрение") {
+            throw new AppError(
+                `Потребителят не може да потвърди/отхвърли разхода повече от веднъж`,
+                400
+            );
+        }
+
+        // Update status to "Отхвърлен"
+        userApproval.status = "Отхвърлен";
+        paidExpense.expenseStatus = "Отхвърлен";
+
+        // Add the rejection reason as a comment
+        paidExpense.comments.push({
+            user: userId,
+            text: `Причина за отхвърляне: ${text}`,
+            createdAt: new Date(),
+        });
+
+        // Save the updated paid expense to the database
+        await paidExpense.save({ session });
+
+        for (const rejectMember of paidExpense.balance) {
+            if (rejectMember.user.toString() !== userId) {
+                // Create and send notifications for members
+                const message = `Отхвърлен е разход.`;
+
+                const notification = new Notification({
+                    user: rejectMember.user,
+                    message: message,
+                    household: paidExpense.household,
+                    resourceType: "PaidExpense",
+                    resourceId: paidExpense._id,
+                });
+
+                const savedNotification = await notification.save({ session });
+
+                // Send notification to the user if they have an active connection
+                sendNotificationToUser(rejectMember.user, savedNotification);
+            }
+        }
+
+        // Commit the transaction if all operations succeed
+        await session.commitTransaction();
+    } catch (error) {
+        // Abort the transaction if any operation fails
+        await session.abortTransaction();
+        throw error; // Rethrow the error to be handled by the calling function or middleware
+    } finally {
+        // End the session
+        session.endSession();
     }
-
-    // Update status to "Отхвърлен"
-    userApproval.status = "Отхвърлен";
-    paidExpense.expenseStatus = "Отхвърлен";
-
-    // Add the rejection reason as a comment
-    paidExpense.comments.push({
-        user: userId,
-        text: `Причина за отхвърляне: ${text}`,
-        createdAt: new Date(),
-    });
-
-    // Save the updated paid expense to the database
-    await paidExpense.save();
 };
 
 exports.addComment = async (userId, paidExpenseId, text) => {
