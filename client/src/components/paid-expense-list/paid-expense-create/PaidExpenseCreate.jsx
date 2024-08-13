@@ -371,7 +371,7 @@ export default function PaidExpenseCreate({
         } else {
             // Check if total sum of paid matches the amount
             const totalPaid = paid.reduce((sum, payer) => sum + payer.sum, 0);
-            if (totalPaid !== Number(values.amount)) {
+            if (Number(totalPaid.toFixed(2)) !== Number(values.amount)) {
                 newErrors.paid =
                     "Общата сума на платците трябва да бъде равна на сумата";
             }
@@ -391,7 +391,7 @@ export default function PaidExpenseCreate({
         } else {
             // Check if total sum of owed matches the amount
             const totalOwed = owed.reduce((sum, owee) => sum + owee.sum, 0);
-            if (totalOwed !== Number(values.amount)) {
+            if (Number(totalOwed.toFixed(2)) !== Number(values.amount)) {
                 newErrors.owed =
                     "Общата сума на дължимите суми трябва да бъде равна на сумата";
             }
