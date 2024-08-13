@@ -23,7 +23,7 @@ const calculatePercentages = (amount, currentMembers) => {
     return currentMembers.map((member) => {
         const percentage =
             validAmount !== 0 ? (member.sum / validAmount) * 100 : 0;
-            
+
         return {
             _id: member._id,
             name: member.name,
@@ -140,6 +140,19 @@ export default function Percent({
         const newPercentages = percentages.map((entry) =>
             entry._id === id ? { ...entry, percentage: percentage } : entry
         );
+
+        const totalEnteredPercentage = newPercentages.reduce(
+            (acc, member) => acc + Number(member.percentage),
+            0
+        );
+
+        if (totalEnteredPercentage > 100) {
+            setMessage("Процентите не могат да надвишават 100%.");
+            setMessageColor("red.400");
+            return;
+        } else {
+            setMessage(""); // Clear message if percentages are valid
+        }
 
         setPercentages(newPercentages);
     };
