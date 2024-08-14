@@ -162,6 +162,7 @@ export default function HouseholdDetails() {
                                 {household.allowances?.length > 0 && (
                                     <Tab>Деца</Tab>
                                 )}
+                                <Tab>Чат</Tab>
                             </>
                         )}
                         {currentUserRole === "Дете" && (
@@ -172,7 +173,6 @@ export default function HouseholdDetails() {
                             </>
                         )}
                         <Tab>Членове</Tab>
-                        <Tab>Чат</Tab>
                     </TabList>
                 </Box>
 
@@ -268,6 +268,11 @@ export default function HouseholdDetails() {
                                 />
                             </TabPanel>
                         )}
+                    {currentUserRole !== "Дете" && (
+                        <TabPanel>
+                            <HouseholdChat />
+                        </TabPanel>
+                    )}
                     {currentUserRole === "Дете" && (
                         <TabPanel>
                             <AllowanceList />
@@ -297,9 +302,6 @@ export default function HouseholdDetails() {
                     )}
                     <TabPanel>
                         <MemberList />
-                    </TabPanel>
-                    <TabPanel>
-                        <HouseholdChat />
                     </TabPanel>
                 </TabPanels>
             </Tabs>
