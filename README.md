@@ -30,3 +30,5 @@ To start the server, use the following command:
 ```
 npm start
 ```
+## User Roles and Permissions
+Unregistered users and those not logged in are restricted to accessing only the login and registration pages. Full access to household features, including management of expenses, payments, and other functionalities, requires a valid user account. Each user can have one of the following three roles in each group they are added to - household admin, regular user or child. Depending on the role, users have different permissions and options to manage households, expenses, expense templates, payments, categories, allowances, wishlist items and reminders.
