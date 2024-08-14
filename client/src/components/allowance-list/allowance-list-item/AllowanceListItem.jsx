@@ -20,7 +20,6 @@ export default function AllowanceListItem({ createdAt, amount }) {
                     <Text color="gray.500" fontSize="sm">
                         {new Date(createdAt).toLocaleDateString("bg-BG")}
                     </Text>
-                    
                 </Stack>
                 <Text
                     fontSize="xl"

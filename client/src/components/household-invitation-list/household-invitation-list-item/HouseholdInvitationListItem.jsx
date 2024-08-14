@@ -1,21 +1,15 @@
 import {
     Stack,
-    Button,
     Heading,
-    AvatarGroup,
-    Avatar,
     Badge,
     Box,
     Card,
     IconButton,
     HStack,
-    useDisclosure,
     Text,
     useToast,
 } from "@chakra-ui/react";
 import { FaCircleCheck, FaCircleXmark, FaEye, FaPen } from "react-icons/fa6";
-import { FaSignOutAlt } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import * as householdInvitationService from "../../../services/householdInvitationService";
 import { useContext } from "react";
@@ -98,7 +92,6 @@ export default function HouseholdInvitationListItem({
                 mx="4"
                 my="1"
                 boxShadow="md"
-                // borderRadius="lg"
                 borderTop="4px solid #676F9D"
                 background="white"
                 spacing="4"

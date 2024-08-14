@@ -1,7 +1,5 @@
 import {
     Stack,
-    Button,
-    Heading,
     Badge,
     Box,
     Text,

@@ -34,7 +34,6 @@ export default function Statistics() {
     const { householdId } = useParams();
     const toast = useToast();
 
-    // const [categoryData, setCategoryData] = useState([]);
     const [errors, setErrors] = useState({
         startDate: "",
         endDate: "",

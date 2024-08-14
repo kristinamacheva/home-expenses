@@ -20,7 +20,6 @@ import PaymentDetails from "../../balance-list/payment-list-item/payment-details
 export default function Message({ ownMessage, message }) {
     const [imgLoaded, setImgLoaded] = useState(false);
     const [showCreatedAt, setShowCreatedAt] = useState(false);
-    const { logoutHandler, userId } = useContext(AuthContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isPaidExpenseDetailsModalOpen,

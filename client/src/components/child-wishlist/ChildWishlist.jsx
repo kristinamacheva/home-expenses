@@ -175,7 +175,6 @@ export default function ChildWishlist({ archived, childId = null }) {
         }
 
         fetchChildWishlistItems();
-
         getOneChildAllowance();
     };
 

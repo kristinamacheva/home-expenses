@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Stack, useToast, Select } from "@chakra-ui/react";
+import { useToast, Select } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
 import * as householdService from "../../services/householdService";

@@ -13,7 +13,6 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
-    Select,
     Stack,
     Text,
     useToast,

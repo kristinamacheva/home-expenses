@@ -1,6 +1,5 @@
 import {
     Stack,
-    Button,
     Heading,
     Badge,
     Box,
@@ -14,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import { FaEye, FaPen, FaRegTrashCan } from "react-icons/fa6";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import AuthContext from "../../../contexts/authContext";
 import PaidExpenseDetails from "./paid-expense-details/PaidExpenseDetails";
 import * as paidExpenseService from "../../../services/paidExpenseService";

@@ -6,7 +6,6 @@ import {
     Flex,
     FormControl,
     FormLabel,
-    Heading,
     Input,
     Select,
     Spinner,
@@ -54,7 +53,6 @@ export default function PaidExpenseList({ isAdmin, archived }) {
         fetchCategories();
     }, []);
 
-    // TODO: Display search errors
     const fetchPaidExpenses = useCallback(
         async (reset = false) => {
             setIsLoading(true);
