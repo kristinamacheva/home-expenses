@@ -214,21 +214,6 @@ export default function Login() {
                                     </ChakraLink>
                                 </Text>
                             </Stack>
-                            {/* <Stack spacing={10}>
-                            <Stack
-                                direction={{ base: "column", sm: "row" }}
-                                align={"start"}
-                                justify={"space-between"}
-                            >
-                                <Checkbox>Запомни ме</Checkbox>
-                                <Text color={"themePurple.700"}>
-                                    Забравена парола?
-                                </Text>
-                            </Stack>
-                            <Button variant="primary">
-                                Вход
-                            </Button>
-                        </Stack> */}
                         </Stack>
                     </form>
                 </Box>
