@@ -14,7 +14,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import * as householdInvitationService from "../../services/householdInvitationService";
 import AuthContext from "../../contexts/authContext";
-import HouseholdInvitationNotFound from "../household-invitation-not-found/HouseholdNotFound";
+import HouseholdInvitationNotFound from "../household-invitation-not-found/HouseholdInvitationNotFound";
 
 export default function HouseholdInvitationDetails() {
     const [householdInvitation, setHouseholdInvitation] = useState({});
