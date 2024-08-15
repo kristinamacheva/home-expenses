@@ -9,6 +9,11 @@ export const getAll = async () => {
     return result;
 };
 
+export const getOne = async (invitationId) => {
+    const result = await request.get(`${baseUrl}/${invitationId}`);
+    return result;
+};
+
 export const accept = async (invitationId) => {
     const householdId = await request.remove(
         `${baseUrl}/${invitationId}/accept`
