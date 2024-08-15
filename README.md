@@ -99,3 +99,28 @@ Unregistered users and those not logged in are restricted to accessing only the 
 - Can create a wishlist item, and when the wish is purchased, an expense is created with the corresponding wish amount. For each wishlist item, information is displayed on whether or not it has been purchased, and whether and how much is not enough for the wish. 
 - Can edit or delete wishlist items.
 - Can search for wishlist items by title and purchase status.
+  
+
+## Technologies Used
+
+### Core Technologies
+- MongoDB Atlas 
+- Express.js
+- React
+- Node.js 
+
+### Real-Time Communication
+- Socket.io - For real-time, bidirectional communication between client and server
+
+### Libraries & Tools
+- Chakra UI - Component library for React
+- Moment.js - For date and time manipulation
+- Chart.js & React-Chartjs-2 - For data visualization
+- JWT (jsonwebtoken) - For authentication
+- Bcrypt - For password hashing and security
+- Express Validator - For validating and sanitizing user inputs in Express applications
+- React Icons - For incorporating icons
+- React Image File Resizer - For resizing image files in the client-side application
+
+### Cloud Services
+- Cloudinary - Cloud-based media management service for image and video storage
