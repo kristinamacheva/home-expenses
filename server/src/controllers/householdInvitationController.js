@@ -18,6 +18,22 @@ router.get("/", async (req, res, next) => {
 
 router.use("/:invitationId", getHouseholdInvitation);
 
+router.get("/:invitationId", async (req, res, next) => {
+    const userId = req.userId;
+    const invitationId = req.invitationId;
+
+    try {
+        const invitation = await householdInvitationManager.getOne(
+            userId,
+            invitationId
+        );
+
+        res.status(200).json(invitation);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.delete("/:invitationId/accept", async (req, res, next) => {
     const userId = req.userId;
     const invitationId = req.invitationId;
