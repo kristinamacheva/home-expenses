@@ -9,8 +9,8 @@ import {
     Text,
     useToast,
 } from "@chakra-ui/react";
-import { FaCircleCheck, FaCircleXmark, FaEye, FaPen } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
+import { FaCircleCheck, FaCircleXmark, FaEye} from "react-icons/fa6";
+import { Link, useNavigate } from "react-router-dom";
 import * as householdInvitationService from "../../../services/householdInvitationService";
 import { useContext } from "react";
 import AuthContext from "../../../contexts/authContext";
@@ -128,9 +128,18 @@ export default function HouseholdInvitationListItem({
                     justifyContent="flex-end"
                 >
                     <IconButton
+                        as={Link}
+                        to={`/household-invitations/${_id}`}
+                        aria-label="Детайли"
+                        title="Детайли"
+                        icon={<FaEye fontSize="20px" />}
+                        variant="ghost"
+                        color="themePurple.800"
+                    />
+                    <IconButton
                         aria-label="Приемете"
                         title="Приемете"
-                        icon={<FaCircleCheck fontSize="25px" />}
+                        icon={<FaCircleCheck fontSize="20px" />}
                         variant="ghost"
                         color="themePurple.800"
                         onClick={() => invitationAcceptHandler(_id)}
@@ -138,7 +147,7 @@ export default function HouseholdInvitationListItem({
                     <IconButton
                         aria-label="Отхвърлете"
                         title="Отхвърлете"
-                        icon={<FaCircleXmark fontSize="25px" />}
+                        icon={<FaCircleXmark fontSize="20px" />}
                         variant="ghost"
                         color="themePurple.800"
                         onClick={() => invitationRejectHandler(_id)}

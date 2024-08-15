@@ -19,6 +19,7 @@ import HouseholdInvitationList from "./components/household-invitation-list/Hous
 import NotificationList from "./components/notification-list/NotificationList";
 import { NotificationProvider } from "./contexts/notificationContext";
 import ReminderList from "./components/reminder-list/ReminderList";
+import HouseholdInvitationDetails from "./components/household-invitation-details/HouseholdInvitationDetails";
 
 function App() {
     return (
@@ -40,6 +41,10 @@ function App() {
                                 <Route
                                     path={Path.HouseholdInvitations}
                                     element={<HouseholdInvitationList />}
+                                />
+                                <Route
+                                    path={Path.HouseholdInvitationDetails}
+                                    element={<HouseholdInvitationDetails />}
                                 />
                                 <Route
                                     path={Path.Profile}
