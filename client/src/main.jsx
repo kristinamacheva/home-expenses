@@ -7,9 +7,7 @@ import ThemeProvider from "./themes/ThemeProvider.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
     <ThemeProvider>
         <BrowserRouter>
-            <StrictMode>
                 <App />
-            </StrictMode>
         </BrowserRouter>
     </ThemeProvider>
 );
