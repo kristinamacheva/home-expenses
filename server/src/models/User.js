@@ -32,6 +32,17 @@ const userSchema = new mongoose.Schema({
         required: [true, "Цветът на аватара е задължително поле"],
         match: [/^#([0-9A-F]{3}|[0-9A-F]{6})$/i, "Невалиден цвят на аватара"],
     },
+    bankDetails: {
+        iban: {
+            type: String,
+        },
+        fullName: {
+            type: String,
+        },
+        bic: {
+            type: String,
+        },
+    },
     password: {
         type: String,
         required: [true, "Паролата е задължително поле"],
