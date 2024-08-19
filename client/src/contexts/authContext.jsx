@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
         userId: user._id,
         name: user.name,
         email: user.email,
+        birthdate: user.birthdate,
         phone: user.phone,
         avatar: user.avatar,
         avatarColor: user.avatarColor,

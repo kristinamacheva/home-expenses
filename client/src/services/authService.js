@@ -14,6 +14,7 @@ export const login = async ({ email, password }) => {
 
 export const register = async ({
     name,
+    birthdate,
     email,
     phone,
     password,
@@ -21,6 +22,7 @@ export const register = async ({
 }) => {
     const result = await request.post(`${baseUrl}/register`, {
         name,
+        birthdate,
         email,
         phone,
         password,

@@ -16,6 +16,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 
+import moment from "moment";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { useState, useContext } from "react";
@@ -28,6 +29,7 @@ export default function Register() {
     const [values, setValues] = useState({
         name: "",
         email: "",
+        birthdate: '',
         phone: "",
         password: "",
         repeatPassword: "",
@@ -83,6 +85,19 @@ export default function Register() {
             newErrors.repeatPassword = "Паролите трябва да съвпадат";
         }
 
+        if (!currentUser.birthdate.trim()) {
+            newErrors.birthdate = "Трябва да изберете дата на раждане";
+        } else {
+            // Age validation
+            const today = moment();
+            const birthdate = moment(currentUser.birthdate);
+            const age = today.diff(birthdate, "years");
+            if (age < 6) {
+                newErrors.birthdate =
+                    "Трябва да сте поне на 6 години, за да се регистрирате";
+            }
+        }
+
         setErrors(newErrors);
 
         // Return true if there are no errors
@@ -94,13 +109,15 @@ export default function Register() {
 
         setErrors({
             name: "",
+            birthdate: "",
             email: "",
             password: "",
             repeatPassword: "",
         });
-
+        
         const currentUser = {
             name: values.name,
+            birthdate: values.birthdate,
             email: values.email,
             phone: values.phone,
             password: values.password,
@@ -195,6 +212,21 @@ export default function Register() {
                                 {errors.email && (
                                     <Text color="red.500" fontSize="sm">
                                         {errors.email}
+                                    </Text>
+                                )}
+                            </FormControl>
+                            <FormControl id="birthdate" isRequired>
+                                <FormLabel>Дата на раждане</FormLabel>
+                                <Input
+                                    type="date"
+                                    name="birthdate"
+                                    value={values.birthdate}
+                                    onChange={onChange}
+                                    placeholder="Изберете дата на раждане"
+                                />
+                                {errors.birthdate && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.birthdate}
                                     </Text>
                                 )}
                             </FormControl>
