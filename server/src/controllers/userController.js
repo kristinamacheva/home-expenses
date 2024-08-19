@@ -151,6 +151,7 @@ router.put("/profile", isAuth, updateValidator, async (req, res, next) => {
         oldPassword,
         password,
         repeatPassword,
+        bankDetails,
     } = req.body;
 
     const userId = req.userId;
@@ -165,11 +166,10 @@ router.put("/profile", isAuth, updateValidator, async (req, res, next) => {
             oldPassword,
             password,
             repeatPassword,
+            bankDetails,
         });
 
-        res.cookie("auth", token, { httpOnly: true });
-
-        res.status(200).json({
+        const response = {
             _id: user._id,
             email: user.email,
             birthdate: user.birthdate,
@@ -177,7 +177,16 @@ router.put("/profile", isAuth, updateValidator, async (req, res, next) => {
             phone: user.phone,
             avatar: user.avatar,
             avatarColor: user.avatarColor,
-        });
+        };
+        
+        // Only add `bankDetails` if it exists
+        if (user.bankDetails) {
+            response.bankDetails = user.bankDetails;
+        }
+        
+        res.cookie("auth", token, { httpOnly: true });      
+        
+        res.status(200).json(response);
     } catch (error) {
         next(error);
     }

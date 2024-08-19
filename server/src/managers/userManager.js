@@ -53,7 +53,7 @@ exports.getHouseholdsWithBalances = async (userId) => {
                 as: "householdDetails",
             },
         },
-        // deconstructing the householdDetails array and outputting a document for each household in 
+        // deconstructing the householdDetails array and outputting a document for each household in
         // which the user is a member
         { $unwind: "$householdDetails" },
         // fetch details of all members in each household
@@ -159,7 +159,12 @@ exports.getHouseholdsWithBalances = async (userId) => {
                     $filter: {
                         input: "$householdDetails.balance",
                         as: "bal",
-                        cond: { $eq: ["$$bal.user", new mongoose.Types.ObjectId(userId)] },
+                        cond: {
+                            $eq: [
+                                "$$bal.user",
+                                new mongoose.Types.ObjectId(userId),
+                            ],
+                        },
                     },
                 },
                 archived: "$householdDetails.archived",
@@ -187,7 +192,9 @@ exports.getHouseholdsWithExistingBalances = async (userId) => {
         // Filter households where the user is present in the balance array
         {
             $match: {
-                "householdDetails.balance.user": new mongoose.Types.ObjectId(userId),
+                "householdDetails.balance.user": new mongoose.Types.ObjectId(
+                    userId
+                ),
                 "householdDetails.archived": false, // Filter out archived households
             },
         },
@@ -295,7 +302,12 @@ exports.getHouseholdsWithExistingBalances = async (userId) => {
                             $filter: {
                                 input: "$householdDetails.balance",
                                 as: "bal",
-                                cond: { $eq: ["$$bal.user", new mongoose.Types.ObjectId(userId)] },
+                                cond: {
+                                    $eq: [
+                                        "$$bal.user",
+                                        new mongoose.Types.ObjectId(userId),
+                                    ],
+                                },
                             },
                         },
                         0,
@@ -326,7 +338,9 @@ exports.getHouseholdsWithExistingAllowances = async (userId) => {
         // Filter households where the user is present in the allowances array
         {
             $match: {
-                "householdDetails.allowances.user": new mongoose.Types.ObjectId(userId),
+                "householdDetails.allowances.user": new mongoose.Types.ObjectId(
+                    userId
+                ),
                 "householdDetails.archived": false, // Filter out archived households
             },
         },
@@ -434,7 +448,12 @@ exports.getHouseholdsWithExistingAllowances = async (userId) => {
                             $filter: {
                                 input: "$householdDetails.allowances",
                                 as: "allowance",
-                                cond: { $eq: ["$$allowance.user", new mongoose.Types.ObjectId(userId)] },
+                                cond: {
+                                    $eq: [
+                                        "$$allowance.user",
+                                        new mongoose.Types.ObjectId(userId),
+                                    ],
+                                },
                             },
                         },
                         0,
@@ -447,6 +466,37 @@ exports.getHouseholdsWithExistingAllowances = async (userId) => {
     return result;
 };
 
+// Function to validate IBAN using AnyAPI
+async function validateIban(iban) {
+    const apiKey = process.env.ANYAPI_KEY;
+
+    try {
+        const response = await fetch(
+            `https://anyapi.io/api/v1/iban?iban=${iban}&apiKey=${apiKey}`
+        );
+
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+
+        const result = await response.json();
+
+        // Check if the IBAN is valid
+        if (result.valid) {
+            return {
+                isValidIban: true,
+                bic: result.bic.bic || "", // Extract the BIC from the API response
+            };
+        }
+
+        return { isValidIban: false };
+    } catch (error) {
+        console.error("Error validating IBAN:", error);
+        throw new AppError("Грешка при валидирането на IBAN.");
+    }
+}
+
 exports.update = async ({
     userId,
     avatar,
@@ -456,6 +506,7 @@ exports.update = async ({
     oldPassword,
     password,
     repeatPassword,
+    bankDetails,
 }) => {
     const user = await User.findById(userId);
 
@@ -489,6 +540,40 @@ exports.update = async ({
         user.avatar = uploadedResponse.secure_url;
     }
 
+    if (bankDetails) {
+        const { iban, fullName } = bankDetails;
+
+        // Ensure iban and fullName are provided and not empty
+        if (iban && fullName) {
+            // Check if IBAN or fullName has changed
+            const ibanChanged =
+                !user.bankDetails || user.bankDetails.iban !== iban;
+            const fullNameChanged =
+                !user.bankDetails || user.bankDetails.fullName !== fullName;
+
+            // If IBAN has changed, validate it using the Bank Data API
+            if (ibanChanged) {
+                const { isValidIban, bic } = await validateIban(iban);
+
+                if (!isValidIban) {
+                    throw new AppError("Невалиден IBAN.", 400);
+                }
+
+                // Update bank details with the new IBAN and BIC
+                user.bankDetails.iban = iban;
+                user.bankDetails.bic = bic; // Save the BIC returned by the API
+            } else if (fullNameChanged) {
+                // If only the fullName has changed, update it without validating IBAN
+                user.bankDetails.fullName = fullName;
+            }
+        } else {
+            throw new AppError("IBAN и трите имена са задължителни.", 400);
+        }
+    } else {
+        // If no bankDetails are provided, remove the existing bankDetails
+        user.bankDetails = undefined;
+    }
+
     await user.save();
 
     const result = getAuthResult(user);
@@ -511,16 +596,24 @@ async function getAuthResult(user) {
         expiresIn: ACCESS_TOKEN.expiry,
     });
 
+    // Build the user object
+    const userResponse = {
+        _id: user._id,
+        email: user.email,
+        birthdate: user.birthdate,
+        name: user.name,
+        phone: user.phone,
+        avatar: user.avatar,
+        avatarColor: user.avatarColor,
+    };
+
+    // Only include bankDetails if it exists
+    if (user.bankDetails) {
+        userResponse.bankDetails = user.bankDetails;
+    }
+
     return {
         token,
-        user: {
-            _id: user._id,
-            email: user.email,
-            birthdate: user.birthdate,
-            name: user.name,
-            phone: user.phone,
-            avatar: user.avatar,
-            avatarColor: user.avatarColor,
-        },
+        user: userResponse,
     };
 }
