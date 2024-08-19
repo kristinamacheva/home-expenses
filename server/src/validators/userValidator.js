@@ -19,6 +19,35 @@ module.exports.loginValidator = [
 
 module.exports.registerValidator = [
     body("name").trim().notEmpty().withMessage("Името не може да бъде празно"),
+    body("birthdate")
+        .isISO8601()
+        .withMessage(
+            "Невалиден формат на началната дата (форматът трябва да бъде YYYY-MM-DD)"
+        )
+        .bail()
+        .custom(value => {
+            // Parse the date and check if it's valid
+            const birthdate = new Date(value);
+            if (isNaN(birthdate.getTime())) {
+                throw new Error('Невалидна дата');
+            }
+
+            // Check if the birthdate is at least 6 years ago
+            const today = new Date();
+            const age = today.getFullYear() - birthdate.getFullYear();
+            const monthDiff = today.getMonth() - birthdate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+                age--;
+            }
+
+            if (age < 6) {
+                throw new Error('Трябва да сте поне на 6 години, за да се регистрирате');
+            }
+
+            return true;
+        })
+        .bail()
+        .toDate(),
     body("email")
         .trim()
         .notEmpty()

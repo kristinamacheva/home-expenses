@@ -516,6 +516,7 @@ async function getAuthResult(user) {
         user: {
             _id: user._id,
             email: user.email,
+            birthdate: user.birthdate,
             name: user.name,
             phone: user.phone,
             avatar: user.avatar,

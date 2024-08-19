@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
         },
         lowercase: true,
     },
+    birthdate: {
+        type: Date,
+        required: [true, "Датата на раждане е задължително поле"],
+    },
     phone: {
         type: String,
         // unique: true,

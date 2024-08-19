@@ -26,11 +26,13 @@ router.post("/register", registerValidator, async (req, res, next) => {
         );
     }
 
-    const { name, email, phone, password, repeatPassword } = req.body;
+    const { name, birthdate, email, phone, password, repeatPassword } =
+        req.body;
 
     try {
         const { token, user } = await userManager.register({
             name,
+            birthdate,
             email,
             phone,
             password,
@@ -42,6 +44,7 @@ router.post("/register", registerValidator, async (req, res, next) => {
         res.status(200).json({
             _id: user._id,
             email: user.email,
+            birthdate: user.birthdate,
             name: user.name,
             phone: user.phone,
             avatar: user.avatar,
@@ -77,6 +80,7 @@ router.post("/login", loginValidator, async (req, res, next) => {
         res.status(201).json({
             _id: user._id,
             email: user.email,
+            birthdate: user.birthdate,
             name: user.name,
             phone: user.phone,
             avatarColor: user.avatarColor,
@@ -168,6 +172,7 @@ router.put("/profile", isAuth, updateValidator, async (req, res, next) => {
         res.status(200).json({
             _id: user._id,
             email: user.email,
+            birthdate: user.birthdate,
             name: user.name,
             phone: user.phone,
             avatar: user.avatar,
