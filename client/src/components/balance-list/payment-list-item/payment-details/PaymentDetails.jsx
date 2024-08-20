@@ -28,6 +28,7 @@ import Comments from "./comments/Comments";
 import AuthContext from "../../../../contexts/authContext";
 import PaymentReject from "./payment-reject/PaymentReject";
 import { FaPaperclip } from "react-icons/fa6";
+import BankPaymentDetails from "./bank-payment-details/BankPaymentDetails";
 
 export default function PaymentDetails({
     isOpen,
@@ -248,6 +249,11 @@ export default function PaymentDetails({
         paymentDetails.payer._id === userId &&
         !archived;
 
+    const showBankPaymentDetails =
+        paymentDetails.bankDetails &&
+        (paymentDetails.payee._id === userId ||
+            paymentDetails.payer._id === userId);
+
     return (
         <>
             <Modal isOpen={isOpen} onClose={onCloseForm}>
@@ -313,6 +319,15 @@ export default function PaymentDetails({
                                                 size="xs"
                                             />
                                         </Stack>
+                                        <Box display="inline-block">
+                                            <Badge
+                                                variant="subtle"
+                                                background={"themePurple.200"}
+                                                color={"themePurple.800"}
+                                            >
+                                                {paymentDetails.paymentMethod}
+                                            </Badge>
+                                        </Box>
                                         <Text color={"gray.500"} fontSize="sm">
                                             {new Date(
                                                 paymentDetails.date
@@ -388,6 +403,28 @@ export default function PaymentDetails({
                                 </Stack>
                             </Card>
                         </Stack>
+                        {showBankPaymentDetails && (
+                            <Stack mt={4}>
+                                <Heading size="sm">Детайли за плащане</Heading>
+                                <Card
+                                    px="4"
+                                    py="3"
+                                    mx="0.2em"
+                                    my="1"
+                                    boxShadow="md"
+                                    background="white"
+                                    spacing={{ base: "1", md: "4" }}
+                                    direction={{ base: "column", md: "row" }}
+                                    justifyContent="space-between"
+                                    alignItems={{ md: "center" }}
+                                >
+                                    <BankPaymentDetails
+                                        bankDetails={paymentDetails.bankDetails}
+                                        amount={paymentDetails.amount}
+                                    />
+                                </Card>
+                            </Stack>
+                        )}
                     </ModalBody>
                     <ModalFooter mb="3">
                         <Stack direction="column" width="100%">

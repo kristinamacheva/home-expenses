@@ -26,6 +26,7 @@ export default function PaymentListItem({
     amount,
     date,
     paymentStatus,
+    paymentMethod,
     fetchPayments,
     fetchBalances,
     archived,
@@ -122,6 +123,15 @@ export default function PaymentListItem({
                                 {paymentStatus}
                             </Badge>
                         </Box>
+                        <Box display="inline-block">
+                            <Badge
+                                variant="subtle"
+                                background={"themePurple.200"}
+                                color={"themePurple.800"}
+                            >
+                                {paymentMethod}
+                            </Badge>
+                        </Box>
                         <Text color={"gray.500"} fontSize="sm">
                             {new Date(date).toLocaleDateString("bg-BG")}
                         </Text>
@@ -190,7 +200,8 @@ export default function PaymentListItem({
                             color="themePurple.800"
                         />
                         {userId === payer._id &&
-                            paymentStatus === "Отхвърлен" && !archived && (
+                            paymentStatus === "Отхвърлен" &&
+                            !archived && (
                                 <>
                                     <IconButton
                                         aria-label="Редактирайте"
