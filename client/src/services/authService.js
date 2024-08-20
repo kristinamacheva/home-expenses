@@ -38,6 +38,14 @@ export const getProfile = async () => {
     return result;
 };
 
+export const getBankDetails = async (payeeId) => {
+    const bankDetails = await request.get(
+        `${baseUrl}/bankDetails?payeeId=${payeeId}`
+    );
+
+    return bankDetails;
+};
+
 export const update = async ({
     avatar,
     name,
