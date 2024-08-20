@@ -25,6 +25,7 @@ import moment from "moment";
 import { useContext } from "react";
 import * as householdService from "../../../../services/householdService";
 import * as paymentService from "../../../../services/paymentService";
+import * as authService from "../../../../services/authService";
 import { useParams } from "react-router-dom";
 import AuthContext from "../../../../contexts/authContext";
 
@@ -32,6 +33,7 @@ const initialValues = {
     amount: "",
     date: moment().format("YYYY-MM-DD"),
     payee: "",
+    paymentMethod: "",
 };
 
 export default function PaymentCreate({
@@ -45,6 +47,10 @@ export default function PaymentCreate({
 
     const [payeeOptions, setPayeeOptions] = useState([]);
     const [selectedPayee, setSelectedPayee] = useState(null);
+    const [bankDetails, setBankDetails] = useState({
+        payeeIban: "",
+        payerIban: "",
+    });
 
     const [values, setValues] = useState(initialValues);
     const toast = useToast();
@@ -53,6 +59,7 @@ export default function PaymentCreate({
         amount: "",
         date: "",
         payee: "",
+        paymentMethod: "",
     });
 
     useEffect(() => {
@@ -75,6 +82,41 @@ export default function PaymentCreate({
                 }
             });
     }, [householdId]);
+
+    useEffect(() => {
+        const fetchBankDetails = async () => {
+            if (values.paymentMethod === "Банков превод" && selectedPayee) {
+                try {
+                    const selectedBankDetails =
+                        await authService.getBankDetails(selectedPayee._id);
+
+                    setBankDetails(selectedBankDetails);
+                } catch (error) {
+                    toast({
+                        title: "Грешка при зареждането на данните за превод",
+                        description: error.message,
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+
+                    setValues((state) => ({
+                        ...state,
+                        paymentMethod: "",
+                    }));
+                }
+            } else {
+                setBankDetails({
+                    payeeIban: "",
+                    payerIban: "",
+                });
+            }
+        };
+
+        fetchBankDetails();
+    }, [values.paymentMethod, selectedPayee]);
+
+    const paymentMethodOptions = ["В брой", "Банков превод"];
 
     const onChange = (e) => {
         let value = e.target.value;
@@ -104,6 +146,7 @@ export default function PaymentCreate({
             amount: "",
             date: "",
             payee: "",
+            paymentMethod: "",
         };
 
         if (
@@ -126,6 +169,17 @@ export default function PaymentCreate({
             newErrors.payee = "Получателят трябва да бъде избран";
         }
 
+        if (!values.paymentMethod) {
+            newErrors.paymentMethod =
+                "Методът на плащане трябва да бъде избран";
+        } else if (
+            values.paymentMethod === "Банков превод" &&
+            (!bankDetails.payeeIban || !bankDetails.payerIban)
+        ) {
+            newErrors.paymentMethod =
+                "Подателят и получателят трябва да имат валиден IBAN в профилите си, за да се извърши превода.";
+        }
+
         setErrors(newErrors);
 
         return !Object.values(newErrors).some((error) => error);
@@ -141,7 +195,12 @@ export default function PaymentCreate({
             amount: values.amount,
             date: values.date,
             payee: values.payee,
+            paymentMethod: values.paymentMethod,
         };
+
+        if (values.paymentMethod === "Банков превод") {
+            newPayment.bankDetails = values.bankDetails;
+        }
 
         try {
             await paymentService.create(householdId, newPayment);
@@ -162,7 +221,7 @@ export default function PaymentCreate({
             } else {
                 toast({
                     title: "Грешка.",
-                    description: "Възникна грешка при създаването на разхода",
+                    description: "Възникна грешка при създаването на плащането",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
@@ -236,7 +295,7 @@ export default function PaymentCreate({
                                 isInvalid={errors.payee}
                                 maxW={{ lg: "49%" }}
                             >
-                                <FormLabel>Получател</FormLabel>
+                                <FormLabel>Получател*</FormLabel>
                                 <Select
                                     name="payee"
                                     value={values.payee}
@@ -278,6 +337,48 @@ export default function PaymentCreate({
                                                 {selectedPayee.sum} лв.
                                             </Text>
                                         </Box>
+                                    </Stack>
+                                </Card>
+                            )}
+                        </Stack>
+                        <Stack
+                            direction={{ base: "column", lg: "row" }}
+                            spacing={{ lg: "4" }}
+                        >
+                            <FormControl
+                                mb={4}
+                                mt={{ base: "4", lg: "0" }}
+                                isInvalid={errors.paymentMethod}
+                                maxW={{ lg: "49%" }}
+                            >
+                                <FormLabel>Метод на плащане*</FormLabel>
+                                <Select
+                                    name="paymentMethod"
+                                    value={values.paymentMethod}
+                                    onChange={onChange}
+                                    placeholder="Изберете метод на плащане"
+                                >
+                                    {paymentMethodOptions.map((method) => (
+                                        <option key={method} value={method}>
+                                            {method}
+                                        </option>
+                                    ))}
+                                </Select>
+                                {errors.paymentMethod && (
+                                    <Text color="red.500" fontSize="sm">
+                                        {errors.paymentMethod}
+                                    </Text>
+                                )}
+                            </FormControl>
+                            {bankDetails.payeeIban !== "" && (
+                                <Card mt={4} p={4} width="100%">
+                                    <Stack direction="column" spacing="4">
+                                        <Text fontWeight="bold">
+                                            След успешно създаване на плащането,
+                                            можете да видите информацията за
+                                            банковата сметка на получателя в
+                                            детайлите на плащането.
+                                        </Text>
                                     </Stack>
                                 </Card>
                             )}
