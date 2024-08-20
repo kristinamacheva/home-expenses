@@ -26,8 +26,20 @@ export const AuthProvider = ({ children }) => {
 
     const updateSubmitHandler = async (values) => {
         const result = await authService.update(values);
-        setUser(result);
+
+        const userData = {
+            _id: result._id,
+            name: result.name,
+            email: result.email,
+            birthdate: result.birthdate,
+            phone: result.phone,
+            avatar: result.avatar,
+            avatarColor: result.avatarColor,
+        };
+        setUser(userData);
+
         navigate(Path.Profile);
+
         return result;
     };
 
