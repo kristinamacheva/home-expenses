@@ -46,6 +46,7 @@ export const update = async ({
     oldPassword,
     password,
     repeatPassword,
+    bankDetails,
 }) => {
     const result = await request.put(`${baseUrl}/profile`, {
         avatar,
@@ -55,6 +56,7 @@ export const update = async ({
         oldPassword,
         password,
         repeatPassword,
+        bankDetails,
     });
 
     return result;
