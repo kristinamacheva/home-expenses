@@ -62,10 +62,7 @@ exports.getBankDetails = async (userId, payeeId) => {
 
     const bankDetails = {
         payeeIban: payee.bankDetails.iban,
-        payeeFullName: payee.bankDetails.fullName,
-        payeeBic: payee.bankDetails.bic,
         payerIban: payer.bankDetails.iban,
-        payerFullName: payer.bankDetails.fullName,
     };
 
     return bankDetails;
