@@ -198,10 +198,6 @@ export default function PaymentCreate({
             paymentMethod: values.paymentMethod,
         };
 
-        if (values.paymentMethod === "Банков превод") {
-            newPayment.bankDetails = values.bankDetails;
-        }
-
         try {
             await paymentService.create(householdId, newPayment);
 
