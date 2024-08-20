@@ -129,6 +129,23 @@ router.get("/profile", isAuth, async (req, res, next) => {
     }
 });
 
+router.get("/bankDetails", isAuth, async (req, res, next) => {
+    const userId = req.userId;
+    const payeeId = req.query.payeeId;
+
+    if (!payeeId) {
+        return next(new AppError("Няма посочен потребител", 400));
+    }
+
+    try {
+        const bankDetails = await userManager.getBankDetails(userId, payeeId);
+
+        res.status(200).json(bankDetails);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.put("/profile", isAuth, updateValidator, async (req, res, next) => {
     const errors = validationResult(req);
 
@@ -178,14 +195,14 @@ router.put("/profile", isAuth, updateValidator, async (req, res, next) => {
             avatar: user.avatar,
             avatarColor: user.avatarColor,
         };
-        
+
         // Only add `bankDetails` if it exists
         if (user.bankDetails) {
             response.bankDetails = user.bankDetails;
         }
-        
-        res.cookie("auth", token, { httpOnly: true });      
-        
+
+        res.cookie("auth", token, { httpOnly: true });
+
         res.status(200).json(response);
     } catch (error) {
         next(error);

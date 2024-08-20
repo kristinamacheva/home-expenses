@@ -38,6 +38,39 @@ exports.getProfile = async (userId) => {
     return user;
 };
 
+exports.getBankDetails = async (userId, payeeId) => {
+    const payer = await User.findById(userId).select("-password").lean();
+    const payee = await User.findById(payeeId).select("-password").lean();
+
+    if (!payee) {
+        throw new AppError("Не съществува такъв потребител", 401);
+    }
+
+    if (!payer.bankDetails) {
+        throw new AppError(
+            "Не сте позволили извършването на банкови преводи.",
+            401
+        );
+    }
+
+    if (!payee.bankDetails) {
+        throw new AppError(
+            "Получателят не е позволил извършването на банкови преводи.",
+            401
+        );
+    }
+
+    const bankDetails = {
+        payeeIban: payee.bankDetails.iban,
+        payeeFullName: payee.bankDetails.fullName,
+        payeeBic: payee.bankDetails.bic,
+        payerIban: payer.bankDetails.iban,
+        payerFullName: payer.bankDetails.fullName,
+    };
+
+    return bankDetails;
+};
+
 // Function to get households and balance for a specific user
 exports.getHouseholdsWithBalances = async (userId) => {
     const result = await User.aggregate([
