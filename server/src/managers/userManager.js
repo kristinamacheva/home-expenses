@@ -486,7 +486,7 @@ async function validateIban(iban) {
         if (result.valid) {
             return {
                 isValidIban: true,
-                bic: result.bic.bic || "", // Extract the BIC from the API response
+                bic: result.bic?.bic || "", // Extract the BIC from the API response
             };
         }
 
