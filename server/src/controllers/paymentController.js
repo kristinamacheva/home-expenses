@@ -69,7 +69,7 @@ router.post("/", createValidator, async (req, res, next) => {
         );
     }
 
-    const { amount, date, payee } = req.body;
+    const { amount, date, payee, paymentMethod } = req.body;
 
     const parsedAmount = Number(amount.toFixed(2));
 
@@ -79,6 +79,7 @@ router.post("/", createValidator, async (req, res, next) => {
             date,
             payer: req.userId,
             payee,
+            paymentMethod,
             household: req.householdId,
         });
 

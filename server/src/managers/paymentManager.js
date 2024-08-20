@@ -80,6 +80,7 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
                 amount: 1,
                 date: 1,
                 paymentStatus: 1, // Ensure the status field is included
+                paymentMethod: 1, 
                 payer: {
                     _id: "$payerDetails._id",
                     name: "$payerDetails.name",
@@ -236,7 +237,8 @@ exports.getOneDetails = async (paymentId, userId) => {
 };
 
 exports.create = async (paymentData) => {
-    const { payer, payee, amount, date, household } = paymentData;
+    const { payer, payee, amount, date, paymentMethod, household } =
+        paymentData;
 
     // Fetch the household by ID
     const paymentHousehold = await Household.findById(household);
@@ -291,17 +293,56 @@ exports.create = async (paymentData) => {
         );
     }
 
-    // Create the new payment
-    const newPayment = new Payment({
+    const newPaymentData = {
         payer,
         payee,
         amount: Number((amountInCents / 100).toFixed(2)), // Store the amount in the standard currency unit
         date,
+        paymentMethod,
         household,
-    });
+    };
+
+    if (paymentMethod === "Банков превод") {
+        const payerData = await User.findById(payer).select("-password").lean();
+        const payeeData = await User.findById(payee).select("-password").lean();
+
+        if (!payerData.bankDetails) {
+            throw new AppError(
+                "Не сте позволили извършването на банкови преводи.",
+                401
+            );
+        }
+
+        if (!payeeData.bankDetails) {
+            throw new AppError(
+                "Получателят не е позволил извършването на банкови преводи.",
+                401
+            );
+        }
+
+        const bankDetails = {
+            payeeIban: payeeData.bankDetails.iban,
+            payeeFullName: payeeData.bankDetails.fullName,
+            payeeBic: payeeData.bankDetails.bic,
+            payerIban: payerData.bankDetails.iban,
+            payerFullName: payerData.bankDetails.fullName,
+        };
+
+        newPaymentData.bankDetails = bankDetails;
+    }
+
+    // Create the new payment
+    const newPayment = new Payment(newPaymentData);
 
     // Save the payment to the database
     await newPayment.save();
+
+    if (newPayment.paymentMethod === "Банков превод") {
+        const description = `№: ${newPayment._id}`;
+        await Payment.findByIdAndUpdate(newPayment._id, {
+            "bankDetails.paymentDescription": description,
+        });
+    }
 
     // Create notification for the payee
     const notification = new Notification({
