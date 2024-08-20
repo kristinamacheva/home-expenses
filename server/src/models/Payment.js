@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema(
     {
@@ -24,9 +24,50 @@ const paymentSchema = new mongoose.Schema(
             type: String,
             enum: {
                 values: ["Одобрен", "За одобрение", "Отхвърлен"],
-                message: "Невалиден статус на плащането. Позволени стойности са 'Одобрен', 'За одобрение' или 'Отхвърлен'.",
+                message:
+                    "Невалиден статус на плащането. Позволени стойности са 'Одобрен', 'За одобрение' или 'Отхвърлен'.",
             },
             default: "За одобрение",
+        },
+        paymentMethod: {
+            type: String,
+            enum: ["В брой", "Банков превод"],
+            required: [true, "Полето 'Метод на плащане' е задължително"],
+        },
+        bankDetails: {
+            payeeIban: {
+                type: String,
+                required: function () {
+                    return this.paymentMethod === "Банков превод";
+                },
+            },
+            payeeFullName: {
+                type: String,
+                required: function () {
+                    return this.paymentMethod === "Банков превод";
+                },
+            },
+            payeeBic: {
+                type: String,
+                required: function () {
+                    return this.paymentMethod === "Банков превод";
+                },
+            },
+            payerIban: {
+                type: String,
+                required: function () {
+                    return this.paymentMethod === "Банков превод";
+                },
+            },
+            payerFullName: {
+                type: String,
+                required: function () {
+                    return this.paymentMethod === "Банков превод";
+                },
+            },
+            paymentDescription: {
+                type: String,
+            },
         },
         comments: [
             {
@@ -54,6 +95,6 @@ const paymentSchema = new mongoose.Schema(
     }
 );
 
-const Payment = mongoose.model('Payment', paymentSchema);
+const Payment = mongoose.model("Payment", paymentSchema);
 
 module.exports = Payment;
