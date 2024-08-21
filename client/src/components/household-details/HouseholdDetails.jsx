@@ -30,6 +30,7 @@ import ChildExpenseList from "../child-expense-list/ChildExpenseList";
 import ChildWishlist from "../child-wishlist/ChildWishlist";
 import ChildList from "../child-list/ChildList";
 import ExpenseTemplateList from "../expense-template-list/ExpenseTemplateList";
+import { isChild18OrOver } from "../../utils/ageUtils";
 
 export default function HouseholdDetails() {
     const [household, setHousehold] = useState({});
@@ -104,6 +105,10 @@ export default function HouseholdDetails() {
     );
     const currentUserRole = currentUserMember ? currentUserMember.role : null;
 
+    const isUserChildOver18OrRegularUser =
+        currentUserRole !== "Дете" ||
+        (currentUserRole === "Дете" && isChild18OrOver(birthdate));
+
     return (
         <>
             <Card
@@ -153,15 +158,16 @@ export default function HouseholdDetails() {
             <Tabs isLazy colorScheme="themePurple" mx="1" mt="4">
                 <Box width="100%" overflowX="auto" p={2}>
                     <TabList>
-                        {currentUserRole !== "Дете" && (
+                        {isUserChildOver18OrRegularUser && (
                             <>
                                 <Tab>Баланс</Tab>
                                 <Tab>Разходи</Tab>
                                 <Tab>Анализ</Tab>
                                 <Tab>Категории</Tab>
-                                {household.allowances?.length > 0 && (
-                                    <Tab>Деца</Tab>
-                                )}
+                                {household.allowances?.length > 0 &&
+                                    currentUserRole !== "Дете" && (
+                                        <Tab>Деца</Tab>
+                                    )}
                                 <Tab>Чат</Tab>
                             </>
                         )}
@@ -177,7 +183,7 @@ export default function HouseholdDetails() {
                 </Box>
 
                 <TabPanels>
-                    {currentUserRole !== "Дете" && (
+                    {isUserChildOver18OrRegularUser && (
                         <TabPanel>
                             <BalanceList
                                 archived={
@@ -188,7 +194,7 @@ export default function HouseholdDetails() {
                             />
                         </TabPanel>
                     )}
-                    {currentUserRole !== "Дете" && (
+                    {isUserChildOver18OrRegularUser && (
                         <TabPanel>
                             <Tabs
                                 isLazy
@@ -239,12 +245,12 @@ export default function HouseholdDetails() {
                             </Tabs>
                         </TabPanel>
                     )}
-                    {currentUserRole !== "Дете" && (
+                    {isUserChildOver18OrRegularUser && (
                         <TabPanel>
                             <Statistics />
                         </TabPanel>
                     )}
-                    {currentUserRole !== "Дете" && (
+                    {isUserChildOver18OrRegularUser && (
                         <TabPanel>
                             <CategoryList
                                 isAdmin={isAdmin}
@@ -268,7 +274,7 @@ export default function HouseholdDetails() {
                                 />
                             </TabPanel>
                         )}
-                    {currentUserRole !== "Дете" && (
+                    {isUserChildOver18OrRegularUser && (
                         <TabPanel>
                             <HouseholdChat />
                         </TabPanel>
