@@ -5,7 +5,12 @@ const baseUrl = (householdId) =>
     `${API_BASE_URL}/households/${householdId}/childExpenses`;
 
 // params = {} -> handle optional parameters and prevent errors when accessing properties of params
-export const getAll = async (householdId, page, params = {}) => {
+export const getAll = async (
+    householdId,
+    page,
+    childId = null,
+    params = {}
+) => {
     // Remove empty string parameters
     Object.keys(params).forEach(
         (key) => params[key] === "" && delete params[key]
@@ -15,6 +20,11 @@ export const getAll = async (householdId, page, params = {}) => {
         page,
         ...params,
     });
+
+    // Conditionally add childId to the query parameters if it exists
+    if (childId) {
+        queryParams.append("childId", childId);
+    }
 
     const url = `${baseUrl(householdId)}?${queryParams.toString()}`;
 
