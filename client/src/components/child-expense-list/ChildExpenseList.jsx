@@ -26,7 +26,7 @@ const initialSearchValues = {
     endDate: "",
 };
 
-export default function ChildExpenseList({ archived }) {
+export default function ChildExpenseList({ archived, childId = null }) {
     const [childExpenses, setChildExpenses] = useState([]);
     const [childAllowance, setChildAllowance] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +51,7 @@ export default function ChildExpenseList({ archived }) {
 
     const getOneChildAllowance = () => {
         householdService
-            .getOneChildAllowance(householdId)
+            .getOneChildAllowance(householdId, childId || undefined)
             .then((result) => {
                 setChildAllowance(result);
             })
@@ -86,6 +86,7 @@ export default function ChildExpenseList({ archived }) {
                     await childExpenseService.getAll(
                         householdId,
                         1,
+                        childId || undefined, // Pass the childId only if it's truthy
                         updatedSearchValues
                     );
 
@@ -110,7 +111,7 @@ export default function ChildExpenseList({ archived }) {
 
             setIsLoading(false);
         },
-        [householdId, searchValues]
+        [householdId, childId, searchValues]
     );
 
     const fetchMoreChildExpenses = useCallback(async () => {
@@ -123,6 +124,7 @@ export default function ChildExpenseList({ archived }) {
                 await childExpenseService.getAll(
                     householdId,
                     index,
+                    childId || undefined, // Pass the childId only if it's truthy
                     searchValues
                 );
             setChildExpenses((state) => [...state, ...data]);
@@ -195,13 +197,15 @@ export default function ChildExpenseList({ archived }) {
                 </Heading>
             </Card>
             <Flex justify="flex-end" mb="3" mx="1" mt="4">
-                <Button
-                    variant="primary"
-                    onClick={onOpenCreateModal}
-                    isDisabled={archived}
-                >
-                    + Създаване
-                </Button>
+                {!childId && (
+                    <Button
+                        variant="primary"
+                        onClick={onOpenCreateModal}
+                        isDisabled={archived}
+                    >
+                        + Създаване
+                    </Button>
+                )}
             </Flex>
             <form onSubmit={onSubmit}>
                 <Text fontWeight="bold" fontSize="lg">
@@ -267,7 +271,7 @@ export default function ChildExpenseList({ archived }) {
             <Stack ref={loaderRef} p="2">
                 {isLoading && <Spinner />}
             </Stack>
-            {isCreateModalOpen && (
+            {isCreateModalOpen && !childId && (
                 <ChildExpenseCreate
                     isOpen={isCreateModalOpen}
                     onClose={onCloseCreateModal}
