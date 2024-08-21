@@ -269,6 +269,7 @@ exports.getOneChildMembers = async (householdId) => {
                 _id: 0, // Exclude the default _id field from the output
                 "userDetails._id": 1, // Include user _id
                 "userDetails.name": 1, // Include user name
+                "userDetails.birthdate": 1, // Include user birthdate
                 "userDetails.email": 1, // Include user email
                 "userDetails.avatar": 1, // Include user avatar
                 "userDetails.avatarColor": 1, // Include user avatarColor
@@ -282,6 +283,7 @@ exports.getOneChildMembers = async (householdId) => {
                     $push: {
                         _id: "$userDetails._id",
                         name: "$userDetails.name",
+                        birthdate: "$userDetails.birthdate",
                         email: "$userDetails.email",
                         avatar: "$userDetails.avatar",
                         avatarColor: "$userDetails.avatarColor",
