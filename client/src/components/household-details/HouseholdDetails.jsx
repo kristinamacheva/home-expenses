@@ -35,7 +35,7 @@ export default function HouseholdDetails() {
     const [household, setHousehold] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
-    const { logoutHandler, userId } = useContext(AuthContext);
+    const { logoutHandler, userId, birthdate } = useContext(AuthContext);
     const [isAdmin, setIsAdmin] = useState(false);
     const toast = useToast();
     const navigate = useNavigate();
@@ -168,7 +168,7 @@ export default function HouseholdDetails() {
                         {currentUserRole === "Дете" && (
                             <>
                                 <Tab>Джобни</Tab>
-                                <Tab>Разходи</Tab>
+                                <Tab>Лични Разходи</Tab>
                                 <Tab>Желания</Tab>
                             </>
                         )}

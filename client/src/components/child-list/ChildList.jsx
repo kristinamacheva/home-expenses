@@ -1,9 +1,19 @@
 import { useContext, useEffect, useState } from "react";
-import { useToast, Select } from "@chakra-ui/react";
+import {
+    useToast,
+    Select,
+    TabPanel,
+    TabPanels,
+    Tabs,
+    TabList,
+    Tab,
+} from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import AuthContext from "../../contexts/authContext";
 import * as householdService from "../../services/householdService";
 import ChildWishlist from "../child-wishlist/ChildWishlist";
+import { isChildUnder14 } from "../../utils/ageUtils";
+import ChildExpenseList from "../child-expense-list/ChildExpenseList";
 
 export default function ChildList({ archived }) {
     const [childMembers, setChildMembers] = useState([]);
@@ -59,10 +69,52 @@ export default function ChildList({ archived }) {
                 ))}
             </Select>
             {selectedChild && (
-                <ChildWishlist
-                    archived={archived}
-                    childId={selectedChild._id}
-                />
+                <TabPanel>
+                    <Tabs
+                        isLazy
+                        variant="soft-rounded"
+                        colorScheme="tabsPurple"
+                    >
+                        <TabList mb={2}>
+                            <Tab
+                                sx={{
+                                    padding: "0.4rem 0.6rem",
+                                    marginRight: "0.2rem",
+                                    fontSize: "1rem",
+                                }}
+                            >
+                                Желания
+                            </Tab>
+                            {isChildUnder14(selectedChild.birthdate) && (
+                                <Tab
+                                    sx={{
+                                        padding: "0.4rem 0.6rem",
+                                        marginRight: "0.2rem",
+                                        fontSize: "1rem",
+                                    }}
+                                >
+                                    Лични разходи
+                                </Tab>
+                            )}
+                        </TabList>
+                        <TabPanels>
+                            <TabPanel px="2" pt="2">
+                                <ChildWishlist
+                                    archived={archived}
+                                    childId={selectedChild._id}
+                                />
+                            </TabPanel>
+                            {isChildUnder14(selectedChild.birthdate) && (
+                                <TabPanel px="2" pt="2">
+                                    <ChildExpenseList
+                                        archived={archived}
+                                        childId={selectedChild._id}
+                                    />
+                                </TabPanel>
+                            )}
+                        </TabPanels>
+                    </Tabs>
+                </TabPanel>
             )}
         </>
     );
