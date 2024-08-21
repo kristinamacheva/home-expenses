@@ -66,6 +66,89 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
     return { childExpenses, totalCount };
 };
 
+exports.getAllSelectedChild = async (
+    userId,
+    childId,
+    householdId,
+    page,
+    limit,
+    searchParams
+) => {
+    const household = await Household.findById(householdId).lean();
+
+    // Check if the user is a member of the household with a role different than "Дете"
+    const member = household.members.find((member) =>
+        member.user.equals(userId)
+    );
+
+    if (!member) {
+        throw new AppError("Потребителят не е член на това домакинство", 403);
+    }
+
+    if (member.role === "Дете") {
+        throw new AppError("Нямате право да преглеждате тези данни", 403);
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Build dynamic match conditions based on search parameters
+    let matchConditions = {
+        household: new ObjectId(householdId),
+        child: new ObjectId(childId),
+    };
+
+    if (searchParams.title) {
+        matchConditions.title = {
+            $regex: new RegExp(searchParams.title, "i"),
+        }; // Case-insensitive search
+    }
+
+    // Date range filter
+    if (searchParams.startDate && searchParams.endDate) {
+        matchConditions.date = {
+            $gte: new Date(searchParams.startDate),
+            $lte: new Date(searchParams.endDate),
+        };
+    } else if (searchParams.startDate) {
+        matchConditions.date = { $gte: new Date(searchParams.startDate) };
+    } else if (searchParams.endDate) {
+        matchConditions.date = { $lte: new Date(searchParams.endDate) };
+    }
+
+    // Aggregation pipeline to fetch child expenses
+    const pipeline = [
+        // Stage 1: Match documents with dynamic conditions
+        { $match: matchConditions },
+
+        // Stage 2: Sort by date and _id in descending order
+        { $sort: { date: -1, _id: -1 } },
+
+        // Stage 3: Pagination: Skip records
+        { $skip: skip },
+
+        // Stage 4: Pagination: Limit records
+        { $limit: limit },
+
+        // Stage 5: Project the final shape of the documents
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                amount: 1,
+                date: 1,
+            },
+        },
+    ];
+
+    // Execute aggregation pipeline
+    const childExpenses = await ChildExpense.aggregate(pipeline);
+
+    // Count total number of documents matching the conditions
+    const totalCount = await ChildExpense.countDocuments(matchConditions);
+
+    return { childExpenses, totalCount };
+};
+
 exports.create = async (childExpenseData) => {
     const { title, amount, date, household, child } = childExpenseData;
 
