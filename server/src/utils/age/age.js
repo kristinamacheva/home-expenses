@@ -3,7 +3,7 @@ function isChildUnder14(birthdate) {
 
     const today = new Date();
     const birthDate = new Date(birthdate);
-    const age = today.getFullYear() - birthDate.getFullYear();
+    let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     const dayDiff = today.getDate() - birthDate.getDate();
 
@@ -20,7 +20,7 @@ function isChild18OrOver(birthdate) {
 
     const today = new Date();
     const birthDate = new Date(birthdate);
-    const age = today.getFullYear() - birthDate.getFullYear();
+    let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     const dayDiff = today.getDate() - birthDate.getDate();
 

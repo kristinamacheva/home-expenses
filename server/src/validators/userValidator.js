@@ -34,7 +34,7 @@ module.exports.registerValidator = [
 
             // Check if the birthdate is at least 6 years ago
             const today = new Date();
-            const age = today.getFullYear() - birthdate.getFullYear();
+            let age = today.getFullYear() - birthdate.getFullYear();
             const monthDiff = today.getMonth() - birthdate.getMonth();
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
                 age--;
