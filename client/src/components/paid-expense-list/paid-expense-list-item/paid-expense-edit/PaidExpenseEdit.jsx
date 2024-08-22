@@ -221,6 +221,30 @@ export default function PaidExpenseEdit({
                         await householdService.getOneChildMembers(householdId);
 
                     if (childMembersResult.length > 0) {
+                        if (
+                            childMembersResult.some(
+                                (child) => child._id === userId
+                            )
+                        ) {
+                            toast({
+                                title: "Грешка при избор на категорията",
+                                description:
+                                    "Членове с роля Дете не могат да създават разходи с категория Джобни",
+                                status: "error",
+                                duration: 6000,
+                                isClosable: true,
+                                position: "bottom",
+                            });
+
+                            value = "";
+                            setValues((state) => ({
+                                ...state,
+                                [e.target.name]: value,
+                            }));
+
+                            return;
+                        }
+
                         setChildMembers(childMembersResult);
                     } else {
                         toast({
