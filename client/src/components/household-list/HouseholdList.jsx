@@ -5,21 +5,20 @@ import {
     HStack,
     Heading,
     Spacer,
-    VStack,
     Stack,
     useDisclosure,
     Card,
     useToast,
 } from "@chakra-ui/react";
 
-import * as householdService from "../../services/householdService";
 import * as authService from "../../services/authService";
 import HouseholdCreate from "./household-create/HouseholdCreate";
 import AuthContext from "../../contexts/authContext";
+import { isChildUnder14 } from "../../utils/ageUtils";
 
 export default function HouseholdList() {
     const [households, setHouseholds] = useState([]);
-    const { userId, logoutHandler } = useContext(AuthContext);
+    const { birthdate, logoutHandler } = useContext(AuthContext);
     const toast = useToast();
 
     useEffect(() => {
@@ -41,7 +40,9 @@ export default function HouseholdList() {
                     logoutHandler();
                 } else {
                     toast({
-                        title: error.message || 'Неуспешно зареждане на домакинствата',
+                        title:
+                            error.message ||
+                            "Неуспешно зареждане на домакинствата",
                         status: "error",
                         duration: 6000,
                         isClosable: true,
@@ -66,9 +67,14 @@ export default function HouseholdList() {
                             Домакинства
                         </Heading>
                         <Spacer />
-                        <Button variant="primary" onClick={onOpenCreateModal}>
-                            + Създаване
-                        </Button>
+                        {!isChildUnder14(birthdate) && (
+                            <Button
+                                variant="primary"
+                                onClick={onOpenCreateModal}
+                            >
+                                + Създаване
+                            </Button>
+                        )}
                     </HStack>
                 </Card>
                 <Stack mt="4">
