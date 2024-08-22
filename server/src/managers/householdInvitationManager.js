@@ -3,6 +3,7 @@ const Household = require("../models/Household");
 const HouseholdInvitation = require("../models/HouseholdInvitation");
 const Notification = require("../models/Notification");
 const User = require("../models/User");
+const { isChild18OrOver } = require("../utils/age/age");
 const { AppError } = require("../utils/AppError");
 const mongoose = require("mongoose");
 
@@ -175,6 +176,17 @@ exports.accept = async (userId, invitationId) => {
                 type: "+",
             });
         } else {
+            const childUser = await User.findById(userId).session(session);
+            const is18OrOver = isChild18OrOver(childUser.birthdate);
+
+            if (is18OrOver) {
+                household.balance.push({
+                    user: userId,
+                    sum: 0,
+                    type: "+",
+                });
+            }
+
             household.allowances.push({
                 user: userId,
                 sum: 0,

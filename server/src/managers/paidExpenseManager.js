@@ -1035,9 +1035,36 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
 
         // Update the household balance based on the new balance of the expense
         for (const newEntry of expense.balance) {
-            const existingEntry = expenseHousehold.balance.find((entry) =>
+            let existingEntry = expenseHousehold.balance.find((entry) =>
                 entry.user.equals(newEntry.user)
             );
+
+            let isUserInBalance = true;
+
+            if (!existingEntry) {
+                // If balance entry is not found, fetch the user's birthdate
+                const childUser = await User.findById(newEntry.user).session(
+                    session
+                );
+
+                isUserInBalance = false;
+
+                const is18OrOver = isChild18OrOver(childUser.birthdate);
+
+                // If the user is 18 or over, add them to the balance array with default values
+                if (is18OrOver) {
+                    existingEntry = {
+                        user: newEntry.user,
+                        sum: 0,
+                        type: "+",
+                    };
+                } else {
+                    throw new AppError(
+                        `Потребител с роля Дете, който е под 18 години не може да участва в разходи`,
+                        400
+                    );
+                }
+            }
 
             // Determine the current sum considering the current type
             let currentSumInCents =
@@ -1063,6 +1090,11 @@ const updateBalance = async (householdId, expenseId, childId, categoryId) => {
                     (Math.abs(currentSumInCents) / 100).toFixed(2)
                 );
                 existingEntry.type = "-";
+            }
+
+            // Push the updated entry to the balance array if it was newly created
+            if (!isUserInBalance) {
+                expenseHousehold.balance.push(existingEntry);
             }
 
             // Create and send notifications for all members
