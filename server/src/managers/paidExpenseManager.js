@@ -8,6 +8,7 @@ const { default: mongoose } = require("mongoose");
 const { sendNotificationToUser } = require("../config/socket");
 const Notification = require("../models/Notification");
 const Allowance = require("../models/Allowance");
+const { isChild18OrOver } = require("../utils/age/age");
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -345,10 +346,15 @@ exports.getOneDetails = async (paidExpenseId, userId) => {
     }
 
     if (userRole === "Дете") {
-        throw new AppError(
-            "Потребителят е с роля 'Дете' и не може да достъпва информация за разходите",
-            400
-        );
+        const childUser = await User.findById(userId);
+        const is18OrOver = isChild18OrOver(childUser.birthdate);
+
+        if (!is18OrOver) {
+            throw new AppError(
+                "Потребителят е с роля 'Дете' и не е навършил необходимата възраст, за да достъпва информация за разходите",
+                400
+            );
+        }
     }
 
     // Check if the child field is present and populate it if necessary

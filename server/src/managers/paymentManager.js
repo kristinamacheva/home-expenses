@@ -6,6 +6,7 @@ const { AppError } = require("../utils/AppError");
 const { default: mongoose } = require("mongoose");
 const Payment = require("../models/Payment");
 const { sendNotificationToUser } = require("../config/socket");
+const { isChild18OrOver } = require("../utils/age/age");
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -80,7 +81,7 @@ exports.getAll = async (userId, householdId, page, limit, searchParams) => {
                 amount: 1,
                 date: 1,
                 paymentStatus: 1, // Ensure the status field is included
-                paymentMethod: 1, 
+                paymentMethod: 1,
                 payer: {
                     _id: "$payerDetails._id",
                     name: "$payerDetails.name",
@@ -227,10 +228,15 @@ exports.getOneDetails = async (paymentId, userId) => {
     }
 
     if (userRole === "Дете") {
-        throw new AppError(
-            "Потребителят е с роля 'Дете' и не може да достъпва информация за плащанията",
-            400
-        );
+        const childUser = await User.findById(userId);
+        const is18OrOver = isChild18OrOver(childUser.birthdate);
+
+        if (!is18OrOver) {
+            throw new AppError(
+                "Потребителят е с роля 'Дете' и не е навършил необходимата възраст, за да достъпва информация за плащанията",
+                400
+            );
+        }
     }
 
     return payment;
