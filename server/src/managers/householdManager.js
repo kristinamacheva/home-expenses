@@ -978,25 +978,28 @@ exports.leave = async (userId, householdId) => {
             }
         }
 
-        // Check if the user's role is not "Дете"
-        const userRole = household.members[userIndex].role;
-        if (userRole !== "Дете") {
-            // Check if the user has a non-zero balance sum
-            const userBalance = household.balance.find(
-                (entry) => entry.user.toString() === userId
-            );
-            if (userBalance && userBalance.sum !== 0) {
+        // Check if the user has a non-zero balance sum
+        const userBalance = household.balance.find(
+            (entry) => entry.user.toString() === userId
+        );
+
+        if (userBalance) {
+            if (userBalance.sum !== 0) {
                 throw new AppError(
                     "Не може да напуснете домакинството, ако балансът ви не е 0.",
                     403
                 );
             }
-
+            
             // Remove the user's balance entry if it exists and is zero
             household.balance = household.balance.filter(
                 (entry) => entry.user.toString() !== userId
             );
-        } else {
+        }
+
+        const userRole = household.members[userIndex].role;
+
+        if (userRole === "Дете") {
             // Check if the user has a non-zero allowance sum
             const userAllowance = household.allowances.find(
                 (entry) => entry.user.toString() === userId
