@@ -21,6 +21,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import * as authService from "../../../services/authService";
 import AuthContext from "../../../contexts/authContext";
 import useImagePreview from "../../../hooks/useImagePreview";
+import { isChildUnder14 } from "../../../utils/ageUtils";
 
 const initialValues = {
     name: "",
@@ -33,7 +34,8 @@ const initialValues = {
 };
 
 export default function ProfileEdit() {
-    const { updateSubmitHandler, logoutHandler } = useContext(AuthContext);
+    const { updateSubmitHandler, logoutHandler, birthdate } =
+        useContext(AuthContext);
     const toast = useToast();
 
     const [values, setValues] = useState(initialValues);
@@ -559,54 +561,55 @@ export default function ProfileEdit() {
                             )}
                         </FormControl>
                     </Stack>
-                    <FormControl id="bankPayment">
-                        <FormLabel>Разплащания</FormLabel>
-                        <Checkbox
-                            isChecked={bankPaymentEnabled}
-                            onChange={handleBankPaymentToggle}
-                        >
-                            Позволете банкови преводи
-                        </Checkbox>
-                        {bankPaymentEnabled && (
-                            <Stack
-                                direction={{ base: "column", lg: "row" }}
-                                spacing={3}
-                                mt={2}
+                    {!isChildUnder14(birthdate) && (
+                        <FormControl id="bankPayment">
+                            <FormLabel>Разплащания</FormLabel>
+                            <Checkbox
+                                isChecked={bankPaymentEnabled}
+                                onChange={handleBankPaymentToggle}
                             >
-                                <FormControl id="fullName" isRequired>
-                                    <FormLabel>Три имена</FormLabel>
-                                    <Input
-                                        type="text"
-                                        name="bankDetails.fullName"
-                                        value={values.bankDetails.fullName}
-                                        onChange={onChange}
-                                        placeholder="Три имена"
-                                    />
-                                    {errors.fullName && (
-                                        <Text color="red.500" fontSize="sm">
-                                            {errors.fullName}
-                                        </Text>
-                                    )}
-                                </FormControl>
-                                <FormControl id="iban" isRequired>
-                                    <FormLabel>IBAN</FormLabel>
-                                    <Input
-                                        type="text"
-                                        name="bankDetails.iban"
-                                        value={values.bankDetails.iban}
-                                        onChange={onChange}
-                                        placeholder="IBAN"
-                                    />
-                                    {errors.iban && (
-                                        <Text color="red.500" fontSize="sm">
-                                            {errors.iban}
-                                        </Text>
-                                    )}
-                                </FormControl>
-                            </Stack>
-                        )}
-                    </FormControl>
-
+                                Позволете банкови преводи
+                            </Checkbox>
+                            {bankPaymentEnabled && (
+                                <Stack
+                                    direction={{ base: "column", lg: "row" }}
+                                    spacing={3}
+                                    mt={2}
+                                >
+                                    <FormControl id="fullName" isRequired>
+                                        <FormLabel>Три имена</FormLabel>
+                                        <Input
+                                            type="text"
+                                            name="bankDetails.fullName"
+                                            value={values.bankDetails.fullName}
+                                            onChange={onChange}
+                                            placeholder="Три имена"
+                                        />
+                                        {errors.fullName && (
+                                            <Text color="red.500" fontSize="sm">
+                                                {errors.fullName}
+                                            </Text>
+                                        )}
+                                    </FormControl>
+                                    <FormControl id="iban" isRequired>
+                                        <FormLabel>IBAN</FormLabel>
+                                        <Input
+                                            type="text"
+                                            name="bankDetails.iban"
+                                            value={values.bankDetails.iban}
+                                            onChange={onChange}
+                                            placeholder="IBAN"
+                                        />
+                                        {errors.iban && (
+                                            <Text color="red.500" fontSize="sm">
+                                                {errors.iban}
+                                            </Text>
+                                        )}
+                                    </FormControl>
+                                </Stack>
+                            )}
+                        </FormControl>
+                    )}
                     <Stack alignItems="end" mt="2">
                         <Button
                             variant="primary"
