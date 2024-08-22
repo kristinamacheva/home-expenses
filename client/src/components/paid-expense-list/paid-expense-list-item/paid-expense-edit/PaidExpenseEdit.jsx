@@ -82,7 +82,7 @@ export default function PaidExpenseEdit({
 
     const fetchAllNonChildMembers = () => {
         householdService
-            .getOneNonChildMembers(householdId)
+            .getOneNonChildAndOver18Members(householdId)
             .then((result) => setHouseholdMembers(result))
             .catch((error) => {
                 if (error.status === 401) {

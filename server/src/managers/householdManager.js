@@ -250,6 +250,74 @@ exports.getOneNonChildMembers = async (householdId) => {
     return [];
 };
 
+exports.getOneNonChildAndOver18Members = async (householdId) => {
+    const today = new Date();
+    const eighteenYearsAgo = new Date(
+        today.getFullYear() - 18,
+        today.getMonth(),
+        today.getDate()
+    );
+
+    const household = await Household.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(householdId) } }, // Match the household by ID
+        { $unwind: "$members" }, // Deconstruct the members array
+        {
+            $lookup: {
+                from: "users", // Perform a join with the users collection
+                localField: "members.user", // Match user field in members
+                foreignField: "_id", // with _id field in users collection
+                as: "userDetails", // Output to userDetails array
+            },
+        },
+        { $unwind: "$userDetails" }, // Deconstruct the userDetails array
+        {
+            $match: {
+                $or: [
+                    { "members.role": { $ne: "Дете" } }, // Include non-child members
+                    { "userDetails.birthdate": { $lte: eighteenYearsAgo } }, // Include children who are 18 or over
+                ],
+            },
+        },
+        {
+            $project: {
+                _id: 0, // Exclude the default _id field from the output
+                "userDetails._id": 1, // Include user _id
+                "userDetails.name": 1, // Include user name
+                "userDetails.email": 1, // Include user email
+                "userDetails.avatar": 1, // Include user avatar
+                "userDetails.avatarColor": 1, // Include user avatarColor
+                "members.role": 1, // Include member role
+            },
+        },
+        {
+            $group: {
+                _id: null, // Group by null to aggregate all documents into one array
+                nonChildOrOver18Members: {
+                    $push: {
+                        _id: "$userDetails._id",
+                        name: "$userDetails.name",
+                        email: "$userDetails.email",
+                        avatar: "$userDetails.avatar",
+                        avatarColor: "$userDetails.avatarColor",
+                        role: "$members.role",
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0, // Exclude the grouping key from the output
+                nonChildOrOver18Members: 1, // Include the nonChildMembers array
+            },
+        },
+    ]);
+
+    if (household.length > 0) {
+        return household[0].nonChildOrOver18Members;
+    }
+    return [];
+};
+
 exports.getOneChildMembers = async (householdId) => {
     const household = await Household.aggregate([
         { $match: { _id: new mongoose.Types.ObjectId(householdId) } }, // Match the household by ID
@@ -990,7 +1058,7 @@ exports.leave = async (userId, householdId) => {
                     403
                 );
             }
-            
+
             // Remove the user's balance entry if it exists and is zero
             household.balance = household.balance.filter(
                 (entry) => entry.user.toString() !== userId

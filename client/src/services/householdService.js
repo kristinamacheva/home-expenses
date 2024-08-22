@@ -15,6 +15,13 @@ export const getOneNonChildMembers = async (householdId) => {
     return result;
 };
 
+export const getOneNonChildAndOver18Members = async (householdId) => {
+    const result = await request.get(
+        `${baseUrl}/${householdId}/members?role=not-child-and-over-18`
+    );
+    return result;
+};
+
 export const getOneChildMembers = async (householdId) => {
     const result = await request.get(
         `${baseUrl}/${householdId}/members?role=child`

@@ -69,7 +69,7 @@ export default function ExpenseTemplateCreate({
 
     useEffect(() => {
         householdService
-            .getOneNonChildMembers(householdId)
+            .getOneNonChildAndOver18Members(householdId)
             .then((result) => {
                 setHouseholdMembers(result);
             })

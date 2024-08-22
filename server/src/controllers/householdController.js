@@ -74,6 +74,10 @@ router.get("/:householdId/members", async (req, res, next) => {
             users = await householdManager.getOneChildMembers(householdId);
         } else if (role === "not-child") {
             users = await householdManager.getOneNonChildMembers(householdId);
+        } else if (role === "not-child-and-over-18") {
+            users = await householdManager.getOneNonChildAndOver18Members(
+                householdId
+            );
         } else {
             users = await householdManager.getOneMembers(householdId);
         }
