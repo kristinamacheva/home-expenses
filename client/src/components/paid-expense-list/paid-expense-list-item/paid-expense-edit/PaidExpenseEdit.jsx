@@ -54,6 +54,7 @@ export default function PaidExpenseEdit({
         useContext(AuthContext);
 
     const [householdMembers, setHouseholdMembers] = useState([]);
+    const [childrenIncluded, setChildrenIncluded] = useState(true);
     const [childMembers, setChildMembers] = useState([]);
     const [selectedChild, setSelectedChild] = useState(null);
     const [householdCategories, setHouseholdCategories] = useState([]);
@@ -158,6 +159,7 @@ export default function PaidExpenseEdit({
 
                     if (childMembersResult.length > 0) {
                         setChildMembers(childMembersResult);
+                        setChildrenIncluded(false);
                     } else {
                         toast({
                             title: "Грешка при зареждане на децата",
@@ -176,6 +178,7 @@ export default function PaidExpenseEdit({
                     child ? setSelectedChild(child) : setSelectedChild(null);
                 } else {
                     setSelectedChild(null);
+                    setChildrenIncluded(true);
                 }
             })
             .catch((error) => {
@@ -246,6 +249,7 @@ export default function PaidExpenseEdit({
                         }
 
                         setChildMembers(childMembersResult);
+                        setChildrenIncluded(false);
                     } else {
                         toast({
                             title: "Грешка при зареждане на децата",
@@ -276,6 +280,7 @@ export default function PaidExpenseEdit({
             } else {
                 setChildMembers([]);
                 setSelectedChild(null);
+                setChildrenIncluded(true);
             }
         }
 
@@ -729,6 +734,7 @@ export default function PaidExpenseEdit({
                                             currentMembers={paid}
                                             onUpdate={handlePaidEquallyUpdate}
                                             showCreatorDeleteButton={false}
+                                            childrenIncluded={childrenIncluded}
                                         />
                                     )}
                                     {values.paidSplitTypeField === "manual" && (
@@ -738,6 +744,7 @@ export default function PaidExpenseEdit({
                                             currentMembers={paid}
                                             onUpdate={handlePaidManualUpdate}
                                             showCreatorDeleteButton={false}
+                                            childrenIncluded={childrenIncluded}
                                         />
                                     )}
                                 </Stack>
@@ -777,6 +784,7 @@ export default function PaidExpenseEdit({
                                     currentMembers={owed}
                                     onUpdate={handleOwedEquallyUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
 
@@ -787,6 +795,7 @@ export default function PaidExpenseEdit({
                                     currentMembers={owed}
                                     onUpdate={handleOwedPercentUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
 
@@ -797,6 +806,7 @@ export default function PaidExpenseEdit({
                                     currentMembers={owed}
                                     onUpdate={handleOwedManualUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
                         </Stack>

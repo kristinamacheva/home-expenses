@@ -53,6 +53,7 @@ export default function ExpenseTemplateCreate({
     const { householdId } = useParams();
 
     const [householdMembers, setHouseholdMembers] = useState([]);
+    const [childrenIncluded, setChildrenIncluded] = useState(true);
     const [childMembers, setChildMembers] = useState([]);
     const [selectedChild, setSelectedChild] = useState(null);
     const [householdCategories, setHouseholdCategories] = useState([]);
@@ -160,6 +161,7 @@ export default function ExpenseTemplateCreate({
                         }
 
                         setChildMembers(childMembersResult);
+                        setChildrenIncluded(false);
                     } else {
                         toast({
                             title: "Грешка при зареждане на децата",
@@ -190,6 +192,7 @@ export default function ExpenseTemplateCreate({
             } else {
                 setChildMembers([]);
                 setSelectedChild(null);
+                setChildrenIncluded(true);
             }
         }
 
@@ -618,6 +621,7 @@ export default function ExpenseTemplateCreate({
                                             currentMembers={paid}
                                             onUpdate={handlePaidEquallyUpdate}
                                             showCreatorDeleteButton={false}
+                                            childrenIncluded={childrenIncluded}
                                         />
                                     )}
                                     {values.paidSplitTypeField === "manual" && (
@@ -627,6 +631,7 @@ export default function ExpenseTemplateCreate({
                                             currentMembers={paid}
                                             onUpdate={handlePaidManualUpdate}
                                             showCreatorDeleteButton={false}
+                                            childrenIncluded={childrenIncluded}
                                         />
                                     )}
                                 </Stack>
@@ -666,6 +671,7 @@ export default function ExpenseTemplateCreate({
                                     currentMembers={owed}
                                     onUpdate={handleOwedEquallyUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
 
@@ -676,6 +682,7 @@ export default function ExpenseTemplateCreate({
                                     currentMembers={owed}
                                     onUpdate={handleOwedPercentUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
 
@@ -686,6 +693,7 @@ export default function ExpenseTemplateCreate({
                                     currentMembers={owed}
                                     onUpdate={handleOwedManualUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
                         </Stack>

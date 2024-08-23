@@ -53,6 +53,7 @@ export default function ExpenseTemplateEdit({
         useContext(AuthContext);
 
     const [householdMembers, setHouseholdMembers] = useState([]);
+    const [childrenIncluded, setChildrenIncluded] = useState(true);
     const [childMembers, setChildMembers] = useState([]);
     const [selectedChild, setSelectedChild] = useState(null);
     const [householdCategories, setHouseholdCategories] = useState([]);
@@ -147,12 +148,15 @@ export default function ExpenseTemplateEdit({
                 });
                 setPaid(expenseTemplate.paid);
                 setOwed(expenseTemplate.owed);
+
+                // TODO: Category child validation - setChildrenIncluded(false);
                 if (expenseTemplate.child) {
                     const childMembersResult =
                         await householdService.getOneChildMembers(householdId);
 
                     if (childMembersResult.length > 0) {
                         setChildMembers(childMembersResult);
+                        setChildrenIncluded(false);
                     } else {
                         toast({
                             title: "Грешка при зареждане на децата",
@@ -171,6 +175,7 @@ export default function ExpenseTemplateEdit({
                     child ? setSelectedChild(child) : setSelectedChild(null);
                 } else {
                     setSelectedChild(null);
+                    setChildrenIncluded(true);
                 }
             })
             .catch((error) => {
@@ -240,6 +245,7 @@ export default function ExpenseTemplateEdit({
                         }
 
                         setChildMembers(childMembersResult);
+                        setChildrenIncluded(false);
                     } else {
                         toast({
                             title: "Грешка при зареждане на децата",
@@ -270,6 +276,7 @@ export default function ExpenseTemplateEdit({
             } else {
                 setChildMembers([]);
                 setSelectedChild(null);
+                setChildrenIncluded(true);
             }
         }
 
@@ -699,6 +706,7 @@ export default function ExpenseTemplateEdit({
                                             currentMembers={paid}
                                             onUpdate={handlePaidEquallyUpdate}
                                             showCreatorDeleteButton={false}
+                                            childrenIncluded={childrenIncluded}
                                         />
                                     )}
                                     {values.paidSplitTypeField === "manual" && (
@@ -708,6 +716,7 @@ export default function ExpenseTemplateEdit({
                                             currentMembers={paid}
                                             onUpdate={handlePaidManualUpdate}
                                             showCreatorDeleteButton={false}
+                                            childrenIncluded={childrenIncluded}
                                         />
                                     )}
                                 </Stack>
@@ -747,6 +756,7 @@ export default function ExpenseTemplateEdit({
                                     currentMembers={owed}
                                     onUpdate={handleOwedEquallyUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
 
@@ -757,6 +767,7 @@ export default function ExpenseTemplateEdit({
                                     currentMembers={owed}
                                     onUpdate={handleOwedPercentUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
 
@@ -767,6 +778,7 @@ export default function ExpenseTemplateEdit({
                                     currentMembers={owed}
                                     onUpdate={handleOwedManualUpdate}
                                     showCreatorDeleteButton={true}
+                                    childrenIncluded={childrenIncluded}
                                 />
                             )}
                         </Stack>
