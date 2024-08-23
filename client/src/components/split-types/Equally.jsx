@@ -7,6 +7,7 @@ import {
     Select,
     Stack,
     Text,
+    useToast,
 } from "@chakra-ui/react";
 import useEqualSplit from "../../hooks/useEqualSplit";
 import { useContext, useEffect, useState } from "react";
@@ -14,20 +15,30 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import AuthContext from "../../contexts/authContext";
 import { IoPersonAddSharp } from "react-icons/io5";
 
+// Filter members based on childrenIncluded flag
+const filterMembers = (membersArray, childrenIncluded) => {
+    return childrenIncluded
+        ? membersArray
+        : membersArray.filter((member) => member.role !== "Дете");
+};
+
 export default function Equally({
     amount,
     members,
     currentMembers,
     onUpdate,
     showCreatorDeleteButton,
+    childrenIncluded,
 }) {
     const { userId } = useContext(AuthContext);
     const [splitEquallyMembers, setSplitEquallyMembers] = useState([]);
     const [selectedMemberId, setSelectedMemberId] = useState("");
+    const toast = useToast();
 
     useEffect(() => {
-        setSplitEquallyMembers(currentMembers);
-    }, []);
+        const filteredMembers = filterMembers(currentMembers, childrenIncluded);
+        setSplitEquallyMembers(filteredMembers);
+    }, [childrenIncluded]);
 
     const equalSplit = useEqualSplit(amount, splitEquallyMembers, onUpdate);
 
@@ -51,8 +62,25 @@ export default function Equally({
                 (member) => member._id === selectedMemberId
             );
             if (memberToAdd) {
-                setSplitEquallyMembers([...splitEquallyMembers, memberToAdd]);
-                setSelectedMemberId("");
+                if (memberToAdd.role === "Дете" && !childrenIncluded) {
+                    toast({
+                        title: "Грешка",
+                        description:
+                            "Членове с роля Дете не могат да участват в разходи с категория Джобни",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+
+                    setSelectedMemberId("");
+                } else {
+                    setSplitEquallyMembers([
+                        ...splitEquallyMembers,
+                        memberToAdd,
+                    ]);
+                    setSelectedMemberId("");
+                }
             }
         }
     };
