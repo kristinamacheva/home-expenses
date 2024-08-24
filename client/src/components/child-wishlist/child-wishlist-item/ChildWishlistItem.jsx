@@ -232,39 +232,38 @@ export default function ChildWishlistItem({
                             </Box>
                         )}
                     </Flex>
-                    <HStack
-                        spacing="0"
-                        w={["auto", "auto", "120px"]}
-                        justifyContent="flex-end"
-                    >
-                        {!purchased && !archived && !childId && (
-                            <>
-                                {amount <= childAllowance && (
+                    {!archived && !childId && (
+                        <HStack
+                            spacing="0"
+                            w={["auto", "auto", "120px"]}
+                            justifyContent="flex-end"
+                        >
+                            {!purchased && (
+                                <>
+                                    {amount <= childAllowance && (
+                                        <IconButton
+                                            aria-label="Закупете"
+                                            title="Закупете"
+                                            onClick={() =>
+                                                purchaseClickHandler(_id)
+                                            }
+                                            icon={
+                                                <BiSolidPurchaseTag fontSize="20px" />
+                                            }
+                                            variant="ghost"
+                                            color="themePurple.800"
+                                        />
+                                    )}
                                     <IconButton
-                                        aria-label="Закупете"
-                                        title="Закупете"
-                                        onClick={() =>
-                                            purchaseClickHandler(_id)
-                                        }
-                                        icon={
-                                            <BiSolidPurchaseTag fontSize="20px" />
-                                        }
+                                        aria-label="Редактирайте"
+                                        title="Редактирайте"
+                                        icon={<FaPen fontSize="20px" />}
                                         variant="ghost"
                                         color="themePurple.800"
+                                        onClick={onOpenEditModal}
                                     />
-                                )}
-                                <IconButton
-                                    aria-label="Редактирайте"
-                                    title="Редактирайте"
-                                    icon={<FaPen fontSize="20px" />}
-                                    variant="ghost"
-                                    color="themePurple.800"
-                                    onClick={onOpenEditModal}
-                                />
-                            </>
-                        )}
-
-                        {!archived && !childId && (
+                                </>
+                            )}
                             <IconButton
                                 aria-label="Изтрийте"
                                 title="Изтрийте"
@@ -275,8 +274,8 @@ export default function ChildWishlistItem({
                                     childWishlistItemDeleteHandler(_id)
                                 }
                             />
-                        )}
-                    </HStack>
+                        </HStack>
+                    )}
                 </Stack>
             </Card>
             {isEditModalOpen && !childId && (
