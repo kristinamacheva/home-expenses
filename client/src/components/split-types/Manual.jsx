@@ -10,11 +10,19 @@ import {
     Stack,
     Text,
     Select,
+    useToast,
 } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { IoPersonAddSharp } from "react-icons/io5";
 import AuthContext from "../../contexts/authContext";
+
+// Filter members based on childrenIncluded flag
+const filterMembers = (membersArray, childrenIncluded) => {
+    return childrenIncluded
+        ? membersArray
+        : membersArray.filter((member) => member.role !== "Дете");
+};
 
 export default function Manual({
     amount,
@@ -22,6 +30,7 @@ export default function Manual({
     currentMembers,
     onUpdate,
     showCreatorDeleteButton,
+    childrenIncluded,
 }) {
     const { userId } = useContext(AuthContext);
     const [splitManualMembers, setSplitManualMembers] = useState([]);
@@ -29,20 +38,23 @@ export default function Manual({
     const [message, setMessage] = useState("");
     const [messageColor, setMessageColor] = useState("");
     const [selectedMemberId, setSelectedMemberId] = useState("");
+    const toast = useToast();
 
     useEffect(() => {
-        // Initialize splitManualMembers and manualAmounts
-        setSplitManualMembers(currentMembers);
+        // Initialize splitManualMembers and manualAmounts with filtered members
+        const filteredMembers = filterMembers(currentMembers, childrenIncluded);
+        setSplitManualMembers(filteredMembers);
 
-        const initialAmounts = currentMembers.map((member) => ({
+        const initialAmounts = filteredMembers.map((member) => ({
             _id: member._id,
             name: member.name,
             avatarColor: member.avatarColor,
             avatar: member.avatar,
             sum: member.sum,
+            role: member.role,
         }));
         setManualAmounts(initialAmounts);
-    }, []);
+    }, [childrenIncluded]);
 
     useEffect(() => {
         handleMessageChange(manualAmounts);
@@ -115,18 +127,33 @@ export default function Manual({
                 (member) => member._id === selectedMemberId
             );
             if (memberToAdd) {
-                setSplitManualMembers([...splitManualMembers, memberToAdd]);
-                setManualAmounts([
-                    ...manualAmounts,
-                    {
-                        _id: memberToAdd._id,
-                        name: memberToAdd.name,
-                        avatar: memberToAdd.avatar,
-                        avatarColor: memberToAdd.avatarColor,
-                        sum: 0,
-                    },
-                ]);
-                setSelectedMemberId("");
+                if (memberToAdd.role === "Дете" && !childrenIncluded) {
+                    toast({
+                        title: "Грешка",
+                        description:
+                            "Членове с роля Дете не могат да участват в разходи с категория Джобни",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
+
+                    setSelectedMemberId("");
+                } else {
+                    setSplitManualMembers([...splitManualMembers, memberToAdd]);
+                    setManualAmounts([
+                        ...manualAmounts,
+                        {
+                            _id: memberToAdd._id,
+                            name: memberToAdd.name,
+                            avatar: memberToAdd.avatar,
+                            avatarColor: memberToAdd.avatarColor,
+                            sum: 0,
+                            role: memberToAdd.role,
+                        },
+                    ]);
+                    setSelectedMemberId("");
+                }
             }
         }
     };
