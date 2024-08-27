@@ -10,17 +10,18 @@ import {
     Select,
     Stack,
     Text,
+    useToast,
 } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { FaRegTrashCan } from "react-icons/fa6";
 import AuthContext from "../../contexts/authContext";
 import { IoPersonAddSharp } from "react-icons/io5";
 
-const calculatePercentages = (amount, currentMembers) => {
+const calculatePercentages = (amount, filteredMembers) => {
     // Ensure amount is a number. If amount is an empty string, treat it as 0.
     const validAmount = Number(amount) || 0;
 
-    return currentMembers.map((member) => {
+    return filteredMembers.map((member) => {
         const percentage =
             validAmount !== 0 ? (member.sum / validAmount) * 100 : 0;
 
@@ -30,8 +31,15 @@ const calculatePercentages = (amount, currentMembers) => {
             avatar: member.avatar,
             avatarColor: member.avatarColor,
             percentage: Math.round(percentage), // Round to the nearest whole number
+            role: member.role,
         };
     });
+};
+
+const filterMembers = (currentMembers, childrenIncluded) => {
+    return childrenIncluded
+        ? currentMembers
+        : currentMembers.filter((member) => member.role !== "Дете");
 };
 
 export default function Percent({
@@ -40,17 +48,35 @@ export default function Percent({
     currentMembers,
     onUpdate,
     showCreatorDeleteButton,
+    childrenIncluded,
 }) {
     const { userId } = useContext(AuthContext);
+    const [filteredMembers, setFilteredMembers] = useState(
+        filterMembers(currentMembers, childrenIncluded)
+    );
     const [splitPercentMembers, setSplitPercentMembers] =
-        useState(currentMembers);
-    const [percentAmounts, setPercentAmounts] = useState(currentMembers);
+        useState(filteredMembers);
+    const [percentAmounts, setPercentAmounts] = useState(filteredMembers);
     const [percentages, setPercentages] = useState(
-        calculatePercentages(amount, currentMembers)
+        calculatePercentages(amount, filteredMembers)
     );
     const [message, setMessage] = useState("");
     const [messageColor, setMessageColor] = useState("");
     const [selectedMemberId, setSelectedMemberId] = useState("");
+    const toast = useToast();
+
+    useEffect(() => {
+        const filteredSplitPercentMembers = childrenIncluded
+            ? splitPercentMembers
+            : splitPercentMembers.filter((member) => member.role !== "Дете");
+
+        const filteredPercentages = childrenIncluded
+            ? percentages
+            : percentages.filter((member) => member.role !== "Дете");
+            
+        setSplitPercentMembers(filteredSplitPercentMembers);
+        setPercentages(filteredPercentages);
+    }, [childrenIncluded]);
 
     useEffect(() => {
         handleAmountChange(percentages);
@@ -111,6 +137,7 @@ export default function Percent({
                     avatar: member.avatar,
                     avatarColor: member.avatarColor,
                     sum: Number((roundedSum - adjustment).toFixed(2)),
+                    role: member.role,
                 };
             }
 
@@ -120,6 +147,7 @@ export default function Percent({
                 avatar: member.avatar,
                 avatarColor: member.avatarColor,
                 sum: roundedSum,
+                role: member.role,
             };
         });
 
@@ -177,30 +205,45 @@ export default function Percent({
                 (member) => member._id === selectedMemberId
             );
             if (memberToAdd) {
-                const newSplitPercentMembers = [
-                    ...splitPercentMembers,
-                    memberToAdd,
-                ];
-                const newPercentages = [
-                    ...percentages,
-                    {
-                        _id: memberToAdd._id,
-                        name: memberToAdd.name,
-                        avatar: memberToAdd.avatar,
-                        avatarColor: memberToAdd.avatarColor,
-                        percentage: 0,
-                    },
-                ];
+                if (memberToAdd.role === "Дете" && !childrenIncluded) {
+                    toast({
+                        title: "Грешка",
+                        description:
+                            "Членове с роля Дете не могат да участват в разходи с категория Джобни",
+                        status: "error",
+                        duration: 6000,
+                        isClosable: true,
+                        position: "bottom",
+                    });
 
-                setSplitPercentMembers(newSplitPercentMembers);
-                setPercentages(newPercentages);
-                setSelectedMemberId("");
-                handleAmountChange(newPercentages); // Calculate the sums based on percentages
+                    setSelectedMemberId("");
+                } else {
+                    const newSplitPercentMembers = [
+                        ...splitPercentMembers,
+                        memberToAdd,
+                    ];
+                    const newPercentages = [
+                        ...percentages,
+                        {
+                            _id: memberToAdd._id,
+                            name: memberToAdd.name,
+                            avatar: memberToAdd.avatar,
+                            avatarColor: memberToAdd.avatarColor,
+                            percentage: 0,
+                            role: memberToAdd.role,
+                        },
+                    ];
+
+                    setSplitPercentMembers(newSplitPercentMembers);
+                    setPercentages(newPercentages);
+                    setSelectedMemberId("");
+                    handleAmountChange(newPercentages); // Calculate the sums based on percentages
+                }
             }
         }
     };
 
-    // Filter members to get options that are not already in currentMembers
+    // Filter members to get options that are not already in filteredMembers
     const availableOptions = members.filter(
         (member) =>
             !splitPercentMembers.some((current) => current._id === member._id)
