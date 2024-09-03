@@ -11,6 +11,8 @@ import {
 } from "@chakra-ui/react";
 
 import { FaEnvelope, FaPhone } from "react-icons/fa6";
+import { FaBirthdayCake } from "react-icons/fa";
+import moment from "moment";
 
 export default function MemberListItem({ user }) {
     return (
@@ -24,7 +26,7 @@ export default function MemberListItem({ user }) {
             justifyContent="center"
             alignItems="center"
             width="280px"
-            height="210px"
+            height="230px"
         >
             <Stack
                 direction="column"
@@ -55,6 +57,10 @@ export default function MemberListItem({ user }) {
                     <HStack>
                         <Icon as={FaEnvelope} color="themePurple.800" />
                         <Text>{user.email}</Text>
+                    </HStack>
+                    <HStack>
+                        <Icon as={FaBirthdayCake} color="themePurple.800" />
+                        <Text>{moment(user.birthdate).format("DD.MM.YYYY")}</Text>
                     </HStack>
                 </Stack>
             </Stack>

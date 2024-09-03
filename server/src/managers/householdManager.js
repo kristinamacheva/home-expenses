@@ -159,6 +159,7 @@ exports.getOneMembersDetails = async (householdId) => {
                 _id: 0, // Exclude the default _id field from the output
                 "members._id": "$userDetails._id", // Include user _id
                 "members.name": "$userDetails.name", // Include user name
+                "members.birthdate": "$userDetails.birthdate", // Include user birthdate
                 "members.email": "$userDetails.email", // Include user email
                 "members.phone": "$userDetails.phone", // Include user phone
                 "members.avatar": "$userDetails.avatar", // Include user avatar
@@ -173,6 +174,7 @@ exports.getOneMembersDetails = async (householdId) => {
                     $push: {
                         _id: "$members._id",
                         name: "$members.name",
+                        birthdate: "$members.birthdate",
                         email: "$members.email",
                         phone: "$members.phone",
                         avatar: "$members.avatar",
