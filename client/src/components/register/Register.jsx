@@ -29,7 +29,7 @@ export default function Register() {
     const [values, setValues] = useState({
         name: "",
         email: "",
-        birthdate: '',
+        birthdate: "",
         phone: "",
         password: "",
         repeatPassword: "",
@@ -114,7 +114,7 @@ export default function Register() {
             password: "",
             repeatPassword: "",
         });
-        
+
         const currentUser = {
             name: values.name,
             birthdate: values.birthdate,
@@ -163,7 +163,7 @@ export default function Register() {
             justify={"center"}
             bg={`linear-gradient(135deg, rgba(103,111,157,1) 0%, rgba(135,141,177,1) 25%, rgba(158,162,192,1) 50%, rgba(129,135,174,1) 75%, rgba(103,111,157,1) 100%);`}
         >
-            <Stack spacing={6} mx={"auto"} maxW={"xl"} py={12} px={6}>
+            <Stack spacing={6} mx={"auto"} maxW={"auto"} py={12} px={6}>
                 <Stack align={"center"}>
                     <Heading
                         fontSize={"4xl"}
@@ -185,146 +185,163 @@ export default function Register() {
                                 Създайте нов профил
                             </Heading>
 
-                            <FormControl id="name" isRequired>
-                                <FormLabel>Име</FormLabel>
-                                <Input
-                                    type="text"
-                                    name="name"
-                                    value={values.name}
-                                    onChange={onChange}
-                                    placeholder="Име"
-                                />
-                                {errors.name && (
-                                    <Text color="red.500" fontSize="sm">
-                                        {errors.name}
-                                    </Text>
-                                )}
-                            </FormControl>
-                            <FormControl id="email" isRequired>
-                                <FormLabel>Имейл</FormLabel>
-                                <Input
-                                    type="email"
-                                    name="email"
-                                    value={values.email}
-                                    onChange={onChange}
-                                    placeholder="Имейл"
-                                />
-                                {errors.email && (
-                                    <Text color="red.500" fontSize="sm">
-                                        {errors.email}
-                                    </Text>
-                                )}
-                            </FormControl>
-                            <FormControl id="birthdate" isRequired>
-                                <FormLabel>Дата на раждане</FormLabel>
-                                <Input
-                                    type="date"
-                                    name="birthdate"
-                                    value={values.birthdate}
-                                    onChange={onChange}
-                                    placeholder="Изберете дата на раждане"
-                                />
-                                {errors.birthdate && (
-                                    <Text color="red.500" fontSize="sm">
-                                        {errors.birthdate}
-                                    </Text>
-                                )}
-                            </FormControl>
-                            <FormControl id="phone">
-                                <FormLabel>Телефон</FormLabel>
-                                <Input
-                                    type="phone"
-                                    name="phone"
-                                    value={values.phone}
-                                    onChange={onChange}
-                                    placeholder="Телефон"
-                                />
-                            </FormControl>
-                            <FormControl id="password" isRequired>
-                                <FormLabel>Парола</FormLabel>
-                                <InputGroup>
+                            <Stack direction={{ base: "column", md: "row" }} spacing={3}>
+                                <FormControl id="name" isRequired>
+                                    <FormLabel>Име</FormLabel>
                                     <Input
-                                        type={
-                                            showPassword ? "text" : "password"
-                                        }
-                                        name="password"
-                                        value={values.password}
+                                        type="text"
+                                        name="name"
+                                        value={values.name}
                                         onChange={onChange}
-                                        placeholder="Парола"
+                                        placeholder="Име"
                                     />
-                                    <InputRightElement h={"full"}>
-                                        <Button
-                                            bg="transparent"
-                                            variant={"ghost"}
-                                            onClick={() =>
-                                                setShowPassword(
-                                                    (showPassword) =>
-                                                        !showPassword
-                                                )
-                                            }
-                                        >
-                                            {showPassword ? (
-                                                <Icon as={FaEye} boxSize={3} />
-                                            ) : (
-                                                <Icon
-                                                    as={FaEyeSlash}
-                                                    boxSize={3}
-                                                />
-                                            )}
-                                        </Button>
-                                    </InputRightElement>
-                                </InputGroup>
-                                {errors.password && (
-                                    <Text color="red.500" fontSize="sm">
-                                        {errors.password}
-                                    </Text>
-                                )}
-                            </FormControl>
-                            <FormControl id="repeatPassword" isRequired>
-                                <FormLabel>Повторете парола</FormLabel>
-                                <InputGroup>
+                                    {errors.name && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.name}
+                                        </Text>
+                                    )}
+                                </FormControl>
+                                <FormControl id="email" isRequired>
+                                    <FormLabel>Имейл</FormLabel>
                                     <Input
-                                        type={
-                                            showRePassword ? "text" : "password"
-                                        }
-                                        name="repeatPassword"
-                                        value={values.repeatPassword}
+                                        type="email"
+                                        name="email"
+                                        value={values.email}
                                         onChange={onChange}
-                                        placeholder="Повторете парола"
+                                        placeholder="Имейл"
                                     />
-                                    <InputRightElement h={"full"}>
-                                        <Button
-                                            bg="transparent"
-                                            variant={"ghost"}
-                                            onClick={() =>
-                                                setShowRePassword(
-                                                    (showRePassword) =>
-                                                        !showRePassword
-                                                )
+                                    {errors.email && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.email}
+                                        </Text>
+                                    )}
+                                </FormControl>
+                            </Stack>
+                            <Stack direction={{ base: "column", md: "row" }} spacing={3}>
+                                <FormControl id="birthdate" isRequired>
+                                    <FormLabel>Дата на раждане</FormLabel>
+                                    <Input
+                                        type="date"
+                                        name="birthdate"
+                                        value={values.birthdate}
+                                        onChange={onChange}
+                                        placeholder="Изберете дата на раждане"
+                                    />
+                                    {errors.birthdate && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.birthdate}
+                                        </Text>
+                                    )}
+                                </FormControl>
+                                <FormControl id="phone">
+                                    <FormLabel>Телефон</FormLabel>
+                                    <Input
+                                        type="phone"
+                                        name="phone"
+                                        value={values.phone}
+                                        onChange={onChange}
+                                        placeholder="Телефон"
+                                    />
+                                </FormControl>
+                            </Stack>
+                            <Stack direction={{ base: "column", md: "row" }} spacing={3}>
+                                <FormControl id="password" isRequired>
+                                    <FormLabel>Парола</FormLabel>
+                                    <InputGroup>
+                                        <Input
+                                            type={
+                                                showPassword
+                                                    ? "text"
+                                                    : "password"
                                             }
-                                        >
-                                            {showRePassword ? (
-                                                <Icon as={FaEye} boxSize={3} />
-                                            ) : (
-                                                <Icon
-                                                    as={FaEyeSlash}
-                                                    boxSize={3}
-                                                />
-                                            )}
-                                        </Button>
-                                    </InputRightElement>
-                                </InputGroup>
-                                {errors.repeatPassword && (
-                                    <Text color="red.500" fontSize="sm">
-                                        {errors.repeatPassword}
-                                    </Text>
-                                )}
-                            </FormControl>
-                            <Stack spacing={10} pt={4}>
+                                            name="password"
+                                            value={values.password}
+                                            onChange={onChange}
+                                            placeholder="Парола"
+                                        />
+                                        <InputRightElement h={"full"}>
+                                            <Button
+                                                bg="transparent"
+                                                variant={"ghost"}
+                                                onClick={() =>
+                                                    setShowPassword(
+                                                        (showPassword) =>
+                                                            !showPassword
+                                                    )
+                                                }
+                                            >
+                                                {showPassword ? (
+                                                    <Icon
+                                                        as={FaEye}
+                                                        boxSize={3}
+                                                    />
+                                                ) : (
+                                                    <Icon
+                                                        as={FaEyeSlash}
+                                                        boxSize={3}
+                                                    />
+                                                )}
+                                            </Button>
+                                        </InputRightElement>
+                                    </InputGroup>
+                                    {errors.password && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.password}
+                                        </Text>
+                                    )}
+                                </FormControl>
+                                <FormControl id="repeatPassword" isRequired>
+                                    <FormLabel>Повторете парола</FormLabel>
+                                    <InputGroup>
+                                        <Input
+                                            type={
+                                                showRePassword
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            name="repeatPassword"
+                                            value={values.repeatPassword}
+                                            onChange={onChange}
+                                            placeholder="Повторете парола"
+                                        />
+                                        <InputRightElement h={"full"}>
+                                            <Button
+                                                bg="transparent"
+                                                variant={"ghost"}
+                                                onClick={() =>
+                                                    setShowRePassword(
+                                                        (showRePassword) =>
+                                                            !showRePassword
+                                                    )
+                                                }
+                                            >
+                                                {showRePassword ? (
+                                                    <Icon
+                                                        as={FaEye}
+                                                        boxSize={3}
+                                                    />
+                                                ) : (
+                                                    <Icon
+                                                        as={FaEyeSlash}
+                                                        boxSize={3}
+                                                    />
+                                                )}
+                                            </Button>
+                                        </InputRightElement>
+                                    </InputGroup>
+                                    {errors.repeatPassword && (
+                                        <Text color="red.500" fontSize="sm">
+                                            {errors.repeatPassword}
+                                        </Text>
+                                    )}
+                                </FormControl>
+                            </Stack>
+                            <Stack spacing={10} pt={4} margin={{ md: "auto"}}>
                                 <Button
                                     loadingText="Изпращане"
                                     variant="primary"
                                     onClick={onSubmit}
+                                    width={{ md: "270px"}}
                                 >
                                     Регистрация
                                 </Button>
