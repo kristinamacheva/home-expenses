@@ -245,8 +245,12 @@ export default function PaymentCreate({
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4} isInvalid={errors.amount}>
-                                <FormLabel>Сума*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.amount}
+                                isRequired
+                            >
+                                <FormLabel>Сума</FormLabel>
                                 <InputGroup>
                                     <Input
                                         type="number"
@@ -266,8 +270,12 @@ export default function PaymentCreate({
                                     Дължима сума: {balanceSum} лв.
                                 </Text>
                             </FormControl>
-                            <FormControl mb={4} isInvalid={errors.date}>
-                                <FormLabel>Дата*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.date}
+                                isRequired
+                            >
+                                <FormLabel>Дата</FormLabel>
                                 <Input
                                     type="date"
                                     name="date"
@@ -290,8 +298,9 @@ export default function PaymentCreate({
                                 mb={4}
                                 isInvalid={errors.payee}
                                 maxW={{ lg: "49%" }}
+                                isRequired
                             >
-                                <FormLabel>Получател*</FormLabel>
+                                <FormLabel>Получател</FormLabel>
                                 <Select
                                     name="payee"
                                     value={values.payee}
@@ -346,8 +355,9 @@ export default function PaymentCreate({
                                 mt={{ base: "4", lg: "0" }}
                                 isInvalid={errors.paymentMethod}
                                 maxW={{ lg: "49%" }}
+                                isRequired
                             >
-                                <FormLabel>Метод на плащане*</FormLabel>
+                                <FormLabel>Метод на плащане</FormLabel>
                                 <Select
                                     name="paymentMethod"
                                     value={values.paymentMethod}

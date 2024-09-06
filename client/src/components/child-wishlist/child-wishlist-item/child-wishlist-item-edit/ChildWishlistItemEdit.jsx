@@ -180,8 +180,12 @@ export default function ChildWishlistItemEdit({
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4} isInvalid={errors.title}>
-                                <FormLabel>Заглавие*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.title}
+                                isRequired
+                            >
+                                <FormLabel>Заглавие</FormLabel>
                                 <Input
                                     type="text"
                                     name="title"
@@ -196,8 +200,12 @@ export default function ChildWishlistItemEdit({
                                 )}
                             </FormControl>
 
-                            <FormControl mb={4} isInvalid={errors.amount}>
-                                <FormLabel>Сума*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.amount}
+                                isRequired
+                            >
+                                <FormLabel>Сума</FormLabel>
                                 <InputGroup>
                                     <Input
                                         type="number"

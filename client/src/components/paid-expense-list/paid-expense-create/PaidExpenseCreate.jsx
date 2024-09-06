@@ -537,8 +537,12 @@ export default function PaidExpenseCreate({
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4} isInvalid={errors.title}>
-                                <FormLabel>Заглавие*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.title}
+                                isRequired
+                            >
+                                <FormLabel>Заглавие</FormLabel>
                                 <Input
                                     type="text"
                                     name="title"
@@ -553,8 +557,12 @@ export default function PaidExpenseCreate({
                                 )}
                             </FormControl>
 
-                            <FormControl mb={4} isInvalid={errors.amount}>
-                                <FormLabel>Обща сума*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.amount}
+                                isRequired
+                            >
+                                <FormLabel>Обща сума</FormLabel>
                                 <InputGroup>
                                     <Input
                                         type="number"
@@ -576,8 +584,12 @@ export default function PaidExpenseCreate({
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4} isInvalid={errors.date}>
-                                <FormLabel>Дата*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.date}
+                                isRequired
+                            >
+                                <FormLabel>Дата</FormLabel>
                                 <Input
                                     type="date"
                                     name="date"
@@ -617,8 +629,8 @@ export default function PaidExpenseCreate({
                                 direction={{ base: "column", lg: "row" }}
                                 spacing={{ lg: "4" }}
                             >
-                                <FormControl mb={{ base: 2, md: 4 }}>
-                                    <FormLabel>Изберете дете*</FormLabel>
+                                <FormControl mb={{ base: 2, md: 4 }} isRequired>
+                                    <FormLabel>Изберете дете</FormLabel>
                                     <Select
                                         name="childMember"
                                         value={
@@ -674,8 +686,9 @@ export default function PaidExpenseCreate({
                             <FormControl
                                 mb={2}
                                 isInvalid={errors.paidSplitType}
+                                isRequired
                             >
-                                <FormLabel>Платец*</FormLabel>
+                                <FormLabel>Платец</FormLabel>
                                 <Select
                                     name="payersOptionField"
                                     value={values.payersOptionField}
@@ -707,9 +720,10 @@ export default function PaidExpenseCreate({
                                         <FormControl
                                             mb={2}
                                             isInvalid={errors.paid}
+                                            isRequired
                                         >
                                             <FormLabel>
-                                                Метод на разпределение (платци)*
+                                                Метод на разпределение (платци)
                                             </FormLabel>
                                             <Select
                                                 name="paidSplitTypeField"
@@ -764,8 +778,9 @@ export default function PaidExpenseCreate({
                             <FormControl
                                 mb={4}
                                 isInvalid={errors.owedSplitType}
+                                isRequired
                             >
-                                <FormLabel>Метод на разпределение*</FormLabel>
+                                <FormLabel>Метод на разпределение</FormLabel>
                                 <Select
                                     name="splittingOption"
                                     value={values.splittingOption}

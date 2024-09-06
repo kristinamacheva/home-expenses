@@ -158,8 +158,12 @@ export default function ChildExpenseCreate({
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4} isInvalid={errors.title}>
-                                <FormLabel>Заглавие*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.title}
+                                isRequired
+                            >
+                                <FormLabel>Заглавие</FormLabel>
                                 <Input
                                     type="text"
                                     name="title"
@@ -174,8 +178,12 @@ export default function ChildExpenseCreate({
                                 )}
                             </FormControl>
 
-                            <FormControl mb={4} isInvalid={errors.amount}>
-                                <FormLabel>Сума*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.amount}
+                                isRequired
+                            >
+                                <FormLabel>Сума</FormLabel>
                                 <InputGroup>
                                     <Input
                                         type="number"
@@ -201,8 +209,9 @@ export default function ChildExpenseCreate({
                                 mb={4}
                                 isInvalid={errors.date}
                                 maxW={{ lg: "49%" }}
+                                isRequired
                             >
-                                <FormLabel>Дата*</FormLabel>
+                                <FormLabel>Дата</FormLabel>
                                 <Input
                                     type="date"
                                     name="date"

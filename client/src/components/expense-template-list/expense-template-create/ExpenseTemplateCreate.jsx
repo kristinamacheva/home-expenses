@@ -414,8 +414,12 @@ export default function ExpenseTemplateCreate({
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4} isInvalid={errors.templateName}>
-                                <FormLabel>Име на шаблон*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.templateName}
+                                isRequired
+                            >
+                                <FormLabel>Име на шаблон</FormLabel>
                                 <Input
                                     type="text"
                                     name="templateName"
@@ -450,8 +454,12 @@ export default function ExpenseTemplateCreate({
                             direction={{ base: "column", lg: "row" }}
                             spacing={{ lg: "4" }}
                         >
-                            <FormControl mb={4} isInvalid={errors.amount}>
-                                <FormLabel>Обща сума*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.amount}
+                                isRequired
+                            >
+                                <FormLabel>Обща сума</FormLabel>
                                 <InputGroup>
                                     <Input
                                         type="number"
@@ -584,9 +592,10 @@ export default function ExpenseTemplateCreate({
                                         <FormControl
                                             mb={2}
                                             isInvalid={errors.paid}
+                                            isRequired
                                         >
                                             <FormLabel>
-                                                Метод на разпределение (платци)*
+                                                Метод на разпределение (платци)
                                             </FormLabel>
                                             <Select
                                                 name="paidSplitTypeField"

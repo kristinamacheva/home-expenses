@@ -178,9 +178,16 @@ export default function PaymentEdit({
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <form onSubmit={onSubmit}>
-                        <Stack direction={{ base: "column", lg: "row" }} spacing={{ lg: "4" }}>
-                            <FormControl mb={4} isInvalid={errors.amount}>
-                                <FormLabel>Сума*</FormLabel>
+                        <Stack
+                            direction={{ base: "column", lg: "row" }}
+                            spacing={{ lg: "4" }}
+                        >
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.amount}
+                                isRequired
+                            >
+                                <FormLabel>Сума</FormLabel>
                                 <InputGroup>
                                     <Input
                                         type="number"
@@ -200,8 +207,12 @@ export default function PaymentEdit({
                                     Дължима сума: {payerBalanceSum} лв.
                                 </Text>
                             </FormControl>
-                            <FormControl mb={4} isInvalid={errors.date}>
-                                <FormLabel>Дата*</FormLabel>
+                            <FormControl
+                                mb={4}
+                                isInvalid={errors.date}
+                                isRequired
+                            >
+                                <FormLabel>Дата</FormLabel>
                                 <Input
                                     type="date"
                                     name="date"
@@ -220,7 +231,11 @@ export default function PaymentEdit({
                             <Text fontWeight="bold">Получател: </Text>
                             {selectedPayee && (
                                 <Card p={4} width="100%">
-                                    <Stack direction="row" align="center" spacing="4">
+                                    <Stack
+                                        direction="row"
+                                        align="center"
+                                        spacing="4"
+                                    >
                                         <Avatar
                                             src={selectedPayee.avatar}
                                             bg={selectedPayee.avatarColor}
@@ -249,5 +264,4 @@ export default function PaymentEdit({
             </ModalContent>
         </Modal>
     );
-    
 }

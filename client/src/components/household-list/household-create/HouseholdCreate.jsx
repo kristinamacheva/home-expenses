@@ -169,7 +169,7 @@ export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <form onSubmit={onSubmit}>
-                        <FormControl mb={4}>
+                        <FormControl mb={4} isRequired>
                             <FormLabel>Име</FormLabel>
                             <Input
                                 type="text"
@@ -191,7 +191,7 @@ export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
 
                         {values.members.map((member, index) => (
                             <Box key={index}>
-                                <FormControl mt={3}>
+                                <FormControl mt={3} isRequired>
                                     <FormLabel>Имейл</FormLabel>
                                     <Input
                                         type="email"
@@ -209,7 +209,7 @@ export default function HouseholdCreate({ isOpen, onClose, fetchHouseholds }) {
                                     )}
                                 </FormControl>
 
-                                <FormControl mt={2}>
+                                <FormControl mt={2} isRequired>
                                     <FormLabel>Роля</FormLabel>
                                     <Select
                                         name="role"
