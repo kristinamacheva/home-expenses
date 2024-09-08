@@ -693,14 +693,13 @@ exports.create = async (householdData) => {
         }
 
         await session.commitTransaction();
-        session.endSession();
-
         return newHousehold;
     } catch (error) {
         // Discard all changes and release any locks held by the transaction
         await session.abortTransaction();
-        session.endSession();
         throw error;
+    } finally {
+        session.endSession();
     }
 };
 
