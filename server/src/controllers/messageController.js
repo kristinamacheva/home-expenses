@@ -1,8 +1,5 @@
 const router = require("express").Router();
 const messageManager = require("../managers/messageManager");
-const { isAuth } = require("../middlewares/authMiddleware");
-const { validationResult } = require("express-validator");
-const { AppError } = require("../utils/AppError");
 const getMessage = require("../middlewares/messageMiddleware");
 
 router.get("/", async (req, res, next) => {
@@ -19,6 +16,20 @@ router.get("/", async (req, res, next) => {
         );
 
         res.status(200).json(messages);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post("/", async (req, res, next) => {
+    const messageData = req.body;
+    const householdId = req.householdId;
+    const userId = req.userId;
+
+    try {
+        const newMessage = await messageManager.create(userId, householdId, messageData);
+
+        res.status(201).json(newMessage);
     } catch (error) {
         next(error);
     }

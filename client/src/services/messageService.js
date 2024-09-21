@@ -15,3 +15,10 @@ export const getAll = async (householdId, lastMessageId = null) => {
     const result = await request.get(url);
     return result;
 };
+
+export const create = async (householdId, messageData) => {
+    const url = baseUrl(householdId);
+    
+    const result = await request.post(url, messageData);
+    return result;
+};

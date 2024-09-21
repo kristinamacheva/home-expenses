@@ -27,6 +27,7 @@ import { FaLink } from "react-icons/fa6";
 import useImagePreview from "../../../hooks/useImagePreview";
 import AuthContext from "../../../contexts/authContext";
 import * as householdService from "../../../services/householdService";
+import * as messageService from "../../../services/messageService";
 import { useParams } from "react-router-dom";
 
 export default function MessageInput({ isChatDisabled }) {
@@ -95,7 +96,7 @@ export default function MessageInput({ isChatDisabled }) {
         }
     }, [messageText, users]);
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault();
 
         if (imgUrl) {
@@ -110,11 +111,26 @@ export default function MessageInput({ isChatDisabled }) {
             mentionedUsers: mentionedUsers.map((user) => user._id),
         };
 
-        socket.emit("sendMessage", { householdId, messageData });
+        // socket.emit("sendMessage", { householdId, messageData });
+        try {
+            await messageService.create(householdId, messageData);
 
-        setMessageText("");
-        setImage("");
-        setMentionedUsers([]);
+            setMessageText("");
+            setImage("");
+            setMentionedUsers([]);
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message || "Неуспешно изпращане на съобщение",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
+        }
     };
 
     const handleOpenSendResource = async () => {
@@ -168,7 +184,23 @@ export default function MessageInput({ isChatDisabled }) {
             resourceId,
         };
 
-        socket.emit("sendMessage", { householdId, messageData });
+        try {
+            await messageService.create(householdId, messageData);
+        } catch (error) {
+            if (error.status === 401) {
+                logoutHandler();
+            } else {
+                toast({
+                    title: error.message || "Неуспешно изпращане на съобщение",
+                    status: "error",
+                    duration: 6000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            }
+        }
+
+        // socket.emit("sendMessage", { householdId, messageData });
 
         toast({
             title: "Ресурсът е изпратен",
@@ -186,7 +218,7 @@ export default function MessageInput({ isChatDisabled }) {
         const newText = messageText.slice(0, lastIndex) + `@${user.name} `;
         setMessageText(newText);
         setShowAutocomplete(false);
-        
+
         // Check if the user is already in the mentionedUsers array
         if (
             !mentionedUsers.some(
