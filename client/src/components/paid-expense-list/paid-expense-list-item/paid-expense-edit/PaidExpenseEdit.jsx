@@ -60,6 +60,7 @@ export default function PaidExpenseEdit({
     const [householdCategories, setHouseholdCategories] = useState([]);
     const [paid, setPaid] = useState([]);
     const [owed, setOwed] = useState([]);
+    const [creator, setCreator] = useState(null);
 
     const [values, setValues] = useState(initialValues);
     const toast = useToast();
@@ -151,6 +152,7 @@ export default function PaidExpenseEdit({
                             ? "percent"
                             : "manual",
                 });
+                setCreator(paidExpense.creator);
                 setPaid(paidExpense.paid);
                 setOwed(paidExpense.owed);
                 if (paidExpense.child) {
@@ -302,11 +304,11 @@ export default function PaidExpenseEdit({
     const handlePaidCurrentUpdate = () => {
         setPaid([
             {
-                _id: userId,
+                _id: creator._id,
                 sum: values.amount,
-                name: name,
-                avatar: avatar,
-                avatarColor: avatarColor,
+                name: creator.name,
+                avatar: creator.avatar,
+                avatarColor: creator.avatarColor,
             },
         ]);
     };
@@ -702,6 +704,7 @@ export default function PaidExpenseEdit({
                                 <CurrentUser
                                     amount={values.amount}
                                     onUpdate={handlePaidCurrentUpdate}
+                                    creator={creator} 
                                 />
                             )}
                             {values.payersOptionField === "changedUser" && (
