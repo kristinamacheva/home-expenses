@@ -64,11 +64,7 @@ export const AuthProvider = ({ children }) => {
         socket,
     };
 
-    return (
-        <AuthContext.Provider value={authValues}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={authValues}>{children}</AuthContext.Provider>
 };
 
 AuthContext.displayName = "AuthContext";

@@ -198,55 +198,61 @@ export default function PaidExpenseList({ isAdmin, archived }) {
                     Търсене
                 </Text>
                 <Stack spacing="2" direction={{ base: "column", lg: "row" }}>
-                    <FormControl id="title">
-                        <FormLabel>Заглавие на разход</FormLabel>
-                        <Input
-                            size="md"
-                            type="search"
-                            name="title"
-                            value={searchValues.title || ""}
-                            onChange={onChange}
-                            placeholder="Въведете заглавие"
-                        />
-                    </FormControl>
+                    <Stack direction={{ base: "column", md: "row" }} width={{ lg: "49%" }}>
+                        <FormControl id="title">
+                            <FormLabel>Заглавие на разход</FormLabel>
+                            <Input
+                                size="md"
+                                type="search"
+                                name="title"
+                                value={searchValues.title || ""}
+                                onChange={onChange}
+                                placeholder="Въведете заглавие"
+                            />
+                        </FormControl>
 
-                    <FormControl id="category">
-                        <FormLabel>Категория на разход</FormLabel>
-                        <Select
-                            name="category"
-                            value={searchValues.category}
-                            onChange={onChange}
-                            placeholder="Изберете категория"
-                        >
-                            {householdCategories.map((category) => (
-                                <option key={category._id} value={category._id}>
-                                    {category.title}
-                                </option>
-                            ))}
-                        </Select>
-                    </FormControl>
+                        <FormControl id="category">
+                            <FormLabel>Категория на разход</FormLabel>
+                            <Select
+                                name="category"
+                                value={searchValues.category}
+                                onChange={onChange}
+                                placeholder="Изберете категория"
+                            >
+                                {householdCategories.map((category) => (
+                                    <option
+                                        key={category._id}
+                                        value={category._id}
+                                    >
+                                        {category.title}
+                                    </option>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Stack>
+                    <Stack direction={{ base: "column", md: "row" }} width={{ lg: "49%" }}>
+                        <FormControl id="startDate">
+                            <FormLabel>Начална дата</FormLabel>
+                            <Input
+                                size="md"
+                                type="date"
+                                name="startDate"
+                                value={searchValues.startDate || ""}
+                                onChange={onChange}
+                            />
+                        </FormControl>
 
-                    <FormControl id="startDate">
-                        <FormLabel>Начална дата</FormLabel>
-                        <Input
-                            size="md"
-                            type="date"
-                            name="startDate"
-                            value={searchValues.startDate || ""}
-                            onChange={onChange}
-                        />
-                    </FormControl>
-
-                    <FormControl id="endDate">
-                        <FormLabel>Крайна дата</FormLabel>
-                        <Input
-                            size="md"
-                            type="date"
-                            name="endDate"
-                            value={searchValues.endDate || ""}
-                            onChange={onChange}
-                        />
-                    </FormControl>
+                        <FormControl id="endDate">
+                            <FormLabel>Крайна дата</FormLabel>
+                            <Input
+                                size="md"
+                                type="date"
+                                name="endDate"
+                                value={searchValues.endDate || ""}
+                                onChange={onChange}
+                            />
+                        </FormControl>
+                    </Stack>
                 </Stack>
                 <Stack spacing="4" direction="row" mt="4">
                     <Checkbox

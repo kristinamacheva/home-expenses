@@ -31,6 +31,7 @@ import ChildWishlist from "../child-wishlist/ChildWishlist";
 import ChildList from "../child-list/ChildList";
 import ExpenseTemplateList from "../expense-template-list/ExpenseTemplateList";
 import { isChild18OrOver } from "../../utils/ageUtils";
+import styles from "./household-details.module.css";
 
 export default function HouseholdDetails() {
     const [household, setHousehold] = useState({});
@@ -155,9 +156,9 @@ export default function HouseholdDetails() {
                 </HStack>
             </Card>
 
-            <Tabs isLazy colorScheme="themePurple" mx="1" mt="4">
+            <Tabs isLazy colorScheme="themePurple" mx="1" mt="4" className={styles.scroll}>
                 <Box width="100%" overflowX="auto" p={2}>
-                    <TabList>
+                    <TabList >
                         {isUserChildOver18OrRegularUser && (
                             <>
                                 <Tab>Баланс</Tab>
@@ -174,7 +175,7 @@ export default function HouseholdDetails() {
                         {currentUserRole === "Дете" && (
                             <>
                                 <Tab>Джобни</Tab>
-                                <Tab>Лични Разходи</Tab>
+                                <Tab>Лични разходи</Tab>
                                 <Tab>Желания</Tab>
                             </>
                         )}

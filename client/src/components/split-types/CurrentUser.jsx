@@ -17,6 +17,7 @@ export default function CurrentUser({ amount, onUpdate }) {
             direction="row"
             alignItems="center"
             justifyContent="space-between"
+            mt="-4"
         >
             <Stack display="flex" alignItems="center" direction="row" mr="2">
                 <Avatar

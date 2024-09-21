@@ -264,7 +264,7 @@ export default function Manual({
                     </Stack>
                 ))}
             </Flex>
-            <Text mt="4" fontWeight="bold">
+            <Text mt="1" fontWeight="bold">
                 Добавете член:
             </Text>
             <HStack mt="2">

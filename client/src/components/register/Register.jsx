@@ -201,7 +201,7 @@ export default function Register() {
                                         </Text>
                                     )}
                                 </FormControl>
-                                <FormControl id="email" isRequired>
+                                <FormControl id="email" isRequired isInvalid={!!errors.email}>
                                     <FormLabel>Имейл</FormLabel>
                                     <Input
                                         type="email"

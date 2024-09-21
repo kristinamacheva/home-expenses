@@ -527,7 +527,7 @@ export default function PaidExpenseCreate({
             <ModalOverlay />
             <ModalContent
                 mx={{ base: "4", md: "0" }}
-                maxW={{ base: "90vw", md: "80vw", lg: "65vw" }}
+                maxW={{ base: "90vw", md: "80vw", lg: "80vw" }}
             >
                 <ModalHeader>Създайте разход</ModalHeader>
                 <ModalCloseButton />
@@ -774,9 +774,8 @@ export default function PaidExpenseCreate({
                                 </Stack>
                             )}
                         </Stack>
-                        <Stack mt="3" spacing="4">
+                        <Stack mt="3" spacing="2">
                             <FormControl
-                                mb={4}
                                 isInvalid={errors.owedSplitType}
                                 isRequired
                             >

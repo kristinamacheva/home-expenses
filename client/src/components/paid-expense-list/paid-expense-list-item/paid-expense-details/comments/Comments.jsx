@@ -134,7 +134,7 @@ export default function Comments({
                     width="99%"
                 >
                     <form onSubmit={onSubmit} style={{ width: "100%" }}>
-                        <Stack spacing={4}>
+                        <Stack spacing={2}>
                             <Textarea
                                 value={text}
                                 onChange={onChange}

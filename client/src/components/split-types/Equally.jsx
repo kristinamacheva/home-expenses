@@ -163,7 +163,7 @@ export default function Equally({
                     </Card>
                 ))}
             </Flex>
-            <Text mt="4" fontWeight="bold">
+            <Text mt="1" fontWeight="bold">
                 Добавете член:
             </Text>
             <HStack mt="2">

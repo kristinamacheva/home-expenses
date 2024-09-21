@@ -22,7 +22,12 @@ import {
 import * as householdService from "../../../../services/householdService";
 import AuthContext from "../../../../contexts/authContext";
 
-export default function HouseholdEdit({ isOpen, onClose, householdId, fetchHouseholds }) {
+export default function HouseholdEdit({
+    isOpen,
+    onClose,
+    householdId,
+    fetchHouseholds,
+}) {
     const [isLoading, setIsLoading] = useState(true);
     const [values, setValues] = useState({
         name: "",
@@ -56,7 +61,8 @@ export default function HouseholdEdit({ isOpen, onClose, householdId, fetchHouse
                 } else {
                     toast({
                         title:
-                            error.message || "Неуспешно зареждане на домакинство",
+                            error.message ||
+                            "Неуспешно зареждане на домакинство",
                         status: "error",
                         duration: 6000,
                         isClosable: true,
@@ -211,7 +217,10 @@ export default function HouseholdEdit({ isOpen, onClose, householdId, fetchHouse
 
         const updatedHousehold = {
             name: values.name,
-            members: values.members.map(member => ({ _id: member._id, role: member.role })),
+            members: values.members.map((member) => ({
+                _id: member._id,
+                role: member.role,
+            })),
             newMembers: values.newMembers,
         };
 
@@ -239,7 +248,8 @@ export default function HouseholdEdit({ isOpen, onClose, householdId, fetchHouse
             } else {
                 toast({
                     title:
-                        error.message || "Неуспешно редактиране на домакинството",
+                        error.message ||
+                        "Неуспешно редактиране на домакинството",
                     status: "error",
                     duration: 6000,
                     isClosable: true,
@@ -303,6 +313,7 @@ export default function HouseholdEdit({ isOpen, onClose, householdId, fetchHouse
                                             isInvalid={
                                                 errors.members[index]?.role
                                             }
+                                            isRequired
                                         >
                                             <FormLabel>Роля</FormLabel>
                                             <Select
@@ -365,6 +376,7 @@ export default function HouseholdEdit({ isOpen, onClose, householdId, fetchHouse
                                                     errors.newMembers[index]
                                                         ?.email
                                                 }
+                                                isRequired
                                             >
                                                 <FormLabel>Имейл</FormLabel>
                                                 <Input
@@ -400,6 +412,7 @@ export default function HouseholdEdit({ isOpen, onClose, householdId, fetchHouse
                                                     errors.newMembers[index]
                                                         ?.role
                                                 }
+                                                isRequired
                                             >
                                                 <FormLabel>Роля</FormLabel>
                                                 <Select

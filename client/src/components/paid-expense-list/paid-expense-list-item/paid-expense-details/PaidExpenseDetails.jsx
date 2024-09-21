@@ -94,7 +94,8 @@ export default function PaidExpenseDetails({
     };
 
     if (isLoading) {
-        return <Spinner size="lg" />;
+        // return <Spinner size="lg" />;
+        return;
     }
 
     const currentUserBalance = paidExpenseDetails.balance?.filter(
@@ -283,7 +284,7 @@ export default function PaidExpenseDetails({
                 >
                     <ModalHeader>Детайли за разход</ModalHeader>
                     <ModalCloseButton />
-                    <ModalBody pb={6}>
+                    <ModalBody pb={2}>
                         <Stack spacing={4}>
                             <Stack>
                                 <Heading size="sm">Обща информация</Heading>
@@ -562,7 +563,7 @@ export default function PaidExpenseDetails({
                             </Stack>
                         </Stack>
                     </ModalBody>
-                    <ModalFooter mb="3">
+                    <ModalFooter>
                         <Stack direction="column" width="100%">
                             {showButtons && (
                                 <Stack

@@ -89,7 +89,7 @@ export default function CategoryExpenseChart({ data }) {
     return (
         <Stack>
             <Box
-                maxHeight={{ base: "350px", md: "400px", lg: "450px" }}
+                maxHeight={{ base: "350px", md: "400px", lg: "400px" }}
                 display="flex"
                 justifyContent="center"
                 alignItems="center"

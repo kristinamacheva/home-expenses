@@ -54,9 +54,10 @@ export default function ExpenseChart({ data }) {
 
     const options = {
         responsive: true,
+        maintainAspectRatio: false, 
         plugins: {
             legend: {
-                position: "top",
+                display: "false",
             },
             title: {
                 display: true,
@@ -85,8 +86,9 @@ export default function ExpenseChart({ data }) {
     return (
         <Stack>
             <Box
-                mt={10}
-                maxHeight={{ base: "350px", md: "400px", lg: "450px" }}
+                height={{ lg: "400px" }}
+                maxHeight={{ base: "350px", md: "400px", lg: "400px" }}
+                width={{ lg: "740px" }}
                 display="flex"
                 justifyContent="center"
                 alignItems="center"

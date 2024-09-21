@@ -4,6 +4,7 @@ import {
     FormControl,
     FormLabel,
     Heading,
+    HStack,
     Input,
     Stack,
     Text,
@@ -211,9 +212,9 @@ export default function Statistics() {
             </form>
             <Stack>
                 <Heading as="h4" size="md" my={2}>
-                    Анализ на одобрените разходи за избран период
+                    Анализ на одобрените разходи за зададен период
                 </Heading>
-                <Flex direction={{ base: "column", md: "row" }} gap={4} mt={6}>
+                <Flex direction={{ base: "column", md: "row" }} gap={4} mt={1}>
                     <StatisticsCard
                         label="Обща сума на разходите"
                         value={`${totalAmount} лв.`}
@@ -224,8 +225,10 @@ export default function Statistics() {
                         value={`${uncategorizedPercentage}%`}
                     />
                 </Flex>
-                <ExpenseChart data={totalAmountData} />
-                <CategoryExpenseChart data={totalAmountCategoryData} />
+                <Stack direction={{ base: "column", md: "row" }} mt={3}>
+                    <ExpenseChart data={totalAmountData} />
+                    <CategoryExpenseChart data={totalAmountCategoryData} />
+                </Stack>
             </Stack>
         </>
     );
