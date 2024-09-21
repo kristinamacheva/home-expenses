@@ -422,6 +422,14 @@ exports.getEditableFields = async (paidExpenseId) => {
             },
         },
         {
+            $lookup: {
+                from: "users",
+                localField: "creator",
+                foreignField: "_id",
+                as: "creatorDetails",
+            },
+        },
+        {
             $addFields: {
                 paid: {
                     $map: {
@@ -509,6 +517,7 @@ exports.getEditableFields = async (paidExpenseId) => {
                         },
                     },
                 },
+                creator: { $arrayElemAt: ["$creatorDetails", 0] }, // Correctly get the creator details
             },
         },
         {
@@ -530,7 +539,6 @@ exports.getEditableFields = async (paidExpenseId) => {
                 "owed.name": 1,
                 "owed.avatar": 1,
                 "owed.avatarColor": 1,
-                // Conditionally include the child field
                 child: {
                     $cond: {
                         if: { $gt: ["$child", null] },
@@ -538,13 +546,18 @@ exports.getEditableFields = async (paidExpenseId) => {
                         else: "$$REMOVE",
                     },
                 },
+                creator: {
+                    _id: "$creator._id",
+                    name: "$creator.name",
+                    avatar: "$creator.avatar",
+                    avatarColor: "$creator.avatarColor",
+                },
             },
         },
     ]);
 
     return paidExpense[0];
 };
-
 exports.getOneNotApproved = async (paidExpenseId, userId) => {
     const paidExpense = await PaidExpense.aggregate([
         {
