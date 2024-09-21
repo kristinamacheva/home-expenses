@@ -12,16 +12,14 @@ export default function useEqualSplit(totalAmount, members, onUpdate) {
         );
         let remainderInCents = totalAmountInSubunits % numberOfPeople;
 
-        const updatedMembers = members.map((member) => ({
-            ...member,
-            sum: Number(
-                (
-                    (amountPerPersonInCents +
-                        (remainderInCents-- > 0 ? 1 : 0)) /
-                    100
-                ).toFixed(2)
-            ),
-        }));
+        const updatedMembers = members.map((member) => {
+            const amount = amountPerPersonInCents + (remainderInCents > 0 ? 1 : 0);
+            remainderInCents--; 
+            return {
+                ...member,
+                sum: Number((amount / 100).toFixed(2)),
+            };
+        });
 
         setEqualSplit(updatedMembers);
 
