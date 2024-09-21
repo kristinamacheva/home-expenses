@@ -30,6 +30,23 @@ categorySchema.pre("save", function (next) {
     next();
 });
 
+categorySchema.pre("save", async function (next) {
+    if (this.isNew && !this.predefined) {
+        const existingCategory = await Category.findOne({
+            title: this.title,
+            predefined: true,
+        });
+        
+        if (existingCategory) {
+            const error = new Error(
+                "Категория с това заглавие вече съществува като предефинирана."
+            );
+            return next(error);
+        }
+    }
+    next();
+});
+
 // Create unique index on title and householdId
 categorySchema.index({ title: 1, householdId: 1 }, { unique: true });
 
