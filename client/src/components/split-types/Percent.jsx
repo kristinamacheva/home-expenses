@@ -73,7 +73,7 @@ export default function Percent({
         const filteredPercentages = childrenIncluded
             ? percentages
             : percentages.filter((member) => member.role !== "Дете");
-            
+
         setSplitPercentMembers(filteredSplitPercentMembers);
         setPercentages(filteredPercentages);
     }, [childrenIncluded]);
@@ -121,22 +121,28 @@ export default function Percent({
     const handleAmountChange = (newPercentages) => {
         const totalAmountInCents = amount * 100;
 
+        // Calculate totalEnteredPercentage before the map loop
+        const totalEnteredPercentage = newPercentages.reduce(
+            (acc, member) => acc + Number(member.percentage),
+            0
+        );
+
         let totalSum = 0;
         const updatedAmounts = newPercentages.map((member, index, arr) => {
             const sum = ((member.percentage / 100) * totalAmountInCents) / 100;
             const roundedSum = Number(sum.toFixed(2));
             totalSum += roundedSum;
 
-            // Adjust the last sum if the total exceeds amount
-            if (index === arr.length - 1 && totalSum > amount) {
-                const adjustment = totalSum - amount;
-
+            // Apply adjustment only if the total percentage is exactly 100% and it's the last member
+            if (index === arr.length - 1 && totalEnteredPercentage === 100) {
+                 // Convert totalSum to cents for adjustment
+const adjustment = totalAmountInCents - totalSum * 100;
                 return {
                     _id: member._id,
                     name: member.name,
                     avatar: member.avatar,
                     avatarColor: member.avatarColor,
-                    sum: Number((roundedSum - adjustment).toFixed(2)),
+                    sum: Number((roundedSum + adjustment / 100).toFixed(2)), // Apply adjustment if needed
                     role: member.role,
                 };
             }
