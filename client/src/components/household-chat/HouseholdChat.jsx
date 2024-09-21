@@ -34,6 +34,7 @@ export default function HouseholdChat() {
         // Listen for new messages
         socket.on("receiveMessage", (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
+            messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
         });
 
         socket.on("chat_error", (error) => {
@@ -55,11 +56,17 @@ export default function HouseholdChat() {
     }, [householdId, socket]);
 
     useEffect(() => {
-        if (!initialScrollDone && messages.length > 0) {
+        if (messages.length > 0) {
             messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-            setInitialScrollDone(true);
         }
-    }, [messages, initialScrollDone]);
+    }, [messages]);
+
+    // useEffect(() => {
+    //     if (!initialScrollDone && messages.length > 0) {
+    //         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    //         setInitialScrollDone(true);
+    //     }
+    // }, [messages, initialScrollDone]);
 
     useEffect(() => {
         setLoadingMessages(true);
