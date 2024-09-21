@@ -48,7 +48,7 @@ categorySchema.pre("save", async function (next) {
 });
 
 // Create unique index on title and householdId
-categorySchema.index({ title: 1, householdId: 1 }, { unique: true });
+categorySchema.index({ title: 1, household: 1 }, { unique: true });
 
 const Category = mongoose.model("Category", categorySchema);
 
