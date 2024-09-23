@@ -135,8 +135,8 @@ export default function Percent({
 
             // Apply adjustment only if the total percentage is exactly 100% and it's the last member
             if (index === arr.length - 1 && totalEnteredPercentage === 100) {
-                 // Convert totalSum to cents for adjustment
-const adjustment = totalAmountInCents - totalSum * 100;
+                // Convert totalSum to cents for adjustment
+                const adjustment = totalAmountInCents - totalSum * 100;
                 return {
                     _id: member._id,
                     name: member.name,

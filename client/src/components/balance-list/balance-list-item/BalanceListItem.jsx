@@ -31,21 +31,21 @@ export default function BalanceListItem({ balance, fetchPayments }) {
 
     if (userId === balance._id) {
         if (balance.type === "-") {
-            badgeText = `Дължите ${balance.sum} лв.`;
+            badgeText = `Дължите ${balance.sum.toFixed(2)} лв.`;
         } else {
             badgeText =
                 balance.sum === 0
                     ? "Нямате задължения"
-                    : `Дължат Ви ${balance.sum} лв.`;
+                    : `Дължат Ви ${balance.sum.toFixed(2)} лв.`;
         }
     } else {
         if (balance.type === "-") {
-            badgeText = `Дължи ${balance.sum} лв.`;
+            badgeText = `Дължи ${balance.sum.toFixed(2)} лв.`;
         } else {
             badgeText =
                 balance.sum === 0
                     ? "Няма задължения"
-                    : `Ще получи ${balance.sum} лв.`;
+                    : `Ще получи ${balance.sum.toFixed(2)} лв.`;
         }
     }
 

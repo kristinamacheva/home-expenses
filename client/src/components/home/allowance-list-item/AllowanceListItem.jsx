@@ -51,7 +51,7 @@ export default function AllowanceListItem({ household }) {
                 </AvatarGroup>
                 <Box>
                     <Badge variant="subtle" colorScheme="green">
-                        Имате налични {household.allowances.sum} лв.
+                        Имате налични {household.allowances.sum.toFixed(2)} лв.
                     </Badge>
                 </Box>
                 <Button onClick={goToHouseholdDetails}>Детайли</Button>

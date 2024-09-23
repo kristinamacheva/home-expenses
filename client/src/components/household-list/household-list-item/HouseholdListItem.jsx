@@ -131,12 +131,12 @@ export default function HouseholdListItem({ household, fetchHouseholds }) {
     // TODO: error if no user?
     if (userBalance) {
         if (userBalance.type === "-") {
-            badgeText = `Дължите ${userBalanceSum} лв.`;
+            badgeText = `Дължите ${userBalanceSum.toFixed(2)} лв.`;
         } else {
             badgeText =
                 userBalanceSum === 0
                     ? "Нямате задължения"
-                    : `Дължат Ви ${userBalanceSum} лв.`;
+                    : `Дължат Ви ${userBalanceSum.toFixed(2)} лв.`;
         }
     } else {
         badgeText = "Няма информация за баланса";

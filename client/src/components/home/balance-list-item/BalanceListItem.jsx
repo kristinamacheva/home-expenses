@@ -17,12 +17,12 @@ export default function BalanceListItem({ household }) {
     let badgeColor = "";
 
     if (household.balance.type === "-") {
-        badgeText = `Дължите ${household.balance.sum} лв.`;
+        badgeText = `Дължите ${household.balance.sum.toFixed(2)} лв.`;
     } else {
         badgeText =
             household.balance.sum === 0
                 ? "Нямате задължения"
-                : `Дължат Ви ${household.balance.sum} лв.`;
+                : `Дължат Ви ${household.balance.sum.toFixed(2)} лв.`;
     }
 
     badgeColor = household.balance.type === "-" ? "red" : "green";
