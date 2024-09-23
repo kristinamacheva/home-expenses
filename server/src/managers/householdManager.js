@@ -584,30 +584,24 @@ exports.getAllowanceForChild = async (userId, childId, householdId) => {
 
 exports.create = async (householdData) => {
     const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-        session.startTransaction();
-
         const { name, members, admin } = householdData;
 
         // Fetch the admin user by ID
         const adminUser = await User.findById(admin).session(session);
-
-        // Check if admin's email is in members array
         const adminEmail = adminUser.email;
-        const adminInMembers = members.some(
-            (member) => member.email === adminEmail
-        );
-        if (adminInMembers) {
-            throw new AppError(
-                "Създателят не може да бъде добавен повторно като член на домакинството",
-                400
-            );
-        }
 
-        // Check for duplicate emails in members
+        // Check if admin's email is in members array and for duplicate emails
         const uniqueEmails = new Set();
         for (const member of members) {
+            if (member.email === adminEmail) {
+                throw new AppError(
+                    "Създателят не може да бъде добавен повторно като член на домакинството",
+                    400
+                );
+            }
             if (uniqueEmails.has(member.email)) {
                 throw new AppError(
                     `Имейлът се среща повече от 1 път: ${member.email}`,
@@ -662,7 +656,8 @@ exports.create = async (householdData) => {
         adminUser.households.push(newHousehold._id);
         await adminUser.save({ session });
 
-        // Create invitations for each member
+        // Create invitations for each member and save them to the database
+        const invitations = [];
         for (const member of members) {
             const currentUser = memberUsers.find(
                 (user) => user.email === member.email
@@ -675,22 +670,33 @@ exports.create = async (householdData) => {
                 creator: adminUser._id,
             });
 
-            await invitation.save({ session });
+            invitations.push(invitation); // Accumulate invitations
+        }
 
-            // Create notification for the user
-            const notification = new Notification({
-                user: currentUser._id,
+        // Save all invitations at once
+        const savedInvitations = await HouseholdInvitation.insertMany(
+            invitations,
+            { session }
+        );
+
+        // Create notifications for each member based on saved invitations
+        const notifications = savedInvitations.map((invitation) => {
+            return new Notification({
+                user: invitation.user,
                 message: `Имате нова покана за присъединяване към домакинство: ${name}`,
                 resourceType: "HouseholdInvitation",
                 resourceId: invitation._id,
                 household: newHousehold._id,
             });
+        });
 
-            const savedNotification = await notification.save({ session });
+        // Save all notifications at once
+        await Notification.insertMany(notifications, { session });
 
-            // Send notification to the user if they have an active connection
-            sendNotificationToUser(currentUser._id, savedNotification);
-        }
+        // Send notifications to users if they have an active connection
+        notifications.forEach((notification) => {
+            sendNotificationToUser(notification.user, notification);
+        });
 
         await session.commitTransaction();
         return newHousehold;
