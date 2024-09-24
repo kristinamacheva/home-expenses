@@ -739,6 +739,9 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
             household.name = name;
         }
 
+        const invitations = [];
+        const notifications = [];
+
         // Update roles for existing members and handle removal if needed
         for (const existingMember of household.members) {
             // Check if the existing member is in the updated members list
@@ -808,21 +811,13 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
 
                     existingMember.role = updatedMember.role;
 
-                    // Create notification for the user
-                    const notification = new Notification({
-                        user: existingMember.user,
-                        message: `Ролята Ви в домакинство ${household.name} беше променена на ${updatedMember.role}`,
-                        household: household._id,
-                    });
-
-                    const savedNotification = await notification.save({
-                        session,
-                    });
-
-                    // Send notification to the user if they have an active connection
-                    sendNotificationToUser(
-                        existingMember.user,
-                        savedNotification
+                    // Add notification to array
+                    notifications.push(
+                        new Notification({
+                            user: existingMember.user,
+                            message: `Ролята Ви в домакинство ${household.name} беше променена на ${updatedMember.role}`,
+                            household: household._id,
+                        })
                     );
                 }
             } else {
@@ -889,30 +884,23 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
                     $pull: { households: householdId },
                 }).session(session);
 
-                // Create notification for the user
-                const notification = new Notification({
-                    user: existingMember.user,
-                    message: `Бяхте премахнати от домакинството ${household.name}`,
-                    household: household._id,
-                });
-
-                const savedNotification = await notification.save({ session });
-
-                // Send notification to the user if they have an active connection
-                sendNotificationToUser(existingMember.user, savedNotification);
+                // Add notification for member removal
+                notifications.push(
+                    new Notification({
+                        user: existingMember.user,
+                        message: `Бяхте премахнати от домакинството ${household.name}`,
+                        household: household._id,
+                    })
+                );
 
                 for (const member of household.members) {
-                    const notification = new Notification({
-                        user: member.user,
-                        message: `Потребител беше премахнат от домакинството ${household.name}`,
-                        household: household._id,
-                    });
-
-                    const savedNotification = await notification.save({
-                        session,
-                    });
-
-                    sendNotificationToUser(member.user, savedNotification);
+                    notifications.push(
+                        new Notification({
+                            user: member.user,
+                            message: `Потребител беше премахнат от домакинството ${household.name}`,
+                            household: household._id,
+                        })
+                    );
                 }
             }
         }
@@ -963,9 +951,6 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
                 );
             }
 
-            // Save the household to the database
-            await household.save({ session });
-
             // Create invitations for each member
             for (const member of newMembers) {
                 const currentUser = memberUsers.find(
@@ -992,25 +977,35 @@ exports.update = async (householdId, admin, name, members, newMembers) => {
                     creator: adminUser._id,
                 });
 
-                await invitation.save({ session });
+                invitations.push(invitation);
 
-                // Create notification for the user
-                const notification = new Notification({
-                    user: currentUser._id,
-                    message: `Имате нова покана за присъединяване към домакинство: ${household.name}`,
-                    resourceType: "HouseholdInvitation",
-                    resourceId: invitation._id,
-                    household: householdId,
-                });
-
-                const savedNotification = await notification.save({ session });
-
-                // Send notification to the user if they have an active connection
-                sendNotificationToUser(currentUser._id, savedNotification);
+                notifications.push(
+                    new Notification({
+                        user: currentUser._id,
+                        message: `Имате нова покана за присъединяване към домакинство: ${household.name}`,
+                        resourceType: "HouseholdInvitation",
+                        resourceId: invitation._id,
+                        household: householdId,
+                    })
+                );
             }
-        } else {
-            // Save the household to the database
-            await household.save({ session });
+        } 
+
+        // Bulk save household and handle notifications and invitations
+        await household.save({ session });
+
+        // Bulk insert notifications and invitations
+        if (notifications.length > 0) {
+            await Notification.insertMany(notifications, { session });
+        }
+
+        if (invitations.length > 0) {
+            await HouseholdInvitation.insertMany(invitations, { session });
+        }
+
+        // Send out all notifications
+        for (const notification of notifications) {
+            sendNotificationToUser(notification.user, notification);
         }
 
         await session.commitTransaction();
